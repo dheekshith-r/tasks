@@ -1,129 +1,160 @@
 # DEFINE: Tasks
 
-**Status: DRAFT, all key questions answered (2026-11-12). It waits for Ddk's approval.** No design or build work starts before approval (product flow law).
+**Status: DRAFT v2 (2026-11-12), rewritten after market research. It waits for Ddk's approval of the pivot and of the sign-up decision (section 11).** No design or build work starts before approval (product flow law).
 
-Each answer has a source tag:
+Inputs: [RESEARCH.md](RESEARCH.md) (steps 1 and 2) and the source notes in `docs/research/notes/`.
+
+Source tags:
 - **FACT:** read from the repo or the code.
-- **INFERRED:** my best guess from the repo. Confirm or correct it.
-- **UNKNOWN:** only Ddk can answer.
+- **RESEARCH:** from RESEARCH.md, which cites a dated source for each claim.
+- **INFERRED:** my best guess. Confirm or correct it.
+- **DECIDED:** decided by Ddk, or by Claude when Ddk delegated the choice.
+- **OPEN:** waits for Ddk.
 
 ---
 
-## 0. The question that decides everything
+## Kill gate (step 3): PIVOT, not stop
 
-The repo reads like two different things. Everything below depends on which one is true.
-
-| | A. A product for people who keep lists | B. A portfolio piece for a hiring reviewer |
+| Test | Result | Why (RESEARCH.md) |
 |---|---|---|
-| Evidence | Real features: recurring logic, undo, import validation, accessibility, CSP, CI | README: "built twice to show range", a "Debugging task" section, "Enhancement ideas for a basic static page", an AI_WORKFLOW.md for reviewers |
-| Customer | One person with a laptop and a phone | A recruiter or engineering lead who reads the repo for 5 minutes |
-| Main action | Open the app and add a first task | Open the live demo, then read the code |
-| Landing page sells | The outcome (a list you trust, no account) | The engineer (craft, tests, judgment) |
+| Is "free + no account + open source" unique? | **Fail** | Super Productivity is MIT, free, has no account, runs on the web, has 23.6k stars and offers optional sync. Microsoft To Do and Google Tasks are free too. |
+| Does local-only storage meet the core need? | **Fail** | One list on phone and laptop is the top praise for Todoist and TickTick, and the top reason people leave Things 3. |
+| Is "proven accessible + keyboard-first" unique? | **Pass** | No leader publishes a WCAG 2.2 AA report. Google's own Tasks report rates keyboard access "Partially Supports". Todoist shortcuts work only on QWERTY and QWERTZ keyboards. |
+| Is "calm backlog" unique? | **Pass** | Backlog guilt is the best-evidenced reason people quit (HN thread, 1,402 points). Leaders show red overdue counts. |
 
-**ANSWERED (Ddk, 2026-11-12): both.** Tasks is a real product first, and it also works as Ddk's portfolio. Consequences:
-- The landing page sells the product outcome to list-keepers. The craft story (tests, accessibility, CSP, AI workflow) gets one section for reviewers, lower on the page.
-- The README's assignment sections ("Debugging task", "Enhancement ideas for a basic static page") move out of the README into `docs/`, so a product visitor does not read the app as an exercise.
+**Verdict: pivot the positioning and keep the product.** The headline changes from "no account, everything free" to "accessible, keyboard-first, calm and yours". "No paywall, ever" stays as a promise, not the headline. **This pivot needs Ddk's approval.**
 
-## 1. Idea
+## 0. Identity
 
-One person adds tasks in passing all day. Today they lose them in notes, chats and heavy apps that want an account. Tasks gives them a list they can add to in one typed line, with no account, and trust. *(INFERRED)*
+**DECIDED (Ddk):** both a product and a portfolio piece. The landing page sells the product. One section, lower down, shows the craft for reviewers. The README's assignment sections move to `docs/`.
+
+## 1. Idea (step 2)
+
+People quit to-do apps when the list turns into a pile of red overdue guilt, and keyboard and screen-reader users are poorly served by the big apps on the web. Tasks is a calm to-do list that anyone can run fully from the keyboard or a screen reader, proven by a public accessibility report, free forever, with your data in your hands. *(RESEARCH + INFERRED)*
 
 ## 2. Customer
 
-- **Who:** one person who manages only their own tasks, on a laptop and a phone. They use the keyboard on the laptop and the thumb on the phone. *(INFERRED, from PRODUCT.md)*
-- **Scene:** at a desk, in the middle of other work, a thought arrives ("pay rent tomorrow"). They want it saved in 2 seconds without the mouse, then back to work. Later in the day, they check what is due today. *(INFERRED)*
-- **Possible wedge:** keyboard-only and screen-reader users. The app has full keyboard control, announced moves and checked contrast, and many to-do apps do this badly. *(INFERRED. Not tested with real users.)*
-- **Not the customer:** teams, shared lists, project managers. The app has no sharing. *(FACT)*
+- **Primary, keyboard-first people on a laptop:** developers and power users who want an app "built for the keyboard", not one that merely "has shortcuts". *(RESEARCH: Godspeed on HN, 328 points)*
+- **Primary, screen-reader users on desktop:** JAWS and NVDA users on Windows, where the leaders' web apps are weakest. *(RESEARCH: WebAIM survey #10; Google Tasks report)*
+- **Primary, people who quit over backlog guilt,** including many people with ADHD: they want fast capture and no shame pile. *(RESEARCH, low confidence: mostly vendor blogs and Reddit)*
+- **Secondary:** people leaving Todoist or TickTick over price changes. *(RESEARCH: 71% of 184 poll voters said they would move after Todoist's Dec 2025 rise; self-selected poll)*
+- **Scene:** at a desk, mid-work, a thought arrives. They add it in one typed line without the mouse and go back to work. Later, on the phone, they see the same list. *(INFERRED)*
+- **Not the customer:** teams and shared projects. *(DECIDED: no sharing in v1)*
 
 ## 3. Pain
 
-- Big to-do apps ask for an account, a sync setup and an onboarding tour before the first task. *(INFERRED)*
-- A notes app or chat-to-self loses dates, so tasks are found too late. *(INFERRED)*
-- Repeating chores pile up as overdue copies when one is missed. *(INFERRED)*
-- **What they use now instead:** a phone's built-in reminders, a notes app, paper, or a big app such as Todoist or TickTick. *(INFERRED)*
+- **Backlog guilt:** overdue tasks pile up in red, and people quit. *(RESEARCH)*
+- **Keyboard and screen-reader gaps** in the big web apps: functions that need a mouse, checkbox states that a screen reader cannot hear, colour as the only signal. *(RESEARCH: Google Tasks report)*
+- **Changes in the deal:** features move behind a paywall, and prices rise. *(RESEARCH)*
+- **Bloat:** too many "side quests" in feature-rich apps. *(RESEARCH)*
+- **What they use now:** Todoist, TickTick, Microsoft To Do, Apple Reminders, Google Tasks, a .txt file or paper. *(RESEARCH)*
 
 ## 4. Outcome
 
-What is true for the customer after they use it:
-- A task is saved from one typed line, with no mouse. **Target:** under 5 seconds from key press to saved task. *(TARGET, not measured)*
-- What is due today is one key away. *(FACT: Today view and command palette)*
-- A missed repeating task does not create a pile of overdue copies. *(FACT: a task finished late skips the occurrences it missed)*
-- Nothing is lost by mistake: delete and "Clear completed" can be undone. *(FACT)*
-- No account, and no data leaves the device. *(FACT: localStorage only, no server)*
+- A task is saved from one typed line with no mouse. **Target:** under 5 seconds from key press to saved task. The magic moment target is set in step 4. *(TARGET)*
+- Every function works from the keyboard and with NVDA, JAWS and VoiceOver, and a public report proves it. *(TARGET)*
+- Missed tasks roll forward calmly. There is no red pile and no shame count. *(TARGET)*
+- The same list on the laptop and the phone, with no account. *(TARGET; see section 5, item 5)*
+- The data cannot vanish silently. *(TARGET; see risk 1)*
 
 ## 5. Mechanism
 
-How the product makes the outcome happen:
-1. **One-line quick-add.** It reads `today`, `tomorrow`, `!high`, `!med` and `!low` in a typed line. *(FACT)*
-2. **No account, no server.** The app opens in a browser tab and saves to that browser. *(FACT)*
-3. **Keyboard for everything.** Command palette (Ctrl+K), search (/), reorder (Alt+↑/↓), undo. *(FACT)*
-4. **Repeats that never pile up.** Completing a repeat creates the next one and skips missed ones. Monthly repeats keep their day across short months. *(FACT)*
-5. **Smart views.** Today, Upcoming, Overdue and All, with live counts. *(FACT)*
+What exists today *(FACT)*:
+1. One-line quick-add. It reads `today`, `tomorrow`, `!high`, `!med` and `!low`.
+2. Keyboard for everything: command palette (Ctrl+K), search (/), reorder (Alt+↑/↓), undo.
+3. Recurring tasks that never pile up. A late finish skips the missed occurrences.
+4. Accessibility work: focus trap, announced moves, WCAG AA contrast checked in CI.
 
-**What only it does (ruthless):** no single item is unique.
-- Todoist and TickTick parse far more in quick-add: weekdays, times, lists, "next week". Our parser reads only 5 tokens.
-- Built-in reminder apps need no account inside their own ecosystem.
-- The honest edge is the **combination**: no account + keyboard-first + accessible + open source. Whether people care about that combination is **UNKNOWN**.
+What the pivot adds *(INFERRED, to be specified in step 6)*:
 
-## 6. Proof
+5. **User-owned sync, with no account.** These are the research ladder's steps, in this order:
+   1. Home Screen install with `persist()`, and storage moves to IndexedDB.
+   2. One-key export and a scheduled backup file.
+   3. A file in a folder the user already syncs.
+   4. Optional WebDAV.
 
-- **Customer proof today:** none. There are no users, quotes or usage numbers. *(FACT)* We will not invent any.
-- **Engineer proof today:** 140+ automated tests, a WCAG AA contrast check in CI, a CSP check. This is proof for builders, not for list-keepers (crit finding 4). *(FACT)*
-- **Proof we can make:**
-  - A live quick-add demo on the landing page: the visitor types a line and sees it parsed. This is a demonstration, not a claim.
-  - 3 to 5 real people use it for one week and give a one-line quote with permission. **ANSWERED:** Ddk will find them. Until their quotes exist, the page shows the live demo and no quotes.
-- **Proof for reviewers (portfolio):** the engineer proof above, plus AI_WORKFLOW.md, in the one craft section.
+   A one-time pairing code beats per-device tokens.
+6. **Calm backlog:** a "today only" default, gentle roll-forward instead of red overdue counts, and stale tasks that fade into an archive.
+7. **A full quick-add grammar,** at the level of the leaders: weekdays, dates, times, "every"/"every!" recurrence, #list, @label and priority.
+8. **Layout-independent shortcuts:** they work on any keyboard layout, unlike Todoist's QWERTY/QWERTZ-only set.
+9. **Accessibility proof:** a public WCAG 2.2 AA conformance report, NVDA + Chrome and VoiceOver + Safari test notes, an accessibility test suite in CI, and an accessibility changelog.
 
-## 7. Pricing and business model
+## 6. Difference (against the winners)
 
-- **ANSWERED (Ddk, 2026-11-12): free and open source, forever.** There is no server, so the cost to run is only GitHub Pages (free).
-- **FACT:** the README says "MIT", but the repo has no LICENSE file, so legally there is no license yet. Build task: add an MIT LICENSE file.
-- **Consequence:** the page has no pricing table. "Free. Open source. No account." is the price line.
-
-## 8. Alternatives and competitors
-
-| Alternative | What it has that we lack | What we have that it lacks |
+| Against | We do not win on | We win on |
 |---|---|---|
-| Apple Reminders, Google Tasks, Microsoft To Do | Free, built in, sync across devices | Works with no account; keyboard-first; same on every OS |
-| Todoist, TickTick | Rich quick-add, sync, apps on every platform | No account, no tracking, open source |
-| Things | Polished native Apple apps | Free; works outside Apple; open source |
-| A notes app or paper | Zero learning, always at hand | Due dates, Today view, repeats, undo |
+| Todoist, TickTick | Sync polish, AI, integrations | Proven accessibility, calm backlog, no paywall, no account |
+| Microsoft To Do, Google Tasks | Price (also free), ecosystem | Calm backlog, keyboard model, quick-add grammar, no account |
+| Super Productivity | Price, licence, privacy, sync options | Simplicity, proven accessibility, easier sync setup *(RESEARCH: SP's accessibility was not checked)* |
+| Things 3 | Native Apple polish | Works on every OS and in the browser, free |
 
-*(INFERRED from public knowledge of these products. No prices stated, because I did not verify them.)*
+## 7. Proof
 
-## 9. The one main action
+- **Customer proof:** none yet, and none invented. *(FACT)*
+- **Proof we can make:**
+  - The public WCAG 2.2 AA conformance report and screen-reader test notes. This is the main proof, and no leader has one.
+  - A live quick-add demo on the landing page.
+  - Quotes from the 3 to 5 testers Ddk will find. Include at least one screen-reader user. AppleVis or r/Blind can help find one.
+- **Reviewer proof (portfolio):** the test suite, CI checks and AI_WORKFLOW.md, in one craft section.
 
-Open the app and add a first task. There is no sign-up step between the visitor and that task. *(FACT that it is possible. INFERRED that it is the goal.)*
+## 8. Pricing and the "all paid features free" promise
 
-Secondary action, for reviewers only (portfolio): open the code on GitHub from the craft section. It never competes with the main action above the fold.
+**DECIDED (Ddk):** free and open source, MIT, forever. There is no pricing table. The price line is "Free. No paywall, ever. MIT licensed." Build task: add the missing LICENSE file. *(FACT: it is missing)*
 
-## 10. Risks (worst first)
+What "all paid features free" means *(RESEARCH, section 4)*:
 
-1. **No sync, for a two-device customer.** The inferred customer uses a laptop and a phone, but each browser keeps its own list. Export and import is the only bridge, and it is manual. *(FACT)*
-   - **DECIDED (Claude, delegated by Ddk, 2026-11-12): launch with one device per list, no sync.**
-   - Why: sync needs a server and accounts. That breaks free, open source and "nothing leaves the device", adds running cost and a security surface, and the free model has no money to pay for it.
-   - In exchange: the page says "one device" honestly. Build hardens local data (risks 2 and 3).
-   - Later: revisit a no-account option (for example device-to-device transfer, or end-to-end encrypted sync) only if testers ask for it.
-2. **Silent data loss.** Data lives only in localStorage. The browser can clear it. Safari can delete script-written storage after 7 days without a visit, unless the site is on the Home Screen. The app does not request persistent storage. *(FACT for the code; Safari behaviour from WebKit's published policy)*
-3. **Not installable and not fully offline.** There is no service worker and no web app manifest, and the fonts load from Google. *(FACT)*
-4. **Mixed identity.** The README's assignment sections tell a visitor this is a coding exercise (section 0). *(FACT)*
-5. **Weak differentiation** against free built-in apps that sync. *(INFERRED)*
-6. **Phone gaps.** There is no drag-to-reorder on touch screens. *(FACT, on the README roadmap)*
-7. **No public URL.** The README still says "paste your GitHub Pages URL here". *(FACT)*
+| Competitor paid feature | In Tasks |
+|---|---|
+| Unlimited projects, lists, tasks, filters, labels, colour tags, themes | **Free in v1** (all local) |
+| Calendar, table, timeline and Eisenhower views; duration; deadlines | **Free in v1** (all local) |
+| Recurrence (paid in Any.do), full history, local auto-backup | **Free in v1** (all local) |
+| Habits, focus timer, statistics, templates | **Free in v1** (all local) |
+| Attachments | **Free, on the device**; they sync only through the user's own storage |
+| Reminders | **Free while the app is open or installed**; reliable background push needs a push server, so **later** |
+| Cross-device sync | **Free through user-owned storage** (file, then WebDAV); no hosted relay unless a sponsor pays for one |
+| Sharing, teams, AI assistant, email/WhatsApp reminders, integrations | **Not in v1:** they need a server that costs money every month. A rule-based "smart capture" on the device replaces the AI capture. |
+| Location reminders, widgets, HealthKit | **Not possible** in a web app; they need native apps |
 
-## 11. Unknowns
+The page says this honestly: every paid feature that can run on your device is free, and nothing is held back to sell.
 
-Answered on 2026-11-12: identity (both), pricing (free and open source), sync (one device at launch), testers (Ddk will find them).
+## 9. Alternatives and competitors
 
-Still open, and accepted as open:
-1. The names of the 3 to 5 testers. They are needed before quotes go on the page, not before Design.
-2. The public URL: the GitHub Pages address or a custom domain. It is needed before launch, not before Design.
-3. Whether the customer values the combination in section 5. The testers' week answers this.
+See section 6 and RESEARCH.md. The new direct rival is **Super Productivity** (MIT, no account, 23.6k stars).
+
+## 10. The one main action
+
+Open the app and add a first task, with nothing between the visitor and that task. *(DECIDED unless section 11 changes it)* A secondary action for reviewers is the GitHub link in the craft section.
+
+## 11. Sign-up: OPEN, needs Ddk
+
+Ddk asked for a sign-up screen. A real sign-up needs accounts and a server. That conflicts with "no account", "free forever on GitHub Pages" and "your data stays yours". The options:
+
+| Option | What the user does | Cost and risk |
+|---|---|---|
+| **A. No sign-up; a "Get started" screen (recommended)** | Opens the app at once. A first-run screen offers: install to Home Screen, turn on backup, connect a sync folder | Free, private, no server. Matches the research and the pivot |
+| **B. Real accounts (email/password or passkey) on a hosted backend** | Signs up, then syncs everywhere | A server, a database, a privacy policy, security work, and a monthly cost with no income. Breaks "free forever" unless sponsored |
+| **C. Passwordless "sync space"** | Creates a space and saves a recovery phrase; pairs devices with a code. Data is end-to-end encrypted through a relay | Feels like sign-up, but there is no account. It still needs someone to run a relay; this is the sponsor question again |
+
+## 12. Risks (worst first)
+
+1. **Silent total data loss on iPhone.** Safari deletes a site's storage after 7 days of Safari use with no interaction on that site. Home Screen apps are exempt. The app does not call `persist()` yet. *(FACT + RESEARCH)* Fix first: Home Screen prompt, `persist()`, IndexedDB, backup file, "last backup" date.
+2. **No sync for two-device users.** *(FACT)* **REVISED decision:** the earlier "one device at launch" decision is withdrawn. Research shows that local-only fails the core need. User-owned sync (section 5, item 5) is required before launch.
+3. **Demand may stay in a developer niche.** *(RESEARCH)* Go/stop gate below.
+4. **Screen-reader users prefer native apps** (58% prefer an app to a website). The web app must be clearly better on desktop. *(RESEARCH)*
+5. **Bloat from "all features free".** It conflicts with "calm". Free features ship behind progressive disclosure, never all on the first screen. *(RESEARCH + INFERRED)*
+6. **Not installable or offline yet:** no service worker, no manifest, and the fonts come from Google. *(FACT)*
+
+## 13. Go and stop gates (proposed by the research)
+
+- **Go** if, within about 6 months of launch: the WCAG 2.2 AA report is published, user-owned sync works, and traction is near the OpenTodo pace (a few hundred stars in the first months).
+- **Stop, or give the work upstream** (for example, accessibility fixes to Super Productivity) if traction stays flat after sync exists and screen-reader testers do not prefer Tasks to Todoist or Microsoft To Do on desktop.
 
 ## Gate
 
-- [x] Section 0 answered
-- [x] Every UNKNOWN answered or accepted as open
+- [x] Steps 1 and 2 done (RESEARCH.md)
+- [x] Kill gate run: PIVOT
+- [ ] Ddk approves the pivot
+- [ ] Ddk chooses the sign-up option (section 11)
 - [ ] Ddk approves this file
 
-After approval, Design starts with the **magic moment**, then the landing page, onboarding and the design system.
+After approval, Design starts (steps 4 and 5): the magic moment with its target, then the key screens, the landing page, onboarding (or sign-up) and the design system.
