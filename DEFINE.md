@@ -1,6 +1,6 @@
 # DEFINE: Tasks
 
-**Status: DRAFT v2 (2026-11-12), rewritten after market research. It waits for Ddk's approval of the pivot and of the sign-up decision (section 11).** No design or build work starts before approval (product flow law).
+**Status: APPROVED v2 (2026-11-12).** Ddk approved the pivot and chose sign-up option A (no sign-up). Design (steps 4 and 5) may start.
 
 Inputs: [RESEARCH.md](RESEARCH.md) (steps 1 and 2) and the source notes in `docs/research/notes/`.
 
@@ -22,7 +22,7 @@ Source tags:
 | Is "proven accessible + keyboard-first" unique? | **Pass** | No leader publishes a WCAG 2.2 AA report. Google's own Tasks report rates keyboard access "Partially Supports". Todoist shortcuts work only on QWERTY and QWERTZ keyboards. |
 | Is "calm backlog" unique? | **Pass** | Backlog guilt is the best-evidenced reason people quit (HN thread, 1,402 points). Leaders show red overdue counts. |
 
-**Verdict: pivot the positioning and keep the product.** The headline changes from "no account, everything free" to "accessible, keyboard-first, calm and yours". "No paywall, ever" stays as a promise, not the headline. **This pivot needs Ddk's approval.**
+**Verdict: pivot the positioning and keep the product.** The headline changes from "no account, everything free" to "accessible, keyboard-first, calm and yours". "No paywall, ever" stays as a promise, not the headline. **DECIDED (Ddk, 2026-11-12): pivot approved.**
 
 ## 0. Identity
 
@@ -125,7 +125,9 @@ See section 6 and RESEARCH.md. The new direct rival is **Super Productivity** (M
 
 Open the app and add a first task, with nothing between the visitor and that task. *(DECIDED unless section 11 changes it)* A secondary action for reviewers is the GitHub link in the craft section.
 
-## 11. Sign-up: OPEN, needs Ddk
+## 11. Sign-up: DECIDED (Ddk, 2026-11-12): option A, no sign-up
+
+The "sign-up" screen becomes a **Get started** first-run screen: install to Home Screen, turn on backup, connect a sync folder. There are no accounts and no server.
 
 Ddk asked for a sign-up screen. A real sign-up needs accounts and a server. That conflicts with "no account", "free forever on GitHub Pages" and "your data stays yours". The options:
 
@@ -153,8 +155,8 @@ Ddk asked for a sign-up screen. A real sign-up needs accounts and a server. That
 
 - [x] Steps 1 and 2 done (RESEARCH.md)
 - [x] Kill gate run: PIVOT
-- [ ] Ddk approves the pivot
-- [ ] Ddk chooses the sign-up option (section 11)
-- [ ] Ddk approves this file
+- [x] Ddk approves the pivot
+- [x] Ddk chooses the sign-up option (section 11): A
+- [x] Ddk approves this file (through the two gate answers, 2026-11-12)
 
 After approval, Design starts (steps 4 and 5): the magic moment with its target, then the key screens, the landing page, onboarding (or sign-up) and the design system.
