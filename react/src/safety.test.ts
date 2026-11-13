@@ -80,14 +80,15 @@ describe('installable app files', () => {
   const file = (path: string) => fileURLToPath(new URL(path, import.meta.url));
   const manifest = JSON.parse(readFileSync(file('../public/manifest.webmanifest'), 'utf8'));
 
-  it('links the manifest from the page', () => {
+  it('links the manifest from the start page and from the app', () => {
     expect(readFileSync(file('../index.html'), 'utf8')).toMatch(/<link rel="manifest" href="manifest.webmanifest">/);
+    expect(readFileSync(file('../app/index.html'), 'utf8')).toMatch(/<link rel="manifest" href="..\/manifest.webmanifest">/);
   });
 
-  it('describes a standalone app that starts inside its own scope', () => {
+  it('describes a standalone app that opens on the list, inside the site scope', () => {
     expect(manifest.name).toBe('Tasks');
     expect(manifest.display).toBe('standalone');
-    expect(manifest.start_url).toBe('./');
+    expect(manifest.start_url).toBe('./app/');
     expect(manifest.scope).toBe('./');
   });
 
@@ -97,9 +98,10 @@ describe('installable app files', () => {
     expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
   });
 
-  it('ships a service worker that never handles other sites except fonts', () => {
+  it('ships a service worker that never handles other sites except fonts, and caches both pages', () => {
     const sw = readFileSync(file('../public/sw.js'), 'utf8');
     expect(sw).toMatch(/fonts\.gstatic\.com/);
     expect(sw).toMatch(/method !== 'GET'/);
+    expect(sw).toMatch(/'\.\/app\/'/);
   });
 });

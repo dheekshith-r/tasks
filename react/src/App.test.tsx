@@ -15,6 +15,27 @@ const addTask = (text: string) => {
   fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
 };
 
+describe('quick-add lists and the start page', () => {
+  it('files a #list task under a new list and keeps it in sight', () => {
+    render(<App />);
+    addTask('Buy curd friday #groceries');
+    expect(titles()).toContain('Buy curd');
+    const stored = JSON.parse(localStorage.getItem('todo-lists:v1') ?? '[]') as { id: string; name: string }[];
+    const groceries = stored.find((l) => l.name === 'Groceries');
+    expect(groceries).toBeTruthy();
+    const task = (JSON.parse(localStorage.getItem('todo-app:v1') ?? '[]') as Task[]).find((t) => t.text === 'Buy curd');
+    expect(task).toMatchObject({ listId: groceries!.id, dueDate: '2026-11-13' });
+  });
+
+  it('adds a task handed over from the start page once, then forgets it', () => {
+    localStorage.setItem('todo-pending:v1', JSON.stringify({ text: 'From the start page', priority: 'high', listName: 'work' }));
+    render(<App />);
+    expect(titles()).toContain('From the start page');
+    expect(localStorage.getItem('todo-pending:v1')).toBeNull();
+    expect(status()).toMatch(/from the start page/);
+  });
+});
+
 describe('storage safety', () => {
   it('shows the storage state and an unset backup date, then records an export', async () => {
     URL.createObjectURL = vi.fn(() => 'blob:x');

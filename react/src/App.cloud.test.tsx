@@ -137,6 +137,21 @@ describe('leaving the account', () => {
   });
 });
 
+describe('a task from the start page while signed in', () => {
+  it('waits for the account list, then adds and syncs it without touching the guest list', async () => {
+    localStorage.setItem('todo-cloud:v1', 'on');
+    localStorage.setItem('todo-pending:v1', JSON.stringify({ text: 'Pay rent', priority: 'high' }));
+    h.s.user = h.asha;
+    render(<App />);
+    await waitFor(() => expect(h.s.dataCb).not.toBeNull());
+    expect(localStorage.getItem('todo-pending:v1')).not.toBeNull(); // not taken before the snapshot
+    sendSnapshot([cloudTask('Synced task')]);
+    await waitFor(() => expect(h.s.pushes[h.s.pushes.length - 1]?.tasks).toEqual(['Pay rent', 'Synced task']));
+    expect(localStorage.getItem('todo-pending:v1')).toBeNull();
+    expect(guestSaved()).toEqual(['Guest task']);
+  });
+});
+
 describe('coming back', () => {
   it('restores a signed-in session on the next visit', async () => {
     localStorage.setItem('todo-cloud:v1', 'on');

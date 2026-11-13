@@ -4,7 +4,7 @@ import type { Priority } from '../types';
 import { AlertIcon } from './icons';
 
 interface Props {
-  onAdd: (text: string, priority: Priority, dueDate?: string) => void;
+  onAdd: (text: string, priority: Priority, dueDate?: string, listName?: string) => void;
 }
 
 export default function TaskForm({ onAdd }: Props) {
@@ -20,7 +20,7 @@ export default function TaskForm({ onAdd }: Props) {
       setError('Enter a task before adding it.');
       return;
     }
-    onAdd(parsed.text, parsed.priority ?? priority, parsed.dueDate ?? (due || undefined));
+    onAdd(parsed.text, parsed.priority ?? priority, parsed.dueDate ?? (due || undefined), parsed.listName);
     setText('');
     setDue('');
   }
@@ -33,7 +33,7 @@ export default function TaskForm({ onAdd }: Props) {
         className="title"
         dir="auto"
         type="text"
-        placeholder='Try "Pay rent tomorrow !high"'
+        placeholder='Try "Pay rent friday !high #home"'
         maxLength={120}
         value={text}
         aria-required="true"

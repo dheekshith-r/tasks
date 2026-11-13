@@ -51,6 +51,18 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Party tomorrow', new Date(2026, 11, 31, 12)).dueDate).toBe('2027-01-01');
     expect(parseQuickAdd('Leap tomorrow', new Date(2028, 1, 28)).dueDate).toBe('2028-02-29');
   });
+  it('reads weekday names as the next such day, today included', () => {
+    // 1 Nov 2026 is a Sunday
+    expect(parseQuickAdd('Pay rent friday', now).dueDate).toBe('2026-11-06');
+    expect(parseQuickAdd('Bins sun', now).dueDate).toBe('2026-11-01');
+    expect(parseQuickAdd('Gym Mon', now).dueDate).toBe('2026-11-02');
+    expect(parseQuickAdd('Meet the Friday team', now)).toMatchObject({ text: 'Meet the team', dueDate: '2026-11-06' });
+  });
+  it('reads a #list and leaves look-alikes alone', () => {
+    expect(parseQuickAdd('Pay rent friday !high #home', now)).toEqual({ text: 'Pay rent', priority: 'high', dueDate: '2026-11-06', listName: 'home' });
+    expect(parseQuickAdd('Call Amma #घर', now).listName).toBe('घर');
+    expect(parseQuickAdd('Issue#42 and # alone', now)).toEqual({ text: 'Issue#42 and # alone', priority: undefined, dueDate: undefined });
+  });
   it('collapses the whitespace left behind', () => {
     expect(parseQuickAdd('  Buy   milk   today   !low ', now).text).toBe('Buy milk');
   });

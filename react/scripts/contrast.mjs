@@ -49,12 +49,28 @@ function themes(css) {
   return { light: blocks[0], dark: { ...blocks[0], ...blocks[1] } };
 }
 
+// The start page has its own, smaller token set.
+const START_PAIRS = [
+  ['ink', 'bg', 'headings and body text'],
+  ['muted', 'bg', 'sub-lines, the promise line, footer'],
+  ['ink', 'soft', 'button hover background'],
+  ['red-ink', 'red', 'Open Tasks and Add to my list buttons'],
+  ['red-text', 'bg', 'link hover, invalid input border'],
+  ['sun-ink', 'sun', 'text on the date highlighter'],
+  ['band-ink', 'band', 'closing band heading'],
+  ['red-ink', 'red', 'button on the closing band'],
+];
+const SOURCES = [
+  ...FILES.map((file) => ({ file, pairs: PAIRS })),
+  { file: '../src/landing/landing.css', pairs: START_PAIRS },
+];
+
 let failures = 0;
-for (const file of FILES) {
+for (const { file, pairs } of SOURCES) {
   const css = readFileSync(fileURLToPath(new URL(file, import.meta.url)), 'utf8');
   for (const [theme, tokens] of Object.entries(themes(css))) {
     console.log(`\n${file.replace(/^(\.\.\/)+/, '')} (${theme})`);
-    for (const [fg, bg, where] of PAIRS) {
+    for (const [fg, bg, where] of pairs) {
       if (!tokens[fg] || !tokens[bg]) { console.log(`  MISSING  --${fg} / --${bg}`); failures++; continue; }
       const ratio = contrast(tokens[fg], tokens[bg]);
       const ok = ratio >= MIN;

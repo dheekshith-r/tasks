@@ -2,7 +2,7 @@
   "name": "Tasks",
   "short_name": "Tasks",
   "description": "A calm to-do list you can run from the keyboard. Free, no account, saved on your device.",
-  "start_url": "./",
+  "start_url": "./app/",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",

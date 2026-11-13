@@ -16,6 +16,7 @@ import { tasksReducer } from './reducer';
 import { loadBackupDate, loadPersist, requestPersist, saveBackupDate, type PersistState } from './safety';
 import { DEFAULT_LISTS, loadLists, loadTasks, parseBackup, saveLists, saveTasks } from './storage';
 import { useCloud } from './useCloud';
+import { resolveList, takePending } from './handoff';
 import type { Filter, List, Sort, Task, View } from './types';
 import { uid } from './uid';
 import { count, dueForNewTask, inView, whenLabel } from './views';
@@ -95,6 +96,16 @@ export default function App() {
   useEffect(() => { if (cloud.mode === 'guest') saveLists(lists); }, [lists, cloud.mode]);
   // Signed in: send what changed. A no-op in guest mode and until the first snapshot is on screen.
   useEffect(() => { cloud.push(tasks, lists); }, [tasks, lists, cloud.ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A task typed on the start page while signed in waits until the account's list is on screen,
+  // so it syncs like any other task. (Guest tasks are already saved by the start page itself.)
+  useEffect(() => {
+    if (cloud.mode === 'cloud' && !cloud.ready) return;
+    const pending = takePending();
+    if (!pending) return;
+    handleAdd(pending.text, pending.priority, pending.dueDate, pending.listName);
+    setStatus(`Added "${pending.text}" from the start page`);
+  }, [cloud.mode, cloud.ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function deleteCloudData() {
     if (!window.confirm('Delete every task and list in your account, and the account itself? Tasks on this device in guest mode stay. This cannot be undone.')) return;
@@ -201,10 +212,13 @@ export default function App() {
   const canDrag = sort === 'manual' && !query.trim();
   const openTask = tasks.find((t) => t.id === openId);
 
-  function handleAdd(text: string, priority: Task['priority'], explicitDue?: string) {
-    const task: Task = { id: uid(), text, priority, done: false, dueDate: dueForNewTask(view, today, explicitDue), listId: currentListId };
+  function handleAdd(text: string, priority: Task['priority'], explicitDue?: string, listName?: string) {
+    // A typed #list files the task there, creating the list if it is new.
+    const resolved = resolveList(lists, listName);
+    if (resolved.lists !== lists) setLists(resolved.lists);
+    const task: Task = { id: uid(), text, priority, done: false, dueDate: dueForNewTask(view, today, explicitDue), listId: resolved.listId ?? currentListId };
     dispatch({ type: 'add', ...task });
-    if (!inView(task, view, today)) setView('all'); // e.g. an undated task added from Overdue
+    if (!inView(task, view, today) || (resolved.listId && resolved.listId !== currentListId)) setView('all'); // keep the new task in sight
     setQuery('');                                   // so the new task is never hidden by a leftover search
     if (filter === 'done') setFilter('all');
     setStatus(`Added "${text}"`);

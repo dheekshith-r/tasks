@@ -28,8 +28,16 @@ Fixes risk 1 in DEFINE.md (silent data loss on iPhone) and risk 6 (not installab
 ### M2: Plain Sight app
 The new look; self-hosted fonts; the one-column shell; calm backlog ("Carried over", "Let go"). Quick-add grammar adds weekdays, dates such as `14 nov`, `#list`, and `every day|week|month`. Existing features and tests keep working.
 
-### M3: Landing page and Get started
-The site root becomes the landing page, with a working hero quick-add. The task saves into the same storage, then the app opens at `/app/`. Get started has three optional steps: install, protect and back up, sync folder (sync itself arrives in M5). There is no sign-up (DEFINE.md section 11).
+### M3: Landing page (built 2026-11-13, ahead of M2, at Ddk's request)
+- **Done:**
+  - The site root is the start page, and the app moved to `/app/`. The storage keys and the origin are unchanged, so existing lists stay.
+  - **Hero:** the "Pencil to type" visual, drawn in code (Ddk chose option 1 of 3 on the "Plain Sight visuals" canvas).
+  - **Working input:** the hero input saves the task. Guests write straight to this device. Signed-in users get a hand-off that the app adds after their synced list loads.
+  - **Quick-add:** the app's quick-add now reads weekdays and `#list`, so the page claims nothing the app cannot do.
+- **Still open:**
+  - The Get started screen (install, protect, back up) is still to do. Today the app shows the same items in its colophon.
+  - The app itself still wears the Grid look. M2 restyles it to Plain Sight, so the page and the app match.
+  - The share image (`og.png`) still shows the Grid look. M2 replaces it.
 
 ### M4: Free features, batch 1
 Week calendar view, durations and deadlines, saved filters and labels, unlimited lists (already true).

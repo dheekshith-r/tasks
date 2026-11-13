@@ -2,9 +2,9 @@
 // - Pages: network first, so a new release shows at once; the cached copy is used offline.
 // - Files from this site and Google Fonts: served from the cache, refreshed in the background.
 // - Everything else, and every non-GET request, is left to the browser.
-const CACHE = 'tasks-v1';
+const CACHE = 'tasks-v2';
 const FONT_ORIGINS = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
-const SHELL = ['./', './manifest.webmanifest', './icon-192.png'];
+const SHELL = ['./', './app/', './manifest.webmanifest', './icon-192.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -34,7 +34,10 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(async () => (await caches.match(request)) || (await caches.match('./')) || Response.error()),
+        // Offline: the page itself if cached, else the app (inside /app/) or the start page.
+        .catch(async () => (await caches.match(request))
+          || (await caches.match(url.pathname.includes('/app/') ? './app/' : './'))
+          || Response.error()),
     );
     return;
   }

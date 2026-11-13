@@ -7,7 +7,9 @@ A clean, accessible to-do app built twice to show range:
 | [`/react`](./react) | React 19, TypeScript 7, Vite 8, Vitest 5 | Component-based version with typed state and unit tests |
 | [`/vanilla`](./vanilla) | HTML, CSS, JavaScript | Same app with no framework, proving the fundamentals |
 
-**Live app:** https://dheekshithsnewjourney-crypto.github.io/to-do-sample/ (the React version deploys automatically from `main`). It installs like an app and works offline.
+**Live:** the start page is https://dheekshithsnewjourney-crypto.github.io/to-do-sample/ and the app is at [/app/](https://dheekshithsnewjourney-crypto.github.io/to-do-sample/app/). Both deploy automatically from `main`; the app installs like an app and works offline.
+
+The start page's hero is drawn in code (`react/src/landing/pencil.ts`): a typed line is written in pencil, the date gets a highlighter, the priority a red pen circle, and it settles into a clean task. Type your own line and it is saved to your list.
 
 ## Guest mode and optional sign-in
 - **Guest mode (default):** no account. Tasks stay in this browser, nothing is uploaded, and the app works offline.

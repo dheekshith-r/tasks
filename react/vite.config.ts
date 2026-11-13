@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -52,6 +54,8 @@ function csp(authDomain?: string): Plugin {
   };
 }
 
+const root = fileURLToPath(new URL('.', import.meta.url));
+
 // base './' lets the build work on GitHub Pages under any repo name
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_FIREBASE_');
@@ -60,6 +64,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), csp(env.VITE_FIREBASE_AUTH_DOMAIN?.trim() || undefined)],
     // Budget: the page itself loads one ~265 kB chunk. The Firebase chunk (~650 kB) is fetched
     // only after someone chooses to sign in, so its size never reaches guests.
-    build: { chunkSizeWarningLimit: 700 },
+    build: {
+      chunkSizeWarningLimit: 700,
+      // Two pages: the start page at the site root, the app at /app/.
+      rollupOptions: { input: { start: resolve(root, 'index.html'), app: resolve(root, 'app/index.html') } },
+    },
   };
 });
