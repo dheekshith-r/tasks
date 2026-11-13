@@ -33,7 +33,7 @@ The start page's hero is drawn in code (`react/src/landing/pencil.ts`): a typed 
 The day as a Swiss International Style poster. A red field at the top states how many tasks remain, at poster scale, next to the date. Below it, a 12-column typographic sheet lists the tasks by when they are due. Full rules and tokens: [DESIGN.md](./DESIGN.md).
 
 - **Brand:** red `#D62839` (the field) and yellow `#FFC53D` (a marker only), on white and off-black.
-- **Type:** one family, Hanken Grotesk, from 300 to 900. Every number uses tabular figures.
+- **Type:** the app uses Hanken Grotesk (300 to 900); the start page uses Atkinson Hyperlegible Next and Mono. All fonts are served from this site. Every number uses tabular figures.
 - **Layout:** no sidebar and no cards. 3px ink rules open each group, and hairlines separate rows. A "when" rail (Overdue, Today, Tomorrow, a date, Done) labels each run of tasks. On phones the views and lists move into a slide-out menu.
 - **Signature:** the count re-sets with a short roll when it changes, and a finished task gets a red strike, line by line.
 - **Red text** uses a text-safe red (`#C8202F`), so it reaches 4.5:1 even on the hover grey. Red never means danger by colour alone: overdue tasks also get an icon and words.
@@ -75,7 +75,7 @@ Needs Node 22.12 or newer (CI uses Node 26 LTS).
 cd react
 npm install
 npm run dev        # development server
-npm test           # unit and DOM tests (186)
+npm test           # unit and DOM tests (208)
 npm run test:rules # Firestore security rules against the emulator (17)
 npm run contrast   # WCAG AA check of the colour tokens
 npm run build      # type-check + production build
@@ -102,7 +102,7 @@ react/
 ```
 
 ## Tests
-186 tests across 13 files, plus 17 Firestore security-rules tests that run against the emulator (`npm run test:rules`, needs Java 21+):
+208 tests across 15 files, plus 17 Firestore security-rules tests that run against the emulator (`npm run test:rules`, needs Java 21+):
 - **Logic** (`reducer`, `dates`, `quickadd`, `storage`, `views`, `color`): recurring tasks, month ends, daylight-saving days, quick-add edge cases, corrupted storage, import validation.
 - **Components and app** (jsdom + Testing Library): focus trap and focus restore in the drawer, palette and mobile menu, keyboard reorder, drag and drop, undo, date rollover at midnight.
 - **Vanilla** (`vanilla.test.ts`): loads the real `vanilla/index.html` and `script.js` into jsdom.

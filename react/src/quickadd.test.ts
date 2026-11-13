@@ -10,6 +10,15 @@ describe('parseQuickAdd', () => {
   it('reads today', () => {
     expect(parseQuickAdd('Call mom today', now)).toMatchObject({ text: 'Call mom', dueDate: '2026-11-01' });
   });
+  it('reads a list name with combining marks, such as Hindi', () => {
+    expect(parseQuickAdd('Pay rent #मकान', now)).toMatchObject({ text: 'Pay rent', listName: 'मकान' });
+  });
+  it('leaves a list word longer than 24 characters in the title', () => {
+    const long = '#' + 'a'.repeat(25);
+    const r = parseQuickAdd(`Pay rent ${long}`, now);
+    expect(r.text).toBe(`Pay rent ${long}`);
+    expect(r.listName).toBeUndefined();
+  });
   it('leaves plain text alone', () => {
     expect(parseQuickAdd('Buy milk', now)).toEqual({ text: 'Buy milk', priority: undefined, dueDate: undefined });
   });

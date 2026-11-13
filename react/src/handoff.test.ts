@@ -30,6 +30,15 @@ describe('start page hand-off, guest mode', () => {
     expect(addFromStartPage({ text: 'x', priority: 'urgent' as never })).toBe('failed');
     expect(localStorage.getItem('todo-app:v1')).toBeNull();
   });
+
+  it('keeps the app limits, task 120 and list 24 characters, without cutting an emoji in half', () => {
+    addFromStartPage({ text: '🙂'.repeat(130), priority: 'med', listName: 'मकान'.repeat(10) });
+    const task = loadTasks(loadLists())[0];
+    expect([...task.text]).toHaveLength(120);
+    expect(task.text).toBe('🙂'.repeat(120));
+    const list = loadLists().find((l) => l.id === task.listId)!;
+    expect([...list.name]).toHaveLength(24);
+  });
 });
 
 describe('start page hand-off, signed in', () => {

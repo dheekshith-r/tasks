@@ -98,9 +98,10 @@ describe('installable app files', () => {
     expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
   });
 
-  it('ships a service worker that never handles other sites except fonts, and caches both pages', () => {
+  it('ships a service worker that never handles other sites, and caches both pages', () => {
     const sw = readFileSync(file('../public/sw.js'), 'utf8');
-    expect(sw).toMatch(/fonts\.gstatic\.com/);
+    expect(sw).toMatch(/url\.origin !== self\.location\.origin\) return;/);
+    expect(sw).not.toMatch(/https?:\/\//);
     expect(sw).toMatch(/method !== 'GET'/);
     expect(sw).toMatch(/'\.\/app\/'/);
   });

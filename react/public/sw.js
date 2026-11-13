@@ -1,9 +1,8 @@
 // Offline support for Tasks. No dependencies.
 // - Pages: network first, so a new release shows at once; the cached copy is used offline.
-// - Files from this site and Google Fonts: served from the cache, refreshed in the background.
-// - Everything else, and every non-GET request, is left to the browser.
-const CACHE = 'tasks-v2';
-const FONT_ORIGINS = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
+// - Files from this site (fonts included): served from the cache, refreshed in the background.
+// - Other sites, and every non-GET request, are left to the browser.
+const CACHE = 'tasks-v3';
 const SHELL = ['./', './app/', './manifest.webmanifest', './icon-192.png'];
 
 self.addEventListener('install', (event) => {
@@ -22,7 +21,7 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin && !FONT_ORIGINS.includes(url.origin)) return;
+  if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -47,7 +46,7 @@ self.addEventListener('fetch', (event) => {
       const cached = await cache.match(request);
       const fresh = fetch(request)
         .then((response) => {
-          if (response.ok || response.type === 'opaque') cache.put(request, response.clone());
+          if (response.ok) cache.put(request, response.clone());
           return response;
         })
         .catch(() => cached || Response.error());

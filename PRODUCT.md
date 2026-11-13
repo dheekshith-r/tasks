@@ -21,7 +21,7 @@ Used in short bursts many times a day, mostly by keyboard on desktop and by thum
 
 ## Capabilities and Constraints
 - Must keep: every feature and behavior covered by the 143 tests (quick-add parsing, views, recurring logic, undo, drag and keyboard reorder, drawer, palette, import/export, accent colour).
-- Stack: React 19 + TypeScript + Vite, plain CSS, deployed to GitHub Pages with a CSP (no external scripts; fonts only from Google Fonts).
+- Stack: React 19 + TypeScript + Vite, plain CSS, deployed to GitHub Pages with a CSP (no external scripts; fonts self-hosted, so the page makes no third-party requests).
 - Accessibility: WCAG AA contrast checked by script, full keyboard operation, reduced-motion support.
 
 ## Brand Commitments

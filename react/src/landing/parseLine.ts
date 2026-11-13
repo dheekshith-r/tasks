@@ -19,7 +19,7 @@ export interface ParsedLine {
 const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const DATE_WORD = /^(today|tomorrow|tmrw|monday|mon|tuesday|tues|tue|wednesday|wed|thursday|thurs|thu|friday|fri|saturday|sat|sunday|sun)$/i;
 const PRIORITY_WORD = /^!(high|medium|med|low)$/i;
-const LIST_WORD = /^#([\p{L}\p{N}_-]{1,40})$/u;
+const LIST_WORD = /^#([\p{L}\p{M}\p{N}_-]{1,24})$/u;
 
 function dateFor(word: string, now: Date): Date {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());

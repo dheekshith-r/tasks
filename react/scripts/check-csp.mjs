@@ -25,7 +25,7 @@ for (const page of PAGES) {
     const hash = `'sha256-${createHash('sha256').update(body).digest('base64')}'`;
     check(policy.includes(hash), `inline script ${hash}`);
   }
-  for (const directive of ["worker-src 'self'", "manifest-src 'self'"]) {
+  for (const directive of ["worker-src 'self'", "manifest-src 'self'", "font-src 'self'", "style-src 'self'"]) {
     check(policy.split(';').some((part) => part.trim() === directive), directive);
   }
   check(html.includes(page.manifest), 'manifest link');

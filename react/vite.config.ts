@@ -37,8 +37,8 @@ function csp(authDomain?: string): Plugin {
         const policy = [
           "default-src 'self'",
           `script-src 'self' ${hashes.join(' ')} ${fb.script}`.trim(),
-          "style-src 'self' https://fonts.googleapis.com",
-          'font-src https://fonts.gstatic.com',
+          "style-src 'self'",
+          "font-src 'self'",
           "img-src 'self' data:",
           `connect-src 'self' ${fb.connect}`.trim(),
           `frame-src ${fb.frame || "'none'"}`,
@@ -66,6 +66,8 @@ export default defineConfig(({ mode }) => {
     // only after someone chooses to sign in, so its size never reaches guests.
     build: {
       chunkSizeWarningLimit: 700,
+      // Fonts stay files: inlined as data: URLs they would break font-src 'self' and the cache.
+      assetsInlineLimit: (file) => (/\.woff2?$/.test(file) ? false : undefined),
       // Two pages: the start page at the site root, the app at /app/.
       rollupOptions: { input: { start: resolve(root, 'index.html'), app: resolve(root, 'app/index.html') } },
     },

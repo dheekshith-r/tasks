@@ -17,6 +17,11 @@ describe('parseLine', () => {
     expect(parseLine('Bin day mon', thu).dueLabel).not.toBe('Tomorrow');
   });
 
+  it('reads a Hindi list name whole, and ignores a list word over 24 characters', () => {
+    expect(parseLine('Pay rent #मकान', thu)).toMatchObject({ title: 'Pay rent', listName: 'मकान' });
+    expect(parseLine('Pay rent #' + 'a'.repeat(25), thu).listName).toBeUndefined();
+  });
+
   it('defaults to medium priority with no date and no list', () => {
     const p = parseLine('Buy curd', thu);
     expect(p).toMatchObject({ title: 'Buy curd', priority: 'med', dueLabel: '', tokens: [] });

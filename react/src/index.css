@@ -1,6 +1,6 @@
 /* ==== Tasks · Grid: the day as a Swiss poster ====
    One red field states what is left; a strict 12-column typographic sheet lists it by when.
-   Brand: red #D62839, yellow #FFC53D, white/black neutrals. One family: Hanken Grotesk.
+   Brand: red #D62839, yellow #FFC53D, white/black neutrals. One family: Hanken Grotesk, served from this site.
    Every text/background pair below is checked by `npm run contrast`. */
 :root {
   --bg: #FFFFFF; --surface: #FFFFFF; --soft: #F2F2F2; --line: #DCDCDC;
@@ -11,7 +11,7 @@
   --overlay: rgba(17, 17, 17, .5);
   --focus-tint: color-mix(in srgb, var(--sun) 20%, var(--bg));
 
-  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font: "Hanken Grotesk Variable", "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Grid (12 / 4 columns), spacing on an 8px rhythm */
   --max: 1240px; --margin: 40px; --gutter: 24px;
   --rail: calc(33.333% - 8px); /* four of twelve columns, so the check lines up with the date heading above */

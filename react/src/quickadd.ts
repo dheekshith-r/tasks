@@ -10,7 +10,7 @@ export interface Parsed {
 
 // Tokens only count as whole, whitespace-separated words, so "tomorrow's" or "wow!high" stay text.
 const PRIORITY = /(^|\s)!(high|medium|med|low)(?=\s|$)/gi;
-const LIST = /(^|\s)#([\p{L}\p{N}_-]{1,40})(?=\s|$)/gu;
+const LIST = /(^|\s)#([\p{L}\p{M}\p{N}_-]{1,24})(?=\s|$)/gu;
 const DATE_WORD = /(^|\s)(today|tomorrow|tmrw|monday|mon|tuesday|tues|tue|wednesday|wed|thursday|thurs|thu|friday|fri|saturday|sat|sunday|sun)(?=\s|$)/gi;
 const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const tidy = (s: string) => s.replace(/\s+/g, ' ').trim();

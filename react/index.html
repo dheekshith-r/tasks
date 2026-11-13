@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
   <title>Tasks · Write it like a note. Get a list.</title>
-  <meta name="description" content="A free to-do list you can run from the keyboard. Type &quot;Pay rent friday !high #home&quot; and it sets the date, priority and list. No account, works offline, open source.">
+  <meta name="description" content="A free to-do list you can run from the keyboard. Type &quot;Pay rent friday !high #home&quot; and it sets the date, priority and list. No account, open source.">
   <link rel="canonical" href="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Tasks · Write it like a note. Get a list.">
-  <meta property="og:description" content="Type one line with a day, a priority and a list. No account, no paywall, works offline.">
+  <meta property="og:description" content="Type one line with a day, a priority and a list. No account and no paywall.">
   <meta property="og:url" content="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/">
   <meta property="og:image" content="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The Tasks app.">
+  <meta property="og:image:alt" content="The Tasks to-do app.">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -30,9 +31,6 @@
         : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     } catch (e) { /* storage blocked */ }
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@500&family=Atkinson+Hyperlegible+Next:wght@400;500;700;800&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -43,9 +41,9 @@
         Tasks
       </a>
       <div class="nav-links">
-        <a href="#reads">How it works</a>
-        <a href="#keys">Keyboard</a>
-        <a href="#privacy">Privacy</a>
+        <a class="anchor" href="#reads">How it works</a>
+        <a class="anchor" href="#keys">Keyboard</a>
+        <a class="anchor" href="#privacy">Privacy</a>
         <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">GitHub</a>
         <a class="btn btn-red" href="app/">Open Tasks</a>
       </div>
@@ -54,106 +52,93 @@
 
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
-      <h1 id="hero-title">Write it like a note. Tasks makes it a list.</h1>
-      <p class="lede">Type one line with a day, a <strong>!priority</strong> and a <strong>#list</strong>. Tasks reads it, files it and stays out of your way.</p>
-
-      <div class="stage">
-        <canvas id="pencil" role="img" aria-label="Handwritten in pencil: Pay rent friday !high #home. It becomes the task Pay rent, due Friday, high priority, list home."></canvas>
+      <div class="hero-text">
+        <h1 id="hero-title">Write it like a note. Tasks makes it a list.</h1>
+        <p class="lede">Type one line with a day, a <strong>!priority</strong> and a <strong>#list</strong>. Tasks files it for you.</p>
       </div>
 
-      <form class="try" id="hero-form" autocomplete="off" novalidate>
-        <label for="hero-line">Try your own line</label>
+      <div class="stage">
+        <canvas id="pencil" role="img" aria-label="Pencil drawing: &quot;Pay rent friday !high #home&quot; becomes the task Pay rent, due Friday, high priority, list home.">Pencil drawing: "Pay rent friday !high #home" becomes the task Pay rent, due Friday, high priority, list home.</canvas>
+      </div>
+
+      <form class="try" id="hero-form" method="dialog" autocomplete="off" novalidate>
+        <label for="hero-line">Try your own line, then press Enter</label>
         <div class="try-row">
-          <input id="hero-line" name="line" type="text" maxlength="200" placeholder="Call the bank tomorrow !high #work" aria-describedby="hero-status">
+          <input id="hero-line" name="line" type="text" maxlength="120" dir="auto" enterkeyhint="done" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Call the bank tomorrow !high #work">
           <button class="btn btn-red" type="submit">Add to my list</button>
         </div>
         <div class="status-line">
-          <p id="hero-status" role="status" aria-live="polite"></p>
-          <a id="hero-open" href="app/" hidden>Open my list</a>
+          <p id="hero-status" role="status"></p>
+          <a id="hero-open" class="btn btn-line" href="app/" hidden>Open my list</a>
         </div>
       </form>
-      <p class="promise">Free, with no paywall, ever. No account needed. Works offline once installed.</p>
+      <p class="promise">Free, with no paywall, ever. No account needed. After you open it once, it works offline.</p>
     </section>
 
-    <section class="section" id="reads" aria-labelledby="reads-title">
+    <section class="section" id="reads">
       <div class="wrap split">
         <div>
-          <h2 id="reads-title">It reads the line the way you wrote it.</h2>
+          <h2>It reads the line the way you wrote it.</h2>
           <p class="sub">Write the task first, then add any of these words, in any order. The same line works in the app's own add box.</p>
         </div>
         <dl class="reads">
-          <div><dt><span class="mark-due">friday</span></dt><dd>The day it is due: <strong>today</strong>, <strong>tomorrow</strong> or a day of the week, which means the next one.</dd></div>
+          <div><dt><span class="mark-due">friday</span></dt><dd>The day it is due: <strong>today</strong>, <strong>tomorrow</strong> or a day of the week. A day name means the next one, and today counts.</dd></div>
           <div><dt><span class="mark-pr">!high</span></dt><dd>How much it matters: <strong>!high</strong>, <strong>!med</strong> or <strong>!low</strong>.</dd></div>
           <div><dt><span class="mark-list">#home</span></dt><dd>The list it belongs to. A new name makes a new list.</dd></div>
         </dl>
       </div>
     </section>
 
-    <section class="section" id="keys" aria-labelledby="keys-title">
-      <div class="wrap split">
-        <div>
-          <h2 id="keys-title">Built for the keyboard, and for screen readers.</h2>
-          <p class="sub">Every action works without a mouse. Moves and changes are announced, focus is always visible, and every colour pair is checked against WCAG AA on each build.</p>
-        </div>
+    <section class="section" id="keys">
+      <div class="wrap">
+        <h2>Run it from the keyboard.</h2>
+        <p class="sub">Add, search, move, rename and close with keys alone. Moves and changes are announced to screen readers.</p>
         <dl class="keys">
           <div><dt><kbd>N</kbd></dt><dd>New task</dd></div>
           <div><dt><kbd>/</kbd></dt><dd>Search</dd></div>
-          <div><dt><kbd>Ctrl K</kbd></dt><dd>Go anywhere, do anything</dd></div>
-          <div><dt><kbd>Alt ↑ ↓</kbd></dt><dd>Move a task, and hear where it went</dd></div>
+          <div><dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>Command menu (<kbd>⌘</kbd> <kbd>K</kbd> on a Mac)</dd></div>
+          <div><dt><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move a task, and hear where it went</dd></div>
           <div><dt><kbd>F2</kbd></dt><dd>Rename</dd></div>
           <div><dt><kbd>Esc</kbd></dt><dd>Close any panel</dd></div>
         </dl>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="free-title">
+    <section class="section">
       <div class="wrap">
-        <h2 id="free-title">What other apps charge for is free here.</h2>
-        <p class="sub">Everything runs on your device, so nothing is held back to sell. MIT licensed, so it stays that way.</p>
+        <h2>What other apps charge for is free here.</h2>
+        <p class="sub">Every paid feature that can run on your device is included. Sharing and teams need a server, so they are not here. MIT licensed, so it stays free.</p>
         <ul class="free">
           <li>Unlimited lists and tasks</li>
           <li>Repeating tasks that never pile up</li>
           <li>Subtasks and notes</li>
           <li>Today, Upcoming and Overdue views</li>
           <li>Search, undo and a command menu</li>
-          <li>Backups to a file you own</li>
+          <li>Backups to a file you keep</li>
           <li>Light and dark themes</li>
-          <li>Install it like an app, works offline</li>
+          <li>Installs like an app, works offline</li>
           <li data-cloud hidden>Optional sync with Google sign-in</li>
         </ul>
       </div>
     </section>
 
-    <section class="section" id="privacy" aria-labelledby="privacy-title">
+    <section class="section" id="privacy">
       <div class="wrap split">
         <div>
-          <h2 id="privacy-title">Your list stays yours.</h2>
-          <p class="sub">No ads and no analytics.</p>
+          <h2>Where your tasks are kept.</h2>
+          <p class="sub">No ads, no analytics and no third-party requests. The fonts come from this site.</p>
         </div>
         <dl class="facts">
-          <div><dt>Guest mode, the default</dt><dd>Your tasks are saved in this browser only. Nothing is uploaded unless you export it.</dd></div>
-          <div data-cloud hidden><dt>Optional Google sign-in</dt><dd>Signed-in tasks are stored by Google Firebase so they sync to your other devices. Only you can read them, and you can delete them and your account from inside the app.</dd></div>
-          <div><dt>Open source</dt><dd>Every line is on GitHub under the MIT license, with its tests and security checks.</dd></div>
+          <div><dt>Guest mode, the default</dt><dd>Your tasks are saved in this browser only. Nothing leaves your device. A backup is a file you save yourself.</dd></div>
+          <div data-cloud hidden><dt>Optional Google sign-in</dt><dd>Signed-in tasks are stored by Google Firebase so they sync to your other devices. Security rules let only your account read or write them, and you can delete them and your account from inside the app.</dd></div>
+          <div><dt>Open source, built in the open</dt><dd>Every line is <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">on GitHub</a> under the MIT license, with tests that run on every change. How AI helped, and how its work was checked, is in <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/AI_WORKFLOW.md">AI_WORKFLOW.md</a>.</dd></div>
         </dl>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="built-title">
-      <div class="wrap split">
-        <div>
-          <h2 id="built-title">Built in the open.</h2>
-          <p class="sub">For the people who read the code: how Tasks is made and checked.</p>
-        </div>
-        <dl class="facts">
-          <div><dt>Tested on every change</dt><dd>Automated tests for the logic, the screens and the security rules run on every push, with a strict content security policy.</dd></div>
-          <div><dt>Made with AI, checked by a person</dt><dd>The prompts, the checks and the bugs caught are written up in <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/AI_WORKFLOW.md">AI_WORKFLOW.md</a>.</dd></div>
-        </dl>
-      </div>
-    </section>
-
-    <section class="band" aria-labelledby="band-title">
+    <section class="band">
       <div class="wrap">
-        <h2 id="band-title">Your list is one keypress away.</h2>
+        <h2>Open your list.</h2>
         <a class="btn btn-red" href="app/">Open Tasks</a>
       </div>
     </section>

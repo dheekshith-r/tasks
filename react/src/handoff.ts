@@ -14,12 +14,15 @@ const LIST_COLORS = ['#D62839', '#FFC53D', '#8A8A8A'];
 export interface NewTask { text: string; priority: Priority; dueDate?: string; listName?: string }
 
 const isPriority = (v: unknown): v is Priority => v === 'low' || v === 'med' || v === 'high';
-const cleanName = (v: unknown) => (typeof v === 'string' ? v.trim().slice(0, 40) : '');
+// Same limits as the app's own inputs (task 120, list name 24), counted in characters, not
+// UTF-16 units, so an emoji or a Hindi letter is never cut in half.
+const clip = (s: string, max: number) => [...s].slice(0, max).join('').trim();
+const cleanName = (v: unknown) => (typeof v === 'string' ? clip(v.trim(), 24) : '');
 
 function valid(raw: unknown): NewTask | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const r = raw as Record<string, unknown>;
-  const text = typeof r.text === 'string' ? r.text.trim().slice(0, 1000) : '';
+  const text = typeof r.text === 'string' ? clip(r.text.trim(), 120) : '';
   if (!text || !isPriority(r.priority)) return null;
   const task: NewTask = { text, priority: r.priority };
   if (typeof r.dueDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dueDate)) task.dueDate = r.dueDate;
