@@ -13,6 +13,7 @@ import { accentVars, parseHex } from './color';
 import { parseISO } from './dates';
 import { isDialogOpen, useClock } from './hooks';
 import { tasksReducer } from './reducer';
+import { loadBackupDate, loadPersist, requestPersist, saveBackupDate, type PersistState } from './safety';
 import { loadLists, loadTasks, parseBackup, saveLists, saveTasks } from './storage';
 import type { Filter, List, Sort, Task, View } from './types';
 import { uid } from './uid';
@@ -28,6 +29,8 @@ const LIST_COLORS = ['#D62839', '#FFC53D', '#8A8A8A'];
 const DATE_LONG: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
 const VIEW_TITLES: Record<string, string> = { all: 'All tasks', today: 'Today', upcoming: 'Upcoming', overdue: 'Overdue' };
 const MOD_KEY = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+
+const formatDay = (iso: string) => parseISO(iso)?.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) ?? iso;
 
 function initialTheme(): Theme {
   try {
@@ -50,6 +53,9 @@ export default function App() {
   const [palette, setPalette] = useState(false);
   const [menu, setMenu] = useState(false);
   const [status, setStatus] = useState(''); // read out by screen readers
+  const [persist, setPersist] = useState<PersistState>(loadPersist);
+  const [backupDate, setBackupDate] = useState<string | null>(loadBackupDate);
+  const persistAsked = useRef(false);
   const [accent, setAccent] = useState<string | null>(() => {
     try {
       const saved = localStorage.getItem(ACCENT_KEY);
@@ -172,6 +178,12 @@ export default function App() {
     setQuery('');                                   // so the new task is never hidden by a leftover search
     if (filter === 'done') setFilter('all');
     setStatus(`Added "${text}"`);
+    // Ask once, after the first saved task: now there is something worth protecting.
+    // The ref stops a second quick add from asking again before the first answer arrives.
+    if (persist === 'unknown' && !persistAsked.current) {
+      persistAsked.current = true;
+      requestPersist().then(setPersist);
+    }
   }
 
   function handleToggle(id: string) {
@@ -231,7 +243,7 @@ export default function App() {
     { id: 'v-over', label: 'Go to Overdue', run: () => setView('overdue') },
     ...lists.map((l) => ({ id: `l-${l.id}`, label: `Go to list: ${l.name}`, run: () => setView(`list:${l.id}` as View) })),
     { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
-    { id: 'export', label: 'Export backup', run: () => exportData() },
+    { id: 'export', label: `Export backup (last: ${backupDate ? formatDay(backupDate) : 'never'})`, run: () => exportData() },
     ...(totalDone > 0 ? [{ id: 'clear', label: 'Clear completed tasks', run: clearCompleted }] : []),
     ...tasks.map((t) => ({ id: `t-${t.id}`, label: `Open task: ${t.text}`, run: () => setOpenId(t.id) })),
   ];
@@ -259,6 +271,9 @@ export default function App() {
     a.download = `tasks-backup-${today}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    saveBackupDate(today);
+    setBackupDate(today);
+    setStatus('Backup exported');
   }
 
   async function importData(file: File) {
@@ -367,7 +382,8 @@ export default function App() {
         <p className="sr-only" role="status">{status}</p>
       </main>
 
-      <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={menu} />
+      <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={menu}
+        persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null} />
 
       {openTask && (
         <Drawer

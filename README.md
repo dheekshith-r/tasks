@@ -7,7 +7,7 @@ A clean, accessible to-do app built twice to show range:
 | [`/react`](./react) | React 19, TypeScript 7, Vite 8, Vitest 5 | Component-based version with typed state and unit tests |
 | [`/vanilla`](./vanilla) | HTML, CSS, JavaScript | Same app with no framework, proving the fundamentals |
 
-**Live demo:** _paste your GitHub Pages URL here_ (the React version deploys automatically)
+**Live app:** https://dheekshithsnewjourney-crypto.github.io/to-do-sample/ (the React version deploys automatically from `main`). It installs like an app and works offline.
 
 ## Features
 - **Lists and smart views:** custom lists (each with a monogram marker, red for the one you are in) plus All tasks, Today, Upcoming and Overdue, each with live counts
@@ -68,7 +68,7 @@ Needs Node 22.12 or newer (CI uses Node 26 LTS).
 cd react
 npm install
 npm run dev        # development server
-npm test           # unit and DOM tests (145)
+npm test           # unit and DOM tests (162)
 npm run contrast   # WCAG AA check of the colour tokens
 npm run build      # type-check + production build
 npm run csp        # checks the built page's Content Security Policy
@@ -94,35 +94,13 @@ react/
 ```
 
 ## Tests
-140 tests across 9 files:
+162 tests across 10 files:
 - **Logic** (`reducer`, `dates`, `quickadd`, `storage`, `views`, `color`): recurring tasks, month ends, daylight-saving days, quick-add edge cases, corrupted storage, import validation.
 - **Components and app** (jsdom + Testing Library): focus trap and focus restore in the drawer, palette and mobile menu, keyboard reorder, drag and drop, undo, date rollover at midnight.
 - **Vanilla** (`vanilla.test.ts`): loads the real `vanilla/index.html` and `script.js` into jsdom.
 
-## Debugging task
-**Broken:**
-```js
-const todos = ["Buy milk", "Study JS"];
-for (var i = 0; i <= todos.length; i++) {
-  setTimeout(() => console.log(todos[i].toUpperCase()), 100);
-}
-```
-**Problems:** `<=` runs one step past the end (`undefined`), `var` shares one `i` across all callbacks, so the result is a `TypeError`.
-
-**Fixed:**
-```js
-todos.forEach((todo) => setTimeout(() => console.log(todo.toUpperCase()), 100));
-```
-
-## Enhancement ideas for a basic static page
-1. Dark mode with CSS variables and `prefers-color-scheme` (used in this app).
-2. Accessibility and performance pass: semantic landmarks, contrast checks, lazy-loaded images, Lighthouse above 90.
-3. Micro-interactions and a validated contact form instead of a bare `mailto:` link.
-
 ## Roadmap
-- Reordering on touch screens (HTML drag and drop is mouse-only; the keyboard shortcut needs a keyboard)
-- Self-hosted fonts, so the app works fully offline
-- Search inside notes and subtasks
+The plan lives in [SPEC.md](./SPEC.md), built on [DEFINE.md](./DEFINE.md) and [RESEARCH.md](./RESEARCH.md). The original assignment answers are in [docs/assignment.md](./docs/assignment.md).
 
 ## License
-MIT
+[MIT](./LICENSE). Free, with no paywall, ever.

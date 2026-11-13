@@ -15,6 +15,32 @@ const addTask = (text: string) => {
   fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
 };
 
+describe('storage safety', () => {
+  it('shows the storage state and an unset backup date, then records an export', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<App />);
+    expect(screen.getByText('Last backup: never')).toBeTruthy();
+    expect(screen.getByText(/Not protected yet/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Export backup' }));
+    expect(screen.queryByText('Last backup: never')).toBeNull();
+    expect(localStorage.getItem('todo-backup:v1')).toBe('2026-11-10');
+  });
+
+  it('asks for persistent storage once, after the first saved task', async () => {
+    const persist = vi.fn(async () => true);
+    vi.stubGlobal('navigator', Object.assign(Object.create(navigator), { storage: { persisted: async () => false, persist } }));
+    render(<App />);
+    addTask('First task');
+    addTask('Second task');
+    await act(async () => {});
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem('todo-persist:v1')).toBe('granted');
+    expect(screen.getByText(/Protected: this browser will keep your tasks/)).toBeTruthy();
+  });
+});
+
 beforeEach(() => {
   localStorage.clear();
   document.documentElement.removeAttribute('style');

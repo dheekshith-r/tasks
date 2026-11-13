@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { storageMessage, type PersistState } from '../safety';
 
 // `null` is the brand red from the stylesheet.
 const ACCENTS: { name: string; value: string | null; swatch: string }[] = [
@@ -17,10 +18,12 @@ interface Props {
   onImport: (file: File) => void;
   modKey: string;
   inert?: boolean; // set while the mobile menu is open
+  persist?: PersistState;
+  lastBackup?: string | null; // already formatted for display
 }
 
 // The page's closing block, like the colophon of a printed poster: settings, backup and shortcuts.
-export default function Colophon({ accent, onAccent, onExport, onImport, modKey, inert }: Props) {
+export default function Colophon({ accent, onAccent, onExport, onImport, modKey, inert, persist = 'unknown', lastBackup = null }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   return (
     <footer className="colophon" inert={inert}>
@@ -41,6 +44,8 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
 
       <div className="col-block">
         <p className="col-title">Backup</p>
+        <p className="col-storage">{storageMessage(persist)}</p>
+        <p className="col-storage">Last backup: {lastBackup ?? 'never'}</p>
         <div className="data">
           <button type="button" className="link" onClick={onExport}>Export backup</button>
           <button type="button" className="link" onClick={() => fileRef.current?.click()}>Import backup</button>

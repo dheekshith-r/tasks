@@ -208,6 +208,7 @@ h1 { margin: 0; font: 800 clamp(2.25rem, 4.2vw, 3.5rem)/1 var(--font); letter-sp
 .col-block:nth-of-type(3) { grid-column: 7 / 9; }
 .col-block.keys { grid-column: 9 / 13; }
 .col-title { margin: 0 0 var(--s3); font-weight: 700; }
+.col-storage { margin: 0 0 var(--s2); color: var(--muted); max-width: 34ch; }
 .swatches { display: flex; flex-wrap: wrap; gap: var(--s3); }
 .swatch { position: relative; width: 28px; height: 28px; border: 0; border-radius: 0; padding: 0; outline: 2px solid transparent; outline-offset: 3px; }
 .swatch::before { content: ''; position: absolute; inset: -6px; }
