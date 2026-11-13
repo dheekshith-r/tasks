@@ -1,0 +1,57 @@
+rules_version = '2';
+
+// Tasks cloud sync. Each signed-in user can read and write only their own documents under
+// users/{uid}/tasks and users/{uid}/lists. Every other path is denied by default.
+// Writes are checked field by field, with size limits, so one account cannot fill the shared
+// free quota with junk. Tested against the emulator: rules/firestore.rules-test.ts.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function shortString(v, max) {
+      return v is string && v.size() > 0 && v.size() <= max;
+    }
+
+    function validTask(id) {
+      let d = request.resource.data;
+      return d.keys().hasAll(['id', 'text', 'priority', 'done', 'order'])
+        && d.keys().hasOnly(['id', 'text', 'priority', 'done', 'order', 'dueDate', 'notes', 'listId',
+                             'subtasks', 'repeat', 'repeatDay', 'spawnedId'])
+        && d.id == id
+        && shortString(d.text, 1000)
+        && d.priority in ['low', 'med', 'high']
+        && d.done is bool
+        && d.order is number
+        && (!('dueDate' in d) || (d.dueDate is string && d.dueDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && (!('notes' in d) || (d.notes is string && d.notes.size() <= 10000))
+        && (!('listId' in d) || shortString(d.listId, 100))
+        && (!('subtasks' in d) || (d.subtasks is list && d.subtasks.size() <= 100))
+        && (!('repeat' in d) || d.repeat in ['daily', 'weekly', 'monthly'])
+        && (!('repeatDay' in d) || (d.repeatDay is int && d.repeatDay >= 1 && d.repeatDay <= 31))
+        && (!('spawnedId' in d) || shortString(d.spawnedId, 100));
+    }
+
+    function validList(id) {
+      let d = request.resource.data;
+      return d.keys().hasAll(['id', 'name', 'color', 'order'])
+        && d.keys().hasOnly(['id', 'name', 'color', 'order'])
+        && d.id == id
+        && shortString(d.name, 100)
+        && d.color is string && d.color.matches('^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$')
+        && d.order is number;
+    }
+
+    match /users/{uid}/tasks/{taskId} {
+      allow read, delete: if signedInAs(uid);
+      allow create, update: if signedInAs(uid) && validTask(taskId);
+    }
+
+    match /users/{uid}/lists/{listId} {
+      allow read, delete: if signedInAs(uid);
+      allow create, update: if signedInAs(uid) && validList(listId);
+    }
+  }
+}

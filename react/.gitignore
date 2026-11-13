@@ -1,2 +1,7 @@
 node_modules
 dist
+# Local Firebase web config (see .env.example and docs/FIREBASE_SETUP.md)
+.env.local
+.env.*.local
+# Firebase emulator logs
+*-debug.log

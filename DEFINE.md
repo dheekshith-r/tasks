@@ -1,6 +1,6 @@
 # DEFINE: Tasks
 
-**Status: APPROVED v2 (2026-11-12).** Ddk approved the pivot and chose sign-up option A (no sign-up). Design (steps 4 and 5) may start.
+**Status: APPROVED v2 (2026-11-12), amended 2026-11-13.** Ddk approved the pivot. On 2026-11-13 Ddk changed sign-up from "none" to "optional Google sign-in" (section 11).
 
 Inputs: [RESEARCH.md](RESEARCH.md) (steps 1 and 2) and the source notes in `docs/research/notes/`.
 
@@ -67,7 +67,7 @@ What exists today *(FACT)*:
 
 What the pivot adds *(INFERRED, to be specified in step 6)*:
 
-5. **User-owned sync, with no account.** These are the research ladder's steps, in this order:
+5. **Sync.** *Changed 2026-11-13:* optional Google sign-in with Firestore is the main sync path (section 11). The user-owned ladder below stays as an option for people without a Google account, in this order:
    1. Home Screen install with `persist()`, and storage moves to IndexedDB.
    2. One-key export and a scheduled backup file.
    3. A file in a folder the user already syncs.
@@ -111,7 +111,7 @@ What "all paid features free" means *(RESEARCH, section 4)*:
 | Habits, focus timer, statistics, templates | **Free in v1** (all local) |
 | Attachments | **Free, on the device**; they sync only through the user's own storage |
 | Reminders | **Free while the app is open or installed**; reliable background push needs a push server, so **later** |
-| Cross-device sync | **Free through user-owned storage** (file, then WebDAV); no hosted relay unless a sponsor pays for one |
+| Cross-device sync | **Free with optional Google sign-in** (Firebase Spark, no card, within daily quotas). Guests keep a device-only list and file backups |
 | Sharing, teams, AI assistant, email/WhatsApp reminders, integrations | **Not in v1:** they need a server that costs money every month. A rule-based "smart capture" on the device replaces the AI capture. |
 | Location reminders, widgets, HealthKit | **Not possible** in a web app; they need native apps |
 
@@ -125,9 +125,27 @@ See section 6 and RESEARCH.md. The new direct rival is **Super Productivity** (M
 
 Open the app and add a first task, with nothing between the visitor and that task. *(DECIDED unless section 11 changes it)* A secondary action for reviewers is the GitHub link in the craft section.
 
-## 11. Sign-up: DECIDED (Ddk, 2026-11-12): option A, no sign-up
+## 11. Sign-up: CHANGED (Ddk, 2026-11-13): from "none" to optional Google sign-in
 
-The "sign-up" screen becomes a **Get started** first-run screen: install to Home Screen, turn on backup, connect a sync folder. There are no accounts and no server.
+**Decision:**
+- **Guest mode stays the default.** There is no sign-in, and tasks save to this device only.
+- **Optional "Sign in with Google"** adds sync across devices. It uses Firebase Authentication and Cloud Firestore on the free **Spark** plan, with no credit card.
+- Hosting stays on GitHub Pages.
+
+**What the free plan gives** (Firebase pricing page, checked 2026-11-13):
+- No payment method needed.
+- Firestore: 1 GiB stored, 50K reads, 20K writes and 20K deletes per day, 10 GiB/month of download traffic.
+- Authentication: 50K monthly active users.
+- Quotas apply to the whole project and reset around midnight Pacific time (Firestore quotas page).
+- With no billing account there is nothing to charge. If a daily quota runs out, cloud sync pauses until the reset, and guest storage and the offline copy keep working.
+
+**Rules that keep this honest:**
+- Each user can read and write only their own tasks, enforced by Firestore security rules and tested in CI.
+- Signing in is never required for any feature.
+- A signed-in user can export everything, and can delete their cloud data and their account from inside the app.
+- The landing page says plainly that signed-in tasks are stored by Google Firebase. The page gets a privacy note.
+
+**Superseded:** option A below ("no sign-up") was the decision of 2026-11-12. The research ladder of user-owned sync (file, WebDAV) is now optional, for people who refuse a Google account.
 
 Ddk asked for a sign-up screen. A real sign-up needs accounts and a server. That conflicts with "no account", "free forever on GitHub Pages" and "your data stays yours". The options:
 
@@ -144,7 +162,10 @@ Ddk asked for a sign-up screen. A real sign-up needs accounts and a server. That
 3. **Demand may stay in a developer niche.** *(RESEARCH)* Go/stop gate below.
 4. **Screen-reader users prefer native apps** (58% prefer an app to a website). The web app must be clearly better on desktop. *(RESEARCH)*
 5. **Bloat from "all features free".** It conflicts with "calm". Free features ship behind progressive disclosure, never all on the first screen. *(RESEARCH + INFERRED)*
-6. **Not installable or offline yet:** no service worker, no manifest, and the fonts come from Google. *(FACT)*
+6. **Not installable or offline yet:** no service worker, no manifest, and the fonts come from Google. *(FACT; fixed in M1 except the fonts, which move in M2)*
+7. **Firebase quota is shared by all users.** 50K reads a day covers a small user base only. Cloud sync pauses for everyone when it runs out. Mitigation: Firestore's offline cache, listeners instead of repeated reads, and a usage check before launch. *(RESEARCH: Firebase pricing page)*
+8. **Privacy shift.** Signed-in tasks live on Google servers. Mitigation: guest mode by default, a plain privacy note, and in-app export and deletion of cloud data. *(DECIDED)*
+9. **Lock-in.** Sync depends on one vendor. Mitigation: guests are unaffected, and the export format stays plain JSON. *(INFERRED)*
 
 ## 13. Go and stop gates (proposed by the research)
 

@@ -23,5 +23,12 @@ for (const directive of ["worker-src 'self'", "manifest-src 'self'"]) {
   console.log(`${ok ? 'pass' : 'FAIL'}  ${directive}`);
 }
 if (!html.includes('<link rel="manifest" href="manifest.webmanifest">')) { failed++; console.log('FAIL  manifest link missing'); }
+// No wildcard sources, and frames only from a Firebase auth domain (or none at all).
+const wildcard = policy.split(/\s|;/).some((src) => src.includes('*'));
+if (wildcard) { failed++; console.log('FAIL  wildcard source in the policy'); } else console.log('pass  no wildcard sources');
+const frame = policy.split(';').map((p) => p.trim()).find((p) => p.startsWith('frame-src'));
+const frameOk = frame === "frame-src 'none'" || /^frame-src https:\/\/[a-z0-9-]+\.(firebaseapp\.com|web\.app)$/.test(frame ?? '');
+if (!frameOk) failed++;
+console.log(`${frameOk ? 'pass' : 'FAIL'}  ${frame ?? 'frame-src missing'}`);
 console.log(failed ? `${failed} CSP check(s) failed.` : `All ${scripts.length} inline script(s) allowed by the CSP; worker and manifest restricted to this site.`);
 process.exit(failed ? 1 : 0);

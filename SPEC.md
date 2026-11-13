@@ -34,8 +34,22 @@ The site root becomes the landing page, with a working hero quick-add. The task 
 ### M4: Free features, batch 1
 Week calendar view, durations and deadlines, saved filters and labels, unlimited lists (already true).
 
-### M5: User-owned sync
-IndexedDB storage; sync through a file in a folder the user already syncs; optional WebDAV; device pairing with a one-time code. Per-item timestamps with last-write-wins (RESEARCH.md); move to a CRDT if testing shows lost edits.
+### M1b: Optional Google sign-in and cloud sync (built now, ahead of M2, at Ddk's request of 2026-11-13)
+- **Guest mode** is unchanged and stays the default (localStorage, this device only).
+- **Sign in with Google** uses Firebase Authentication (popup flow, because the app is not hosted on the Firebase auth domain) on the free Spark plan.
+- **Data:** `users/{uid}/tasks/{taskId}` and `users/{uid}/lists/{listId}` in Cloud Firestore, with a persistent offline cache.
+  - The app keeps its reducer. A pure diff between the last cloud snapshot and the current state turns into one batched write.
+  - Remote changes arrive through snapshot listeners.
+- **First sign-in:** if guest tasks exist on this device, offer once to copy them into the account.
+- **Sign out:** the account's tasks leave this device, and the guest list comes back.
+- **Delete:** "Delete my cloud data" removes every document, then the account.
+- **Security rules:** owner-only access, a whitelist of fields, size limits, and the collections limited to `tasks` and `lists`. Rules tests run against the Firestore emulator in CI.
+- **Config:** the Firebase web config comes from `VITE_FIREBASE_*` variables (GitHub Actions variables, `.env.local` locally). With no config, the sign-in button is hidden and the app is guest-only.
+- **Lazy loading:** the Firebase SDK loads only when someone signs in, or is already signed in, so guests download none of it.
+- **CSP:** allows only the Firebase and Google hosts that sign-in and Firestore need.
+
+### M5: Sync without Google (optional)
+For people who refuse a Google account: sync through a file in a folder the user already syncs, or WebDAV. Per-item timestamps with last-write-wins (RESEARCH.md).
 
 ### M6: Accessibility proof
 Automated accessibility checks in CI, Playwright end-to-end tests, and the magic-moment test (first saved task within 10 seconds of load, keyboard only). Plus NVDA + Chrome and VoiceOver + Safari test notes, and a published WCAG 2.2 AA conformance report.

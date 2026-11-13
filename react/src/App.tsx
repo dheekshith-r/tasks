@@ -14,7 +14,8 @@ import { parseISO } from './dates';
 import { isDialogOpen, useClock } from './hooks';
 import { tasksReducer } from './reducer';
 import { loadBackupDate, loadPersist, requestPersist, saveBackupDate, type PersistState } from './safety';
-import { loadLists, loadTasks, parseBackup, saveLists, saveTasks } from './storage';
+import { DEFAULT_LISTS, loadLists, loadTasks, parseBackup, saveLists, saveTasks } from './storage';
+import { useCloud } from './useCloud';
 import type { Filter, List, Sort, Task, View } from './types';
 import { uid } from './uid';
 import { count, dueForNewTask, inView, whenLabel } from './views';
@@ -68,8 +69,37 @@ export default function App() {
   const { today, hello } = useClock(); // stays correct when the tab is left open past midnight
   const lastCount = useRef<number | null>(null); // the poster numeral rolls only when its value changes
 
-  useEffect(() => saveTasks(tasks), [tasks]);
-  useEffect(() => saveLists(lists), [lists]);
+  // Optional Google sign-in. Guest mode keeps everything on this device; signed in, the tasks
+  // on screen are the account's, and this device's guest list stays untouched until sign-out.
+  const latest = useRef({ tasks, lists });
+  latest.current = { tasks, lists };
+  const cloud = useCloud({
+    current: () => latest.current,
+    onSnapshot: (s) => {
+      dispatch({ type: 'replaceAll', tasks: s.tasks });
+      setLists(s.tasks.length === 0 && s.lists.length === 0 ? DEFAULT_LISTS : s.lists); // a new account
+    },
+    onSignedOut: () => {
+      const guestLists = loadLists();
+      setLists(guestLists);
+      dispatch({ type: 'replaceAll', tasks: loadTasks(guestLists) });
+      setView('all');
+      setOpenId(null);
+      setUndo(null);
+    },
+    confirmCopy: (n) => window.confirm(`Copy ${count(n, 'task')} from this device into your account? They also stay on this device for guest mode.`),
+    announce: setStatus,
+  });
+
+  useEffect(() => { if (cloud.mode === 'guest') saveTasks(tasks); }, [tasks, cloud.mode]);
+  useEffect(() => { if (cloud.mode === 'guest') saveLists(lists); }, [lists, cloud.mode]);
+  // Signed in: send what changed. A no-op in guest mode and until the first snapshot is on screen.
+  useEffect(() => { cloud.push(tasks, lists); }, [tasks, lists, cloud.ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function deleteCloudData() {
+    if (!window.confirm('Delete every task and list in your account, and the account itself? Tasks on this device in guest mode stay. This cannot be undone.')) return;
+    cloud.deleteCloudData();
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -244,6 +274,8 @@ export default function App() {
     ...lists.map((l) => ({ id: `l-${l.id}`, label: `Go to list: ${l.name}`, run: () => setView(`list:${l.id}` as View) })),
     { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
     { id: 'export', label: `Export backup (last: ${backupDate ? formatDay(backupDate) : 'never'})`, run: () => exportData() },
+    ...(cloud.available && !cloud.user ? [{ id: 'sign-in', label: 'Sign in with Google to sync', run: () => { cloud.signIn(); } }] : []),
+    ...(cloud.user ? [{ id: 'sign-out', label: 'Sign out', run: () => { cloud.signOut(); } }] : []),
     ...(totalDone > 0 ? [{ id: 'clear', label: 'Clear completed tasks', run: clearCompleted }] : []),
     ...tasks.map((t) => ({ id: `t-${t.id}`, label: `Open task: ${t.text}`, run: () => setOpenId(t.id) })),
   ];
@@ -383,7 +415,9 @@ export default function App() {
       </main>
 
       <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={menu}
-        persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null} />
+        persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null}
+        account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
+          onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
 
       {openTask && (
         <Drawer
