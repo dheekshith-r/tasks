@@ -2,7 +2,7 @@ import { todayISO } from '../dates';
 import type { Priority } from '../types';
 
 // Reads one typed line the way the start page shows it: which words are the date, the priority
-// and the list, and where they sit in the line (the pencil marks those spans).
+// and the list, and where they sit in the line.
 // "Pay rent friday !high #home" -> title "Pay rent", next Friday, high priority, list "home".
 
 export type TokenKind = 'due' | 'priority' | 'list';

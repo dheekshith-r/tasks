@@ -1,16 +1,18 @@
 # SPEC: Tasks v1 (product flow step 6)
 
-Inputs: [DEFINE.md](DEFINE.md) (approved), [RESEARCH.md](RESEARCH.md), [docs/design/MAGIC-MOMENT.md](docs/design/MAGIC-MOMENT.md), and the chosen design direction **A · Plain Sight** (Ddk, 2026-11-12) on the "Tasks directions" canvas.
+Inputs: [DEFINE.md](DEFINE.md) (approved), [RESEARCH.md](RESEARCH.md), [docs/design/MAGIC-MOMENT.md](docs/design/MAGIC-MOMENT.md), and the chosen design direction **Sorting Frame** (Ddk, 2026-11-14, direction A on the "Tasks rebuild directions" canvas). It replaces "Plain Sight" (2026-11-12) for both the start page and the app.
 
 The work ships in milestones. Each milestone is production-ready on its own and goes through CI (tests, type-check, build, contrast, CSP). The test suite is never weakened.
 
-## Design decisions carried from the canvas
+## Design decisions: Sorting Frame (2026-11-14)
 
-- **Type:** Atkinson Hyperlegible Next for all text, and Atkinson Hyperlegible Mono for keys and code. Both are self-hosted, so the app works offline.
-- **Colour roles:** white ground and ink #141414. Red #D62839 is only for the main action and the focus ring. Yellow #FFC53D is only the "today" and date marker. Red never means overdue.
-- **Signature:** the quick-add line is the headline, very large, on the landing page and at the top of the app.
-- **App layout:** one main column. A large quick-add band sits at the top, view tabs below it, then the list. **Change from the canvas:** the canvas drew a sidebar app. The design log already has a "sidebar + list" app (the first Tasks design), and the design law forbids repeating a layout. The views move into tabs, with lists in a menu.
-- **Calm backlog:** "Carried over" replaces the red Overdue view. There are no red counts. After 14 days a task offers "Let go" (archive, with undo).
+- **Idea:** a post-office sorting frame. Each task is a paper slip. One typed line is postmarked with the day and drops into its day's slot.
+- **Slots:** Carried over, Today, Tomorrow, This week (2 to 6 days), Later (7 days or more, or no date), Done. Wide screens show the slots as columns of one frame; phones stack them.
+- **Type:** Overpass for all text, Overpass Mono for dates, keys and tags. Both self-hosted.
+- **Colour roles:** white ground, ink #161616 for text and the frame. Yellow #FFC53D is only the slot label strip. Red #D62839 is only the main action, the postmark and the "!high" tag (always with the word, never colour alone). "Carried over" is grey, never red. Dark theme: the same roles on #101010 with light frame lines.
+- **Signature:** on Enter the slip drops into its slot and a red postmark with today's date lands on it (one 240 ms move, none with reduced motion).
+- **Page intent:** start page = add your first task here; app = add and finish tasks. Nav and footer stay standard.
+- **Calm backlog:** "Carried over" replaces the red Overdue view. No red counts.
 
 ## Milestones
 
@@ -25,8 +27,17 @@ Fixes risk 1 in DEFINE.md (silent data loss on iPhone) and risk 6 (not installab
 7. The CSP gains `worker-src 'self'` and `manifest-src 'self'`; the CSP check covers them.
 - **Not in M1:** IndexedDB. It has the same eviction rules as localStorage (RESEARCH.md), and the dataset is small. It moves to M5, where sync needs it.
 
-### M2: Plain Sight app
-The new look; self-hosted fonts; the one-column shell; calm backlog ("Carried over", "Let go"). Quick-add grammar adds weekdays, dates such as `14 nov`, `#list`, and `every day|week|month`. Existing features and tests keep working.
+### M2: Sorting Frame rebuild (start page and app), started 2026-11-14
+- **Scope:** new look for both pages; app fonts self-hosted (done); the frame layout; postmark on add; "Carried over" naming. Later in M2: "Let go" after 14 days, dates such as `14 nov`, `every day|week|month`, a new `og.png`.
+- **Screens:** start page (IN slot with the working input, then the day slots with a sample list); app (header with the IN slot, list strips, the frame, the key bar).
+- **Data:** unchanged. Same storage keys, same Firestore rules, same hand-off.
+- **Acceptance tests:**
+  1. All unit, DOM and rules tests pass with no weakened assertion.
+  2. The headline and the input are visible with no scroll at 375x667 and 1280x720, light and dark.
+  3. A typed line lands in the right slot with the right tag, by keyboard only.
+  4. Contrast AA by script for both themes of both pages; CSP check passes.
+  5. Lighthouse mobile (slow 4G): LCP <= 2.5 s, TBT <= 200 ms, CLS <= 0.1.
+  6. No horizontal scroll at 320 px; worst-case lines (long, RTL, Hindi, emoji) stay inside their slip.
 
 ### M3: Landing page (built 2026-11-13, ahead of M2, at Ddk's request)
 - **Done:**

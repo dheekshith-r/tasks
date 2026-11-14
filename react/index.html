@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
-  <title>Tasks · Write it like a note. Get a list.</title>
-  <meta name="description" content="A free to-do list you can run from the keyboard. Type &quot;Pay rent friday !high #home&quot; and it sets the date, priority and list. No account, open source.">
+  <meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)">
+  <title>Tasks · Type it once. It is filed under the right day.</title>
+  <meta name="description" content="A free to-do list you run from the keyboard. Type &quot;Pay rent friday !high #home&quot; and it is filed under Friday, high priority, list Home. No account, open source.">
   <link rel="canonical" href="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Tasks · Write it like a note. Get a list.">
-  <meta property="og:description" content="Type one line with a day, a priority and a list. No account and no paywall.">
+  <meta property="og:title" content="Tasks · Type it once. It is filed under the right day.">
+  <meta property="og:description" content="One typed line with a day, a priority and a list. No account and no paywall.">
   <meta property="og:url" content="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/">
   <meta property="og:image" content="https://dheekshithsnewjourney-crypto.github.io/to-do-sample/og.png">
   <meta property="og:image:width" content="1200">
@@ -22,7 +22,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="referrer" content="no-referrer">
   <!-- The production build adds a Content-Security-Policy meta tag here (see vite.config.ts). -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D62839'/%3E%3Cpath d='M9 16.5l5 5 9-10.5' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23161616'/%3E%3Cpath d='M16 4v24M4 16h24' stroke='%23fff' stroke-width='3'/%3E%3Crect x='19' y='7' width='7' height='7' fill='%23D62839'/%3E%3C/svg%3E">
   <!-- Same theme as the app, set before first paint -->
   <script>
     try {
@@ -34,64 +34,83 @@
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
+  <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+  </svg>
   <header class="top">
     <nav class="nav wrap" aria-label="Main">
       <a class="brand" href="./" aria-label="Tasks, start page">
-        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M7.5 13.5l3.6 3.6 7.4-8" fill="none" stroke="#D62839" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M13 2v22M2 13h22" stroke="currentColor" stroke-width="2"/><rect x="15.5" y="4.5" width="6" height="6" fill="#D62839"/></svg>
         Tasks
       </a>
       <div class="nav-links">
         <a class="anchor" href="#reads">How it works</a>
-        <a class="anchor" href="#keys">Keyboard</a>
         <a class="anchor" href="#privacy">Privacy</a>
         <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">GitHub</a>
-        <a class="btn btn-red" href="app/">Open Tasks</a>
+        <a class="btn btn-line" href="app/">Open my list</a>
       </div>
     </nav>
   </header>
 
   <main id="main">
-    <section class="hero wrap" aria-labelledby="hero-title">
-      <div class="hero-text">
-        <h1 id="hero-title">Write it like a note. Tasks makes it a list.</h1>
-        <p class="lede">Type one line with a day, a <strong>!priority</strong> and a <strong>#list</strong>. Tasks files it for you.</p>
+    <div class="frame-wrap">
+      <div class="frame">
+        <section class="slot slot-in" aria-labelledby="hero-title">
+          <p class="label">In · one line at a time</p>
+          <div class="in-body">
+            <h1 id="hero-title">Type it once. Tasks files it under the right day.</h1>
+            <p class="lede">Add a day, a <strong>!priority</strong> and a <strong>#list</strong> anywhere in the line, then press Enter. No account, and nothing leaves this device.</p>
+            <form class="try" id="hero-form" method="dialog" autocomplete="off" novalidate>
+              <label class="sr-only" for="hero-line">Your task, in one line</label>
+              <div class="try-row">
+                <input id="hero-line" name="line" type="text" maxlength="120" dir="auto" enterkeyhint="done" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Renew passport at PSK tomorrow !high #documents">
+                <button class="btn btn-red" type="submit">Add to my list</button>
+              </div>
+              <div class="status-line">
+                <p id="hero-status" role="status"></p>
+                <a id="hero-open" class="btn btn-line" href="app/" hidden>Open my list</a>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="slot" data-slot="today" aria-labelledby="slot-today">
+          <h2 class="label" id="slot-today">Today</h2>
+          <ul class="slips"></ul>
+        </section>
+        <section class="slot" data-slot="tomorrow" aria-labelledby="slot-tomorrow">
+          <h2 class="label" id="slot-tomorrow">Tomorrow</h2>
+          <ul class="slips"></ul>
+        </section>
+        <section class="slot" data-slot="week" aria-labelledby="slot-week">
+          <h2 class="label" id="slot-week">This week</h2>
+          <ul class="slips"></ul>
+        </section>
+        <section class="slot" data-slot="later" aria-labelledby="slot-later">
+          <h2 class="label" id="slot-later">Later · no date</h2>
+          <ul class="slips"></ul>
+        </section>
       </div>
+      <p class="sample-note wrap">The slips above are a sample week. Yours are kept on your device.</p>
+    </div>
 
-      <div class="stage">
-        <canvas id="pencil" role="img" aria-label="Pencil drawing: &quot;Pay rent friday !high #home&quot; becomes the task Pay rent, due Friday, high priority, list home.">Pencil drawing: "Pay rent friday !high #home" becomes the task Pay rent, due Friday, high priority, list home.</canvas>
-      </div>
-
-      <form class="try" id="hero-form" method="dialog" autocomplete="off" novalidate>
-        <label for="hero-line">Try your own line, then press Enter</label>
-        <div class="try-row">
-          <input id="hero-line" name="line" type="text" maxlength="120" dir="auto" enterkeyhint="done" autocapitalize="sentences" autocorrect="off" spellcheck="false" placeholder="Call the bank tomorrow !high #work">
-          <button class="btn btn-red" type="submit">Add to my list</button>
-        </div>
-        <div class="status-line">
-          <p id="hero-status" role="status"></p>
-          <a id="hero-open" class="btn btn-line" href="app/" hidden>Open my list</a>
-        </div>
-      </form>
-      <p class="promise">Free, with no paywall, ever. No account needed. After you open it once, it works offline.</p>
-    </section>
-
-    <section class="section" id="reads">
+    <section class="section" id="reads" aria-labelledby="reads-title">
       <div class="wrap split">
         <div>
-          <h2>It reads the line the way you wrote it.</h2>
+          <h2 id="reads-title">It reads the line the way you wrote it.</h2>
           <p class="sub">Write the task first, then add any of these words, in any order. The same line works in the app's own add box.</p>
         </div>
         <dl class="reads">
-          <div><dt><span class="mark-due">friday</span></dt><dd>The day it is due: <strong>today</strong>, <strong>tomorrow</strong> or a day of the week. A day name means the next one, and today counts.</dd></div>
-          <div><dt><span class="mark-pr">!high</span></dt><dd>How much it matters: <strong>!high</strong>, <strong>!med</strong> or <strong>!low</strong>.</dd></div>
-          <div><dt><span class="mark-list">#home</span></dt><dd>The list it belongs to. A new name makes a new list.</dd></div>
+          <div><dt><span class="tag tag-day">friday</span></dt><dd>The day it is due: <strong>today</strong>, <strong>tomorrow</strong> or a day of the week. A day name means the next one, and today counts.</dd></div>
+          <div><dt><span class="tag tag-high">!high</span></dt><dd>How much it matters: <strong>!high</strong>, <strong>!med</strong> or <strong>!low</strong>. High gets a red tag with the word on it.</dd></div>
+          <div><dt><span class="tag">#home</span></dt><dd>The list it belongs to. A new name makes a new list, in any language.</dd></div>
         </dl>
       </div>
     </section>
 
-    <section class="section" id="keys">
+    <section class="section" id="keys" aria-labelledby="keys-title">
       <div class="wrap">
-        <h2>Run it from the keyboard.</h2>
+        <h2 id="keys-title">Run it from the keyboard.</h2>
         <p class="sub">Add, search, move, rename and close with keys alone. Moves and changes are announced to screen readers.</p>
         <dl class="keys">
           <div><dt><kbd>N</kbd></dt><dd>New task</dd></div>
@@ -104,15 +123,15 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" aria-labelledby="free-title">
       <div class="wrap">
-        <h2>What other apps charge for is free here.</h2>
+        <h2 id="free-title">What other apps charge for is free here.</h2>
         <p class="sub">Every paid feature that can run on your device is included. Sharing and teams need a server, so they are not here. MIT licensed, so it stays free.</p>
         <ul class="free">
           <li>Unlimited lists and tasks</li>
           <li>Repeating tasks that never pile up</li>
           <li>Subtasks and notes</li>
-          <li>Today, Upcoming and Overdue views</li>
+          <li>Today, Upcoming and Carried over views</li>
           <li>Search, undo and a command menu</li>
           <li>Backups to a file you keep</li>
           <li>Light and dark themes</li>
@@ -122,10 +141,10 @@
       </div>
     </section>
 
-    <section class="section" id="privacy">
+    <section class="section" id="privacy" aria-labelledby="privacy-title">
       <div class="wrap split">
         <div>
-          <h2>Where your tasks are kept.</h2>
+          <h2 id="privacy-title">Where your tasks are kept.</h2>
           <p class="sub">No ads, no analytics and no third-party requests. The fonts come from this site.</p>
         </div>
         <dl class="facts">
@@ -136,10 +155,10 @@
       </div>
     </section>
 
-    <section class="band">
+    <section class="band" aria-labelledby="band-title">
       <div class="wrap">
-        <h2>Open your list.</h2>
-        <a class="btn btn-red" href="app/">Open Tasks</a>
+        <h2 id="band-title">Your list is one click away.</h2>
+        <a class="btn btn-red" href="app/">Open my list</a>
       </div>
     </section>
   </main>

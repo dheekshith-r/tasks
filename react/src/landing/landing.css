@@ -1,29 +1,31 @@
-/* ==== Tasks start page · Plain Sight ====
-   White page, ink type, red only for the main action and focus, yellow only for dates.
-   Type: Atkinson Hyperlegible Next (made for low vision) and Mono for keys; Nanum Pen Script
-   only inside the pencil drawing. All fonts are served from this site.
-   Every text/background pair is checked by `npm run contrast`. */
+/* ==== Tasks start page · Sorting Frame ====
+   A post-office sorting frame: ink rules make the slots, yellow strips label them, each task is a
+   white slip, and a red postmark dates the one you just added. Red is only the main action, the
+   postmark and the "!high" tag (always with its word). Overpass for text, Overpass Mono for
+   dates, keys and tags; both served from this site. `npm run contrast` checks every pair. */
 :root {
-  --bg: #FFFFFF; --soft: #F4F4F4; --line: #E4E4E4;
-  --ink: #141414; --muted: #4A4A4A;
-  --red: #D62839; --red-ink: #FFFFFF; --red-text: #C8202F; --red-hover: #B3202F;
-  --sun: #FFC53D; --sun-ink: #141414;
-  --band: #141414; --band-ink: #FFFFFF;
-  --pencil-mode: light;
-  --font: "Atkinson Hyperlegible Next Variable", "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "Atkinson Hyperlegible Mono Variable", "Atkinson Hyperlegible Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-  --max: 1120px;
-  --radius: 12px;
+  --bg: #FFFFFF; --ink: #161616; --muted: #4A4A4A;
+  --frame: #161616; --soft: #F3F3F1; --slip: #FFFFFF; --line: #E2E2DF;
+  --slip-shadow: 0 1px 0 rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.06);
+  --slot-shade: inset 0 14px 18px -14px rgb(0 0 0 / 0.28);
+  --sun: #FFC53D; --sun-ink: #161616;
+  --red: #D62839; --red-ink: #FFFFFF; --red-hover: #B3202F; --red-text: #C8202F; --mark: #D62839;
+  --band: #161616; --band-ink: #FFFFFF;
+  --font: "Overpass Variable", "Overpass", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Overpass Mono Variable", "Overpass Mono", ui-monospace, Consolas, monospace;
+  --max: 1200px;
+  --gutter: max(20px, env(safe-area-inset-left, 0px));
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   color-scheme: light;
 }
 :root[data-theme='dark'] {
-  --bg: #111111; --soft: #1C1C1C; --line: #2C2C2C;
-  --ink: #F2F2F2; --muted: #BDBDBD;
-  --red: #D62839; --red-ink: #FFFFFF; --red-text: #FF6B76; --red-hover: #B3202F;
-  --sun: #FFC53D; --sun-ink: #141414;
-  --band: #1E1E1E; --band-ink: #F2F2F2;
-  --pencil-mode: dark;
+  --bg: #101010; --ink: #EDEDED; --muted: #B5B5B5;
+  --frame: #4A4A4A; --soft: #1A1A1A; --slip: #262626; --line: #2E2E2E;
+  --slip-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+  --slot-shade: inset 0 14px 18px -14px rgb(0 0 0 / 0.7);
+  --sun: #FFC53D; --sun-ink: #161616;
+  --red: #D62839; --red-ink: #FFFFFF; --red-hover: #B3202F; --red-text: #FF6B76; --mark: #FF6B76;
+  --band: #1E1E1E; --band-ink: #EDEDED;
   color-scheme: dark;
 }
 
@@ -31,32 +33,30 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font: 400 1.0625rem/1.55 var(--font);
+  font: 400 1.0625rem/1.5 var(--font);
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-tap-highlight-color: transparent;
 }
+::selection { background: var(--sun); color: var(--sun-ink); }
 a { color: inherit; text-underline-offset: 3px; }
 :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
-h1, h2, h3 { margin: 0; line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; }
 p, dd, li { margin: 0; text-wrap: pretty; }
 kbd {
-  display: inline-block; min-width: 1.9em; padding: 2px 8px; text-align: center; white-space: nowrap;
-  font: 500 .9em/1.5 var(--mono); color: var(--ink); background: var(--soft); border-radius: 6px;
-  box-shadow: inset 0 0 0 1px var(--line), 0 1px 0 var(--line);
+  display: inline-block; min-width: 1.9em; padding: 1px 7px; text-align: center; white-space: nowrap;
+  font: 600 .875em/1.5 var(--mono); color: var(--ink); background: var(--slip);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
 }
-.wrap {
-  max-width: var(--max); margin: 0 auto;
-  padding-left: max(20px, env(safe-area-inset-left, 0px));
-  padding-right: max(20px, env(safe-area-inset-right, 0px));
-}
-.skip { position: absolute; left: -9999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: var(--radius); z-index: 10; }
+.wrap { max-width: var(--max); margin: 0 auto; padding-inline: var(--gutter); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.defs { position: absolute; }
+.skip { position: absolute; left: -9999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; z-index: 10; }
 .skip:focus { left: 12px; }
 [hidden] { display: none !important; }
 
-/* Buttons: plain, with a press response. Hover only on devices with a mouse. */
+/* Buttons: square, like the frame. Press response; hover only with a mouse. */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
-  padding: 10px 18px; border-radius: var(--radius); border: 0; font: 700 1rem var(--font); text-decoration: none; cursor: pointer;
-  touch-action: manipulation;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px;
+  border: 0; border-radius: 2px; font: 800 1rem var(--font); text-decoration: none; cursor: pointer; touch-action: manipulation;
   transition: transform 120ms var(--ease-out), background-color 150ms ease-out;
 }
 .btn:active { transform: scale(.97); }
@@ -65,92 +65,120 @@ kbd {
 @media (hover: hover) and (pointer: fine) {
   .btn-red:hover { background: var(--red-hover); }
   .btn-line:hover { background: var(--soft); }
-  a:not(.btn):hover { text-decoration-thickness: 2px; }
   .nav-links a:not(.btn):hover { text-decoration: underline; }
 }
 
-/* Header: a boring, standard nav on purpose. */
-.top { border-bottom: 1px solid var(--line); }
-.nav { display: flex; align-items: center; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding-block: 12px; }
+/* Header: standard on purpose. */
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding-block: 10px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 800; font-size: 1.25rem; text-decoration: none; }
-.nav-links { display: flex; align-items: center; gap: 4px 22px; flex-wrap: wrap; font-size: 1rem; }
+.nav-links { display: flex; align-items: center; gap: 4px 24px; flex-wrap: wrap; }
 .nav-links a:not(.btn) { text-decoration: none; padding-block: 10px; }
 
-/* Hero: the pencil drawing is the one strange thing on the page. */
-.hero { padding-block: 48px 24px; display: flex; flex-direction: column; }
-.hero h1 { font-size: clamp(2.25rem, 5.2vw, 4rem); font-weight: 800; max-width: 24ch; }
-.hero .lede { margin-top: 16px; font-size: clamp(1.0625rem, 1.6vw, 1.25rem); color: var(--muted); max-width: 52ch; }
-.stage { margin-top: 24px; }
-/* The height is reserved before the drawing runs, so nothing below it jumps. */
-.stage canvas { display: block; width: 100%; aspect-ratio: 1120 / 400; border-radius: var(--radius); box-shadow: 0 0 0 1px var(--line); background: var(--bg); }
-.try { margin-top: 16px; display: grid; gap: 8px; }
-.try label { font-weight: 700; }
+/* The frame: 3px ink rules between slots, open at the right edge as if it continues. */
+.frame-wrap { overflow: hidden; }
+.frame {
+  display: grid; gap: 3px; background: var(--frame);
+  border-top: 3px solid var(--frame); margin-left: var(--gutter);
+  border-left: 3px solid var(--frame);
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(352px, auto) minmax(300px, auto);
+}
+.slot { background: var(--soft); box-shadow: var(--slot-shade); padding: 0 0 22px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.slot-in { grid-column: span 2; background: var(--bg); box-shadow: none; }
+.label {
+  align-self: flex-start; margin: 0; background: var(--sun); color: var(--sun-ink); padding: 6px 12px;
+  font: 800 .75rem/1.2 var(--font); letter-spacing: .09em; text-transform: uppercase;
+}
+.label .date { font-family: var(--mono); font-weight: 700; letter-spacing: .04em; }
+.in-body { padding: 14px 32px 0 28px; display: flex; flex-direction: column; }
+.slot-in h1 { font-size: clamp(2.25rem, 4.6vw, 3.75rem); font-weight: 800; max-width: 17ch; }
+.lede { margin-top: 14px; font-size: clamp(1.0625rem, 1.4vw, 1.1875rem); color: var(--muted); max-width: 50ch; }
+.try { margin-top: 20px; max-width: 680px; }
 .try-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .try-row input {
-  flex: 999 1 280px; min-width: 0; min-height: 52px; padding: 12px 16px; font: 500 1.125rem var(--font); color: var(--ink);
-  background: var(--bg); border: 2px solid var(--ink); border-radius: var(--radius);
+  flex: 999 1 280px; min-width: 0; min-height: 56px; padding: 0 16px; border-radius: 2px;
+  font: 600 1.125rem var(--font); color: var(--ink); background: var(--bg); border: 2px solid var(--ink);
 }
 .try-row input::placeholder { color: var(--muted); }
 .try-row input[aria-invalid='true'] { border-color: var(--red-text); border-width: 3px; }
-.try-row .btn { flex: 1 0 auto; min-height: 52px; }
-.status-line { min-height: 1.6em; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.try-row .btn { flex: 1 0 auto; min-height: 56px; font-size: 1.0625rem; }
+.status-line { min-height: 1.6em; margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
 .status-line [role='status'] { font-weight: 700; }
 .status-line [role='status'][data-error] { color: var(--red-text); }
-.promise { margin-top: 16px; color: var(--muted); font-size: 1rem; }
 
-/* Sections share one rhythm: more space above a heading than below it. */
-.section { border-top: 1px solid var(--line); padding-block: 72px; }
+/* Slips: white paper with a hairline shadow; text never leaves its slip. */
+.slips { list-style: none; margin: 0; padding: 0 22px; display: grid; gap: 10px; }
+.slip { position: relative; background: var(--slip); box-shadow: var(--slip-shadow); padding: 12px 14px; max-width: 360px; }
+.slip-text { font-size: 1rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.slip-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font: 500 .75rem/1.4 var(--mono); color: var(--muted); }
+.tag { font: 600 .8125rem/1.4 var(--mono); padding: 1px 6px; box-shadow: inset 0 0 0 1.5px currentColor; }
+.slip-meta .tag { font-size: .75rem; box-shadow: none; padding: 0; }
+.tag-high, .slip-meta .tag-high { background: var(--red); color: var(--red-ink); padding: 1px 6px; font-weight: 700; box-shadow: none; }
+.tag-day { background: var(--sun); color: var(--sun-ink); box-shadow: none; }
+.slip-meta .due { color: var(--ink); font-weight: 700; }
+
+/* The postmark: drawn in code, roughened by an SVG ink filter, dated today. */
+.postmark { position: absolute; right: -26px; top: -18px; width: 124px; height: 64px; color: var(--mark); transform: rotate(-10deg); opacity: .92; pointer-events: none; }
+.postmark text { fill: currentColor; font-family: var(--mono); font-weight: 700; }
+@keyframes drop { from { transform: translateY(-14px); } to { transform: none; } }
+@keyframes stamp { from { transform: rotate(-10deg) scale(1.25); opacity: 0; } to { transform: rotate(-10deg) scale(1); opacity: .92; } }
+.slip.fresh { animation: drop 240ms var(--ease-out); }
+.slip.fresh .postmark { animation: stamp 180ms var(--ease-out) 200ms both; }
+
+.sample-note { margin-top: 10px; font: 500 .8125rem var(--mono); color: var(--muted); }
+
+/* Sections below the frame share one rhythm: more space above a heading than below it. */
+.section { border-top: 3px solid var(--frame); margin-top: 64px; padding-block: 64px; }
+.section + .section { margin-top: 0; }
 .section h2 { font-size: clamp(1.75rem, 3.2vw, 2.5rem); font-weight: 800; }
 .section .sub { margin-top: 12px; color: var(--muted); max-width: 58ch; }
 .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: start; }
 
 .reads { margin: 0; display: grid; }
 .reads > div { display: grid; grid-template-columns: minmax(0, 8rem) minmax(0, 1fr); gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--line); }
-.reads dt { font: 500 1.125rem/1.4 var(--mono); }
-.mark-due { background: linear-gradient(transparent 22%, color-mix(in srgb, var(--sun) 80%, transparent) 22%, color-mix(in srgb, var(--sun) 80%, transparent) 90%, transparent 90%); padding-inline: 4px; }
-.mark-pr { box-shadow: 0 0 0 2px var(--ink); border-radius: 999px; padding: 0 8px; }
-.mark-list { text-decoration: underline wavy var(--ink) 1.5px; text-underline-offset: 6px; }
+.reads dt { align-self: start; padding-top: 2px; }
+.reads dd { margin: 0; }
 
-/* Keys as a grid of small tiles: a different shape from the other sections. */
-.keys { margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.keys > div { display: grid; gap: 8px; align-content: start; padding: 16px; border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--line); }
+.keys { margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; background: var(--frame); border: 3px solid var(--frame); }
+.keys > div { display: grid; gap: 8px; align-content: start; padding: 16px; background: var(--soft); }
 .keys dd { margin: 0; }
 
 .free { margin: 28px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; }
 .free li { padding-left: 26px; position: relative; }
-.free li::before { content: ''; position: absolute; left: 2px; top: .45em; width: 12px; height: 7px; border-left: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); }
+.free li::before { content: ''; position: absolute; left: 2px; top: .4em; width: 12px; height: 7px; border-left: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(-45deg); }
 
 .facts { margin: 0; display: grid; }
 .facts > div { padding-block: 16px; border-bottom: 1px solid var(--line); }
-.facts dt { font-weight: 700; }
+.facts dt { font-weight: 800; }
 .facts dd { margin: 4px 0 0; color: var(--muted); }
 
 .band { background: var(--band); color: var(--band-ink); }
-.band .wrap { display: flex; gap: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding-block: 72px; }
+.band .wrap { display: flex; gap: 24px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding-block: 64px; }
 .band h2 { font-size: clamp(1.75rem, 3.6vw, 2.75rem); font-weight: 800; }
 
-.foot { border-top: 1px solid var(--line); }
 .foot .wrap { display: flex; gap: 8px 32px; flex-wrap: wrap; justify-content: space-between; padding-block: 24px; color: var(--muted); font-size: .9375rem; }
 .foot a { display: inline-block; padding-block: 10px; }
 
-@media (max-width: 760px) {
-  .hero { padding-block: 32px 16px; }
-  /* On a phone the box comes first; the drawing below it answers each Enter. */
-  .hero .try { order: 1; margin-top: 20px; }
-  .hero .stage { order: 2; margin-top: 16px; }
-  .hero .promise { order: 3; }
-  .stage canvas { aspect-ratio: 100 / 92; }
+/* Phones and narrow windows: the slots stack, the input first. */
+@media (max-width: 900px) {
+  .frame { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; margin-left: 0; border-left: 0; }
+  .slot-in { grid-column: auto; }
+  .in-body { padding: 12px var(--gutter) 0; }
+  .slot .label { margin-left: 0; }
+  .slips { padding-inline: var(--gutter); }
   .try-row .btn { flex: 1 1 100%; }
-  .section { padding-block: 56px; }
+  .slip { max-width: none; }
+  .section { margin-top: 40px; padding-block: 48px; }
   .split { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .keys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .free { grid-template-columns: minmax(0, 1fr); }
-  .reads > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .reads > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }
 @media (max-width: 640px) {
-  .nav-links .anchor { display: none; } /* the sections are one scroll away */
+  .nav-links .anchor { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn { transition: background-color 150ms ease-out; }
   .btn:active { transform: none; }
+  .slip.fresh, .slip.fresh .postmark { animation: none; }
 }

@@ -1,61 +1,106 @@
-import '@fontsource-variable/atkinson-hyperlegible-next';
-import '@fontsource-variable/atkinson-hyperlegible-mono';
-import '@fontsource/nanum-pen-script/latin.css';
+import '@fontsource-variable/overpass';
+import '@fontsource-variable/overpass-mono';
 import { readConfig } from '../firebaseConfig';
 import { addFromStartPage } from '../handoff';
 import { parseLine } from './parseLine';
-import { drawPencil, readTheme, type PencilRun } from './pencil';
 import './landing.css';
 
-const DEMO = 'Pay rent friday !high #home';
+type Slot = 'today' | 'tomorrow' | 'week' | 'later';
+interface Slip { text: string; list?: string; high: boolean; off: number | null; fresh?: boolean }
 
-const canvas = document.getElementById('pencil') as HTMLCanvasElement;
 const form = document.getElementById('hero-form') as HTMLFormElement;
 const input = document.getElementById('hero-line') as HTMLInputElement;
 const status = document.getElementById('hero-status') as HTMLElement;
 const openList = document.getElementById('hero-open') as HTMLAnchorElement;
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-const dark = window.matchMedia('(prefers-color-scheme: dark)');
+const SVG = 'http://www.w3.org/2000/svg';
 
-let line = DEMO;
-let run: PencilRun | null = null;
-let played = false;
+const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const today = startOfDay(new Date());
+const dayAt = (off: number) => { const d = new Date(today); d.setDate(d.getDate() + off); return d; };
+const short = (d: Date) => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+const slotOf = (off: number | null): Slot => (off === null || off > 6 || off < 0 ? 'later' : off === 0 ? 'today' : off === 1 ? 'tomorrow' : 'week');
+const SLOT_NAME: Record<Slot, string> = { today: 'Today', tomorrow: 'Tomorrow', week: 'This week', later: 'Later' };
 
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-// Fonts never block the hero for long: after the timeout it draws with the fallback face.
-// The pen face's Korean subsets (about 110 small files) are listed only when a line has Hangul.
-let korean: Promise<unknown> | null = null;
-const fontsReady = (text: string, ms: number) => Promise.race([
-  Promise.all([
-    /\p{Script=Hangul}/u.test(text) ? (korean ??= import('@fontsource/nanum-pen-script/index.css')) : null,
-  ]).then(() => Promise.all([
-    document.fonts.load(`120px "Nanum Pen Script"`, text),
-    document.fonts.load(`700 34px "Atkinson Hyperlegible Next Variable"`),
-  ])).catch(() => {}),
-  wait(ms),
-]);
+// A sample week, dated from the visitor's real today so it never goes stale.
+const SAMPLE: Slip[] = [
+  { text: 'Pick up the dry-cleaning', list: 'home', high: false, off: 0 },
+  { text: 'Call Amma about Sunday lunch', list: 'family', high: false, off: 0 },
+  { text: 'Lunch at Amma’s, bring Mysore pak', list: 'family', high: false, off: 1 },
+  { text: 'Pay the electricity bill, ₹1,840', list: 'home', high: true, off: 4 },
+  { text: 'Send the expense report to Priya', list: 'work', high: false, off: 6 },
+  { text: 'Book the Pongal train to Madurai', list: 'travel', high: false, off: null },
+];
 
-// Long text is cut by whole characters, so messages stay short and an emoji is never split.
-const short = (text: string, max = 60) => ([...text].length > max ? [...text].slice(0, max).join('').trimEnd() + '…' : text);
-
-function describe(text: string) {
-  const p = parseLine(text);
-  const shown = short(text);
-  const parts = [p.dueLabel, p.tokens.some((t) => t.kind === 'priority') ? `${p.priority === 'med' ? 'medium' : p.priority} priority` : '', p.listName ? `list ${p.listName}` : ''].filter(Boolean);
-  return `Pencil drawing: "${shown}" becomes the task ${p.title}${parts.length ? `, ${parts.join(', ')}` : ''}.`;
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text) node.textContent = text;
+  return node;
 }
 
-// The first show plays at full speed; later lines play faster, as a repeated action should.
-function render(animate: boolean, startAt = 0) {
-  run?.stop();
-  canvas.setAttribute('aria-label', describe(line));
-  canvas.textContent = describe(line);
-  run = drawPencil(canvas, line, parseLine(line), readTheme(canvas), {
-    animate: animate && !reduce.matches,
-    speed: played ? 2.2 : 1,
-    startAt,
-  });
-  if (animate) played = true;
+// The postmark: two rings, the date and four wavy cancel lines, roughened by the #ink filter.
+function postmark(): SVGSVGElement {
+  const svg = document.createElementNS(SVG, 'svg');
+  svg.setAttribute('class', 'postmark');
+  svg.setAttribute('viewBox', '0 0 124 64');
+  svg.setAttribute('aria-hidden', 'true');
+  const g = document.createElementNS(SVG, 'g');
+  g.setAttribute('filter', 'url(#ink)');
+  g.setAttribute('fill', 'none');
+  g.setAttribute('stroke', 'currentColor');
+  const shape = (name: string, attrs: Record<string, string>) => {
+    const s = document.createElementNS(SVG, name);
+    for (const [k, v] of Object.entries(attrs)) s.setAttribute(k, v);
+    g.append(s);
+  };
+  shape('circle', { cx: '32', cy: '32', r: '28', 'stroke-width': '2.2' });
+  shape('circle', { cx: '32', cy: '32', r: '21', 'stroke-width': '1.2' });
+  for (const y of [20, 29, 38, 47]) shape('path', { d: `M64 ${y} q7 -6 14 0 t14 0 t14 0 t14 0`, 'stroke-width': '2' });
+  svg.append(g);
+  const label = (y: number, size: number, text: string) => {
+    const t = document.createElementNS(SVG, 'text');
+    t.setAttribute('x', '32'); t.setAttribute('y', String(y)); t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', String(size));
+    t.textContent = text;
+    svg.append(t);
+  };
+  label(30, 9, today.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }).toUpperCase());
+  label(41, 7, 'TASKS');
+  return svg;
+}
+
+function slipNode(s: Slip): HTMLLIElement {
+  const li = el('li', s.fresh ? 'slip fresh' : 'slip');
+  const text = el('p', 'slip-text', s.text);
+  text.dir = 'auto';
+  const meta = el('p', 'slip-meta');
+  const slot = slotOf(s.off);
+  if (s.off !== null && slot !== 'today' && slot !== 'tomorrow') meta.append(el('span', 'due', short(dayAt(s.off))));
+  if (s.high) meta.append(el('span', 'tag tag-high', '!high'));
+  if (s.list) meta.append(el('span', 'tag', `#${s.list}`));
+  li.append(text);
+  if (meta.childNodes.length) li.append(meta);
+  if (s.fresh) li.append(postmark());
+  return li;
+}
+
+const slotList = (slot: Slot) => document.querySelector<HTMLUListElement>(`[data-slot="${slot}"] .slips`)!;
+
+// Slot labels carry the real date; screen readers hear "Today, Saturday 14 November".
+function labelSlots() {
+  const set = (slot: Slot, name: string, d: Date) => {
+    const h = document.getElementById(`slot-${slot}`)!;
+    h.textContent = `${name} · `;
+    const date = el('span', 'date', short(d));
+    h.append(date);
+    h.setAttribute('aria-label', `${name}, ${d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}`);
+  };
+  set('today', 'Today', today);
+  set('tomorrow', 'Tomorrow', dayAt(1));
+}
+
+function fill() {
+  for (const s of SAMPLE) slotList(slotOf(s.off)).append(slipNode(s));
 }
 
 // Live-region text: cleared first, so the same message twice is still announced.
@@ -65,37 +110,17 @@ function say(text: string, isError = false) {
   requestAnimationFrame(() => { status.textContent = text; });
 }
 
-fontsReady(DEMO, 1500).then(() => render(true));
+labelSlots();
+fill();
 
-// Typing the next line finishes the current show at once.
 input.addEventListener('input', () => {
-  run?.finish();
   if (input.getAttribute('aria-invalid')) { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
 });
 
-// A resize continues the show from the same moment; at rest it only redraws.
-let resizeTimer = 0;
-let lastWidth = canvas.clientWidth;
-new ResizeObserver(() => {
-  if (Math.abs(canvas.clientWidth - lastWidth) < 2) return;
-  lastWidth = canvas.clientWidth;
-  window.clearTimeout(resizeTimer);
-  resizeTimer = window.setTimeout(() => {
-    const resume = run?.playing() ? run.elapsed() : null;
-    if (resume === null) render(false);
-    else { const p = played; played = false; render(true, resume); played = p; }
-  }, 120);
-}).observe(canvas);
-dark.addEventListener('change', () => {
-  try { if (!localStorage.getItem('todo-theme')) document.documentElement.dataset.theme = dark.matches ? 'dark' : 'light'; } catch { /* ignore */ }
-  render(false);
-});
-reduce.addEventListener('change', () => { if (reduce.matches) run?.finish(); });
-
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', (e) => {
   e.preventDefault();
-  const text = input.value.trim();
-  if (!text) {
+  const line = input.value.trim();
+  if (!line) {
     input.setAttribute('aria-invalid', 'true');
     input.setAttribute('aria-describedby', 'hero-status');
     say('Nothing to add yet. Type a task, for example "Call the bank tomorrow".', true);
@@ -104,28 +129,39 @@ form.addEventListener('submit', async (e) => {
   }
   input.removeAttribute('aria-invalid');
   input.removeAttribute('aria-describedby');
-  const p = parseLine(text);
+  const p = parseLine(line);
   const result = addFromStartPage({ text: p.title, priority: p.priority, dueDate: p.dueDate, listName: p.listName });
-  const details = [p.dueLabel, p.tokens.some((t) => t.kind === 'priority') ? `${p.priority === 'med' ? 'medium' : p.priority} priority` : '', p.listName ? `list ${p.listName.charAt(0).toUpperCase()}${p.listName.slice(1)}` : ''].filter(Boolean).join(', ');
+  const off = p.dueDate ? Math.round((startOfDay(new Date(`${p.dueDate}T00:00`)).getTime() - today.getTime()) / 86_400_000) : null;
+  const slot = slotOf(off);
+
+  if (result !== 'failed') {
+    document.querySelectorAll('.slip.fresh').forEach((n) => n.classList.remove('fresh'));
+    document.querySelectorAll('.slip .postmark').forEach((n) => n.remove());
+    slotList(slot).prepend(slipNode({ text: p.title, list: p.listName, high: p.priority === 'high', off, fresh: true }));
+  }
+  const title = [...p.title].length > 60 ? `${[...p.title].slice(0, 60).join('').trimEnd()}…` : p.title;
+  const extras = [p.priority === 'high' ? 'high priority' : '', p.listName ? `list ${p.listName}` : ''].filter(Boolean).join(', ');
   say(
-    result === 'saved' ? `Added "${short(p.title)}"${details ? `: ${details}` : ''}. It is in your list on this device.`
-    : result === 'pending' ? `"${short(p.title)}" is ready. It joins your synced list when you open it.`
+    result === 'saved' ? `Filed under ${SLOT_NAME[slot]}${extras ? `, ${extras}` : ''}: "${title}". It is in your list on this device.`
+    : result === 'pending' ? `"${title}" is ready. It joins your synced list when you open it.`
     : 'This browser blocked saving. Open Tasks and add it there.',
     result === 'failed',
   );
   openList.hidden = result === 'failed';
   input.value = '';
-  line = text;
-  await fontsReady(text, 800); // a new script (Hindi, Korean) gets its glyphs before the pencil writes it
-  render(true);
 });
 
-// Desktop only: put the cursor in the box, so the magic moment needs no click. On phones this
-// would open the keyboard over the hero.
+// Desktop only: the cursor waits in the box, so the first task needs no click. On phones this
+// would open the keyboard over the page.
 if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) input.focus({ preventScroll: true });
 
 // Mentions of sync show only when this build has a Firebase project behind it.
-if (readConfig()) document.querySelectorAll<HTMLElement>('[data-cloud]').forEach((el) => { el.hidden = false; });
+if (readConfig()) document.querySelectorAll<HTMLElement>('[data-cloud]').forEach((n) => { n.hidden = false; });
+
+// Follow the system theme when the visitor has not picked one in the app.
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  try { if (!localStorage.getItem('todo-theme')) document.documentElement.dataset.theme = e.matches ? 'dark' : 'light'; } catch { /* ignore */ }
+});
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => { /* still works online */ }); });

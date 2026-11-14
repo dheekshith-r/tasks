@@ -51,17 +51,18 @@ function themes(css) {
 
 // The start page has its own, smaller token set.
 const START_PAIRS = [
-  ['ink', 'bg', 'headings and body text'],
-  ['muted', 'bg', 'sub-lines, the promise line, footer'],
-  ['ink', 'soft', 'button hover background'],
-  ['red-ink', 'red', 'Open Tasks and Add to my list buttons'],
+  ['ink', 'bg', 'headings, body text, the input'],
+  ['muted', 'bg', 'lede, sub-lines, footer, sample note'],
+  ['ink', 'soft', 'text in a slot, key tiles, button hover'],
+  ['muted', 'soft', 'help text in a slot'],
+  ['ink', 'slip', 'task text on a slip, key caps'],
+  ['muted', 'slip', 'list tags on a slip'],
+  ['red-ink', 'red', 'Add to my list, Open my list, the !high tag'],
   ['red-ink', 'red-hover', 'button text on hover'],
   ['red-text', 'bg', 'error message, invalid input border'],
-  ['ink', 'soft', 'key caps'],
-  ['sun-ink', 'sun', 'text on the date highlighter'],
+  ['sun-ink', 'sun', 'slot labels, the day tag'],
   ['band-ink', 'band', 'closing band heading'],
-  ['red-ink', 'red', 'button on the closing band'],
-];
+]
 const SOURCES = [
   ...FILES.map((file) => ({ file, pairs: PAIRS })),
   { file: '../src/landing/landing.css', pairs: START_PAIRS },
