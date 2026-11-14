@@ -2,7 +2,7 @@
 // - Pages: network first, so a new release shows at once; the cached copy is used offline.
 // - Files from this site (fonts included): served from the cache, refreshed in the background.
 // - Other sites, and every non-GET request, are left to the browser.
-const CACHE = 'tasks-v3';
+const CACHE = 'tasks-v4'; // v4: Sorting Frame icons and share image
 const SHELL = ['./', './app/', './manifest.webmanifest', './icon-192.png'];
 
 self.addEventListener('install', (event) => {
