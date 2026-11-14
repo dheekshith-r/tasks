@@ -56,6 +56,8 @@ export default function App() {
   const [menu, setMenu] = useState(false);
   const [status, setStatus] = useState(''); // read out by screen readers
   const [stampId, setStampId] = useState<string | null>(null); // the newest task wears the postmark
+  // A message equal to the last one gets a no-break space, so screen readers announce it again.
+  const announce = (m: string) => setStatus((s) => (s === m ? `${m} ` : m));
   const [persist, setPersist] = useState<PersistState>(loadPersist);
   const [backupDate, setBackupDate] = useState<string | null>(loadBackupDate);
   const persistAsked = useRef(false);
@@ -68,6 +70,10 @@ export default function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const focusAfterMove = useRef<string | null>(null);
+  // After a tick or a delete the row leaves its slot and focus would fall to <body>: where it goes instead.
+  const focusAfter = useRef<{ id: string | null; sel: string } | null>(null);
+  const undoAction = useRef<(() => void) | null>(null);
+  const [landed, setLanded] = useState(''); // visible "Added to Today" line under the IN slot
   const { today, hello } = useClock(); // stays correct when the tab is left open past midnight
   const lastCount = useRef<number | null>(null); // the poster numeral rolls only when its value changes
 
@@ -105,7 +111,7 @@ export default function App() {
     const pending = takePending();
     if (!pending) return;
     handleAdd(pending.text, pending.priority, pending.dueDate, pending.listName);
-    setStatus(`Added "${pending.text}" from the start page`);
+    announce(`Added "${pending.text}" from the start page`);
   }, [cloud.mode, cloud.ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function deleteCloudData() {
@@ -127,7 +133,8 @@ export default function App() {
     const vars = accent ? accentVars(accent, surfaces, theme === 'dark') : null;
     if (vars) Object.entries(vars).forEach(([name, value]) => root.style.setProperty(name, value));
     // The browser bar takes the page colour, so the frame starts at the top edge on phones.
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(root).getPropertyValue('--bg').trim() || '#FFFFFF');
+    const bg = getComputedStyle(root).getPropertyValue('--bg').trim() || '#FFFFFF';
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', bg));
     try {
       if (accent) localStorage.setItem(ACCENT_KEY, accent);
       else localStorage.removeItem(ACCENT_KEY);
@@ -144,6 +151,12 @@ export default function App() {
       }
       const el = e.target as HTMLElement;
       const typing = ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) || el.isContentEditable;
+      // Ctrl/Cmd+Z undoes the last delete while its toast is up (fields keep their own undo).
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing && !isDialogOpen() && undoAction.current) {
+        e.preventDefault();
+        undoAction.current();
+        return;
+      }
       // Single-key shortcuts must not reach behind an open dialog
       if (typing || isDialogOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === '/') { e.preventDefault(); searchRef.current?.focus(); }
@@ -163,12 +176,25 @@ export default function App() {
 
   // After a keyboard reorder the moved row is re-inserted in the DOM, which drops focus: restore it.
   useEffect(() => {
+    const rowOf = (id: string) => [...(frameRef.current?.querySelectorAll('li.item') ?? [])].find((li) => (li as HTMLElement).dataset.id === id);
+    const after = focusAfter.current;
+    focusAfter.current = null;
+    if (after) {
+      const target = after.id ? rowOf(after.id)?.querySelector<HTMLElement>(after.sel) : null;
+      (target ?? document.getElementById('new-task'))?.focus();
+    }
     const id = focusAfterMove.current;
     if (!id) return;
     focusAfterMove.current = null;
-    const row = [...(frameRef.current?.querySelectorAll('li.item') ?? [])].find((li) => (li as HTMLElement).dataset.id === id);
-    row?.querySelector<HTMLElement>('.text')?.focus();
+    rowOf(id)?.querySelector<HTMLElement>('.text')?.focus();
   }, [tasks]);
+
+  // The visible "Added to …" line fades from view after a few seconds.
+  useEffect(() => {
+    if (!landed) return;
+    const t = setTimeout(() => setLanded(''), 4000);
+    return () => clearTimeout(t);
+  }, [landed]);
 
   const scoped = useMemo(() => tasks.filter((t) => inView(t, view, today)), [tasks, view, today]);
 
@@ -223,7 +249,9 @@ export default function App() {
     if (!inView(task, view, today) || (resolved.listId && resolved.listId !== currentListId)) setView('all'); // keep the new task in sight
     setQuery('');                                   // so the new task is never hidden by a leftover search
     if (filter === 'done') setFilter('all');
-    setStatus(`Added "${text}"`);
+    const where = slotOf(task, today);
+    announce(`Added "${text}" to ${where}`);
+    setLanded(`Added to ${where}`);
     // Ask once, after the first saved task: now there is something worth protecting.
     // The ref stops a second quick add from asking again before the first answer arrives.
     if (persist === 'unknown' && !persistAsked.current) {
@@ -235,8 +263,9 @@ export default function App() {
   function handleToggle(id: string) {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
+    if (document.activeElement?.closest(`li[data-id="${id}"]`)) focusAfter.current = { id, sel: '.check' };
     dispatch({ type: 'toggle', id, nextId: uid(), today });
-    setStatus(`"${task.text}" ${task.done ? 'marked as not done' : 'completed'}`);
+    announce(`"${task.text}" ${task.done ? 'marked as not done' : 'completed'}`);
   }
 
   function removeWithUndo(items: Undo['items'], message: string) {
@@ -247,6 +276,10 @@ export default function App() {
   function handleDelete(id: string) {
     const index = tasks.findIndex((t) => t.id === id);
     if (index === -1) return;
+    if (document.activeElement?.closest(`li[data-id="${id}"]`)) {
+      const i = visible.findIndex((t) => t.id === id);
+      focusAfter.current = { id: (visible[i + 1] ?? visible[i - 1])?.id ?? null, sel: '.text' };
+    }
     removeWithUndo([{ task: tasks[index], index }], 'Task deleted');
     if (openId === id) setOpenId(null);
     dispatch({ type: 'delete', id });
@@ -263,13 +296,13 @@ export default function App() {
     // Restoring in ascending index order puts every task back in its old slot.
     undo.items.forEach(({ task, index }) => dispatch({ type: 'restore', task, index }));
     setUndo(null);
-    setStatus('Restored');
+    announce('Restored');
   }
 
   // `refocus` is false when the move comes from the drawer: focus must stay inside the dialog.
   function nudge(id: string, dir: -1 | 1, refocus = true) {
     if (!canDrag) {
-      setStatus('Reordering is off while the list is sorted or searched. Switch to "My order" and clear the search to move tasks.');
+      announce('Reordering is off while the list is sorted or searched. Switch to "My order" and clear the search to move tasks.');
       return;
     }
     const i = visible.findIndex((t) => t.id === id);
@@ -278,23 +311,23 @@ export default function App() {
     // A task moves inside its own slot; its date decides the slot.
     const slot = slotOf(visible[i], today);
     if (!other || slotOf(other, today) !== slot) {
-      setStatus(`"${visible[i].text}" is already ${dir < 0 ? 'first' : 'last'} in ${slot}`);
+      announce(`"${visible[i].text}" is already ${dir < 0 ? 'first' : 'last'} in ${slot}`);
       return;
     }
     const inSlot = visible.filter((t) => slotOf(t, today) === slot);
     if (refocus) focusAfterMove.current = id;
     dispatch({ type: 'move', from: id, to: other.id });
-    setStatus(`Moved "${visible[i].text}" to position ${inSlot.indexOf(visible[i]) + dir + 1} of ${inSlot.length} in ${slot}`);
+    announce(`Moved "${visible[i].text}" to position ${inSlot.indexOf(visible[i]) + dir + 1} of ${inSlot.length} in ${slot}`);
   }
 
   const paletteItems = [
     { id: 'new', label: 'New task', run: () => { setTimeout(() => document.getElementById('new-task')?.focus(), 0); } },
     { id: 'search', label: 'Search tasks', run: () => { setTimeout(() => searchRef.current?.focus(), 0); } },
-    { id: 'v-all', label: 'Go to All tasks', run: () => setView('all') },
-    { id: 'v-today', label: 'Go to Today', run: () => setView('today') },
-    { id: 'v-up', label: 'Go to Upcoming', run: () => setView('upcoming') },
-    { id: 'v-over', label: 'Go to Carried over', run: () => setView('overdue') },
-    ...lists.map((l) => ({ id: `l-${l.id}`, label: `Go to list: ${l.name}`, run: () => setView(`list:${l.id}` as View) })),
+    { id: 'v-all', label: 'Go to All tasks', run: () => goView('all') },
+    { id: 'v-today', label: 'Go to Today', run: () => goView('today') },
+    { id: 'v-up', label: 'Go to Upcoming', run: () => goView('upcoming') },
+    { id: 'v-over', label: 'Go to Carried over', run: () => goView('overdue') },
+    ...lists.map((l) => ({ id: `l-${l.id}`, label: `Go to list: ${l.name}`, run: () => goView(`list:${l.id}` as View) })),
     { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
     { id: 'export', label: `Export backup (last: ${backupDate ? formatDay(backupDate) : 'never'})`, run: () => exportData() },
     ...(cloud.available && !cloud.user ? [{ id: 'sign-in', label: 'Sign in with Google to sync', run: () => { cloud.signIn(); } }] : []),
@@ -303,11 +336,19 @@ export default function App() {
     ...tasks.map((t) => ({ id: `t-${t.id}`, label: `Open task: ${t.text}`, run: () => setOpenId(t.id) })),
   ];
 
+  // Going to a view from the menu or the palette says where you are and how much is there.
+  function goView(v: View) {
+    setView(v);
+    const title = VIEW_TITLES[v] ?? lists.find((l) => `list:${l.id}` === v)?.name ?? 'List';
+    announce(`${title}: ${count(viewCounts[v] ?? 0, 'task')} to do`);
+  }
+
   function addList(name: string) {
     const existing = lists.find((l) => l.name.toLowerCase() === name.toLowerCase());
     const list = existing ?? { id: uid(), name, color: LIST_COLORS[lists.length % LIST_COLORS.length] };
     if (!existing) setLists([...lists, list]);
     setView(`list:${list.id}`); // a duplicate name just takes you to the list that already exists
+    announce(existing ? `The list "${existing.name}" already exists. It is open now.` : `List "${name}" created`);
   }
 
   function deleteList(id: string) {
@@ -328,20 +369,26 @@ export default function App() {
     URL.revokeObjectURL(url);
     saveBackupDate(today);
     setBackupDate(today);
-    setStatus('Backup exported');
+    announce('Backup exported');
   }
 
   async function importData(file: File) {
     const parsed = parseBackup(await file.text().catch(() => ''));
-    if (!parsed) { window.alert('That file is not a valid backup. Nothing was changed.'); return; }
-    if (!window.confirm(`Replace your current data with ${count(parsed.tasks.length, 'imported task')}?`)) return;
+    if (!parsed) { window.alert('That file is not a valid backup. Nothing was changed. Choose a file exported from Tasks.'); return; }
+    if (!window.confirm(`Replace the tasks on this device with ${count(parsed.tasks.length, 'imported task')}? Export a backup first to keep the current ones.`)) return;
     dispatch({ type: 'replaceAll', tasks: parsed.tasks });
     setLists(parsed.lists);
     setView('all');
     setOpenId(null);
     setUndo(null);
-    setStatus(`Imported ${count(parsed.tasks.length, 'task')}`);
+    announce(`Imported ${count(parsed.tasks.length, 'task')}`);
   }
+
+  undoAction.current = undo ? handleUndo : null;
+  // A search says how many tasks it found (only while there is a search).
+  useEffect(() => {
+    if (deferredQuery.trim()) announce(`${count(visible.length, 'task')} found`);
+  }, [deferredQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const remaining = viewCounts[view] ?? 0;
   const rolled = lastCount.current !== null && lastCount.current !== remaining;
@@ -363,6 +410,7 @@ export default function App() {
 
   return (
     <div className="poster">
+      <a className="skip" href="#new-task">Skip to new task</a>
       <header className="field">
         <div className="bar">
           <button className="icon-btn menu-btn" type="button" onClick={() => setMenu(true)} aria-label="Open menu" aria-expanded={menu} aria-controls="sidebar">
@@ -370,12 +418,12 @@ export default function App() {
           </button>
           <span className="brand-sm" aria-hidden="true">Tasks</span>
           <Sidebar
-            view={view} onView={setView} counts={viewCounts} lists={lists}
+            view={view} onView={goView} counts={viewCounts} lists={lists}
             onAddList={addList} onDeleteList={deleteList} open={menu} onClose={() => setMenu(false)}
           />
           {/* No aria-label: the visible word "Commands" must be part of the accessible name (WCAG 2.5.3). */}
           <button className="cmd" type="button" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
-            Commands <kbd>{MOD_KEY} K</kbd>
+            Commands <kbd aria-hidden="true">{MOD_KEY} K</kbd>
           </button>
           <button className="icon-btn" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}>
@@ -397,6 +445,7 @@ export default function App() {
                 : <>{count(allActive, 'task')} to do{overdue > 0 && <>, <strong>{overdue} carried over</strong></>}.</>}
             </p>
             <TaskForm onAdd={handleAdd} />
+            <p className="landed" aria-hidden="true">{landed}</p>
           </div>
         </div>
       </header>
@@ -415,7 +464,7 @@ export default function App() {
             <div className="frame" ref={frameRef}>
               {frame.map((g, gi) => (
                 <section key={g.name} className={`slot slot-${g.name.toLowerCase().replace(/\s+/g, '-')}`} aria-labelledby={`slot-${gi}`}>
-                  <h3 className="slot-label" id={`slot-${gi}`}>{g.name} <span className="slot-n">{g.tasks.length}</span></h3>
+                  <h3 className="slot-label" id={`slot-${gi}`}>{g.name} <span className="slot-n" aria-hidden="true">{g.tasks.length}</span><span className="sr-only">, {count(g.tasks.length, 'task')}</span></h3>
                   <ul className="list">
                     {g.tasks.map((t) => (
                       <TaskItem
@@ -449,6 +498,7 @@ export default function App() {
           )}
         </section>
         <p className="sr-only" role="status">{status}</p>
+        <p className="sr-only" id="rename-hint">Press F2 to rename</p>
       </main>
 
       <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={menu}

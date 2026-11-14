@@ -57,6 +57,8 @@ button:active:not(:disabled) { transform: scale(.97); }
 input:focus, select:focus, textarea:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
 ::selection { background: var(--sun); color: var(--sun-ink); }
 mark { background: var(--sun); color: var(--sun-ink); padding: 0 .1em; }
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 50; background: var(--ink); color: var(--bg); padding: 10px 14px; font-weight: 700; }
+.skip:focus { left: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 kbd { font: 600 .75rem/1 var(--mono); box-shadow: inset 0 0 0 1.5px currentColor; padding: .2rem .4rem; }
 .badge, .count, .views .n, .tag, .meta, .tabs .count, .drawer .label { font-variant-numeric: tabular-nums; }
@@ -109,7 +111,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 .sub strong { color: var(--ink); font-weight: 800; }
 
 /* The IN slot: the quick-add, open on the left like the start page's. */
-.composer { grid-column: 1 / -1; margin-top: var(--s4); padding: 0 0 var(--s5); }
+.composer { grid-column: 1 / -1; margin-top: var(--s4); padding: 0; }
 .in-label { display: inline-block; margin-bottom: var(--s3); background: var(--sun); color: var(--sun-ink); padding: 5px 10px; font: 800 .75rem/1.2 var(--font); letter-spacing: .09em; text-transform: uppercase; }
 .composer .title { width: 100%; min-height: 56px; background: var(--bg); border: 2px solid var(--ink); border-radius: 0; padding: 0 var(--s4); font-size: 1.1875rem; font-weight: 600; }
 .composer .title::placeholder { color: var(--muted); font-weight: 400; opacity: 1; }
@@ -117,6 +119,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 .row input, .row select { height: 44px; min-width: 0; background: var(--bg); border: 0; box-shadow: inset 0 0 0 1.5px var(--ink); border-radius: 0; padding: 0 var(--s3); font-size: .9375rem; font-weight: 600; }
 .row select option { color: var(--ink); background: var(--surface); }
 .primary { margin-left: auto; height: 44px; padding: 0 var(--s5); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 0; font-weight: 800; font-size: 1rem; }
+.landed { grid-column: 1 / -1; min-height: 1.5em; margin: var(--s2) 0 var(--s4); font: 700 .875rem var(--mono); color: var(--ink); }
 .error { display: inline-flex; align-items: center; gap: var(--s2); margin: var(--s3) 0 0; padding: var(--s1) var(--s2); background: var(--sun); color: var(--sun-ink); font-size: .9375rem; font-weight: 700; }
 
 /* ==== the frame ==== */
@@ -147,9 +150,9 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 .item {
   position: relative; display: grid; grid-template-columns: 20px minmax(0, 1fr) auto auto; column-gap: var(--s3); align-items: start;
   padding: var(--s3) var(--s2) var(--s3) var(--s3); background: var(--surface); box-shadow: var(--slip-shadow);
-  transition: background-color .15s, opacity .15s;
+  transition: opacity .15s;
 }
-.item:focus-within { background-color: var(--focus-tint); }
+.item:focus-within { background-color: var(--focus-tint); transition: none; } /* keyboard focus moves often: instant */
 .item.drag { cursor: grab; }
 .item.dragging { opacity: .4; }
 .item.over { box-shadow: inset 0 3px 0 var(--accent); }
@@ -166,7 +169,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 
 .body { min-width: 0; }
 /* The strike is a background stripe on the inline title, so a wrapped title is struck line by line. */
-.text { display: inline; font-weight: 600; font-size: 1rem; line-height: 1.45; overflow-wrap: anywhere; cursor: text; background: linear-gradient(var(--ink), var(--ink)) no-repeat 0 55% / 0 2px; transition: background-size 240ms var(--ease-out), color .2s; }
+.text { display: inline; font-weight: 600; font-size: 1rem; line-height: 1.45; overflow-wrap: anywhere; cursor: text; background: linear-gradient(var(--ink), var(--ink)) no-repeat 0 55% / 0 2px; transition: color .15s; } /* the strike is instant: ticking happens many times a day */
 .item.done .text { color: var(--muted); background-size: 100% 2px; }
 .edit { width: 100%; background: var(--surface); border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; padding: 2px 0; font-weight: 600; font-size: 1rem; }
 .meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s1) var(--s3); margin-top: 4px; color: var(--muted); font: 500 .75rem/1.5 var(--mono); }
@@ -181,7 +184,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 
 .act { width: 40px; height: 40px; margin-top: -8px; display: grid; place-items: center; background: none; border: 0; border-radius: 0; color: var(--muted); opacity: 0; }
 .item:hover .act, .item:focus-within .act { opacity: 1; }
-.act + .act { margin-left: calc(-1 * var(--s3)); }
+.act + .act { margin-left: 0; } /* keep a gap: Delete must not sit flush against More */
 
 /* The postmark on the newest slip: still, drawn in code, dated today. */
 .postmark { position: absolute; z-index: 0; right: -10px; top: -16px; width: 96px; height: 50px; color: var(--mark); transform: rotate(-10deg); opacity: .55; pointer-events: none; }
@@ -223,10 +226,11 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 .keys dd { margin: 0; }
 
 /* ==== toast ==== */
-.toast { position: fixed; left: var(--margin); bottom: calc(var(--s5) + env(safe-area-inset-bottom)); z-index: 40; display: flex; align-items: center; gap: var(--s4); max-width: calc(100vw - 2 * var(--margin)); background: var(--ink); color: var(--bg); padding: var(--s2) var(--s2) var(--s2) var(--s4); font-weight: 600; transition: opacity 200ms var(--ease-out), translate 200ms var(--ease-out); }
+.toast { position: fixed; left: max(var(--margin), env(safe-area-inset-left, 0px)); bottom: calc(var(--s5) + env(safe-area-inset-bottom)); z-index: 40; display: flex; align-items: center; gap: var(--s4); max-width: calc(100vw - 2 * var(--margin)); background: var(--ink); color: var(--bg); padding: var(--s2) var(--s2) var(--s2) var(--s4); font-weight: 600; transition: opacity 200ms var(--ease-out), translate 200ms var(--ease-out); }
 @starting-style { .toast { opacity: 0; translate: 0 8px; } }
 .toast.leaving { opacity: 0; translate: 0 8px; transition-duration: 160ms; }
 .toast span { min-width: 0; overflow-wrap: anywhere; }
+.toast kbd { flex: none; opacity: .8; }
 .toast button { flex: none; min-height: 36px; background: var(--sun); color: var(--sun-ink); border: 0; border-radius: 0; padding: 0 var(--s4); font-weight: 800; }
 .toast button:focus-visible { outline-color: var(--bg); }
 
@@ -278,6 +282,8 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
   .act { position: absolute; top: 4px; right: 4px; margin: 0; background: var(--surface); }
   .act:not(.del) { right: 44px; }
   .act + .act { margin-left: 0; }
+  /* Room on the first line for the floating buttons, so they never cover the title. */
+  .body::before { content: ''; float: right; width: 84px; height: 1.45em; }
 }
 
 /* ==== narrow screens: the view index becomes an off-canvas menu ==== */
@@ -317,12 +323,12 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
   .tools input { flex: 1; width: auto; }
   .tools input, .tools select { height: 44px; font-size: 1rem; }
   .act { width: 44px; height: 44px; margin-top: -10px; opacity: 1; }
-  .act + .act { margin-left: calc(-1 * var(--s3)); }
+  .act + .act { margin-left: 0; }
   .postmark { right: -6px; width: 80px; height: 42px; }
   .col-about, .col-block:nth-of-type(2), .col-block:nth-of-type(3), .col-block.keys { grid-column: 1 / -1; }
   .colophon .keys { display: none; } /* phones have no keyboard shortcuts */
   .drawer input[type=text], .drawer input[type=date], .drawer select, .drawer textarea { font-size: 1rem; }
-  .toast { left: var(--margin); right: var(--margin); max-width: none; }
+  .toast { left: max(var(--margin), env(safe-area-inset-left, 0px)); right: max(var(--margin), env(safe-area-inset-right, 0px)); max-width: none; }
 }
 
 /* ==== hover: only for a real pointer, so a tap never leaves a stuck state ==== */
@@ -331,7 +337,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 }
 /* iPadOS zooms into any field under 16px */
 @media (pointer: coarse) {
-  input, select, textarea { font-size: max(1rem, 16px); }
+  input, select, textarea, .row input, .row select, .tools input, .tools select, .new-list input { font-size: max(1rem, 16px); }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -340,6 +346,7 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
   .primary:hover { background: var(--accent-hover); }
   .views button:not(.on):hover { background: var(--soft); }
   .tabs button:hover { color: var(--ink); }
+  .item { transition: opacity .15s, background-color .15s; }
   .item:hover { background-color: var(--soft); }
   .item:focus-within:hover { background-color: var(--focus-tint); }
   .check:hover { box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink) 12%, transparent); }
@@ -354,10 +361,12 @@ h1 { grid-row: 1; margin: 0; font: 800 clamp(1.5rem, 2.6vw, 2rem)/1.05 var(--fon
 /* Reduced motion means no movement, not no feedback: fades and colour changes stay. */
 @media (prefers-reduced-motion: reduce) {
   .drawer { animation-name: fade; }
-  .drawer.closing { animation-name: fade-out; }
+  .drawer.closing { animation-name: fade-out; animation-duration: 160ms; }
   .side, .side.open { transition: none; }
+  .scrim, .scrim.open { transition-duration: 0s; }
+  .toast.leaving { translate: 0 0; }
   .text { transition: color .2s; }
-  .check:active { transform: none; }
-  button:active:not(:disabled) { transform: none; }
+  .check:active { transform: none; opacity: .7; }
+  button:active:not(:disabled) { transform: none; opacity: .7; } /* press feedback without movement */
   @starting-style { .toast { translate: 0 0; } }
 }

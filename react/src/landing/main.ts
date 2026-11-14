@@ -135,6 +135,7 @@ form.addEventListener('submit', (e) => {
   const slot = slotOf(off);
 
   if (result !== 'failed') {
+    input.value = ''; // on failure the line stays in the box, so nothing typed is lost
     document.querySelectorAll('.slip.fresh').forEach((n) => n.classList.remove('fresh'));
     document.querySelectorAll('.slip .postmark').forEach((n) => n.remove());
     slotList(slot).prepend(slipNode({ text: p.title, list: p.listName, high: p.priority === 'high', off, fresh: true }));
@@ -144,16 +145,20 @@ form.addEventListener('submit', (e) => {
   say(
     result === 'saved' ? `Filed under ${SLOT_NAME[slot]}${extras ? `, ${extras}` : ''}: "${title}". It is in your list on this device.`
     : result === 'pending' ? `"${title}" is ready. It joins your synced list when you open it.`
-    : 'This browser blocked saving. Open Tasks and add it there.',
+    : 'Saving was blocked, so your line is still in the box. Open Tasks and paste it there.',
     result === 'failed',
   );
-  openList.hidden = result === 'failed';
-  input.value = '';
+  openList.hidden = false;
 });
 
-// Desktop only: the cursor waits in the box, so the first task needs no click. On phones this
-// would open the keyboard over the page.
-if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) input.focus({ preventScroll: true });
+// No focus on load (screen readers would skip the headline). The skip link goes straight to the
+// box, and "n" puts the cursor there from anywhere, as in the app.
+document.addEventListener('keydown', (e) => {
+  const el = e.target as HTMLElement;
+  if (e.key !== 'n' || e.metaKey || e.ctrlKey || e.altKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable) return;
+  e.preventDefault();
+  input.focus();
+});
 
 // Mentions of sync show only when this build has a Firebase project behind it.
 if (readConfig()) document.querySelectorAll<HTMLElement>('[data-cloud]').forEach((n) => { n.hidden = false; });

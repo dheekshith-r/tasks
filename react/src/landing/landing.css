@@ -120,12 +120,13 @@ kbd {
 /* The postmark: drawn in code, roughened by an SVG ink filter, dated today. */
 .postmark { position: absolute; right: -26px; top: -18px; width: 124px; height: 64px; color: var(--mark); transform: rotate(-10deg); opacity: .92; pointer-events: none; }
 .postmark text { fill: currentColor; font-family: var(--mono); font-weight: 700; }
-@keyframes drop { from { transform: translateY(-14px); } to { transform: none; } }
+@keyframes drop { from { transform: translateY(-14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes stamp-soft { from { opacity: 0; } to { opacity: .92; } }
 @keyframes stamp { from { transform: rotate(-10deg) scale(1.25); opacity: 0; } to { transform: rotate(-10deg) scale(1); opacity: .92; } }
 .slip.fresh { animation: drop 240ms var(--ease-out); }
 .slip.fresh .postmark { animation: stamp 180ms var(--ease-out) 200ms both; }
 
-.sample-note { margin-top: 10px; font: 500 .8125rem var(--mono); color: var(--muted); }
+.sample-note { margin: 0 0 10px; font: 500 .8125rem var(--mono); color: var(--muted); }
 
 /* Sections below the frame share one rhythm: more space above a heading than below it. */
 .section { border-top: 3px solid var(--frame); margin-top: 64px; padding-block: 64px; }
@@ -180,5 +181,6 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   .btn { transition: background-color 150ms ease-out; }
   .btn:active { transform: none; }
-  .slip.fresh, .slip.fresh .postmark { animation: none; }
+  .slip.fresh { animation: none; }
+  .slip.fresh .postmark { animation: stamp-soft 120ms var(--ease-out) 40ms both; } /* a fade, no movement */
 }

@@ -21,6 +21,8 @@ const PRIORITY_LABEL = { low: 'Low', med: 'Medium', high: 'High' } as const;
 // A private drag type, so dropped files, links or selected text are never mistaken for a task.
 const DRAG_TYPE = 'application/x-task';
 const isTaskDrag = (e: DragEvent) => [...e.dataTransfer.types].includes(DRAG_TYPE);
+// On touch screens a long press should select text, not start a drag; the drawer has Move up/down.
+const COARSE = typeof window !== 'undefined' && (window.matchMedia?.('(pointer: coarse)').matches ?? false);
 
 // Wraps every case-insensitive match of the search query in <mark>.
 function Highlight({ text, query }: { text: string; query?: string }) {
@@ -84,7 +86,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
     <li
       data-id={task.id}
       className={`item${task.done ? ' done' : ''}${over ? ' over' : ''}${draggable ? ' drag' : ''}${dragging ? ' dragging' : ''}`}
-      draggable={draggable && !editing}
+      draggable={draggable && !editing && !COARSE}
       onKeyDown={onRowKey}
       onDragStart={(e) => {
         e.dataTransfer.setData(DRAG_TYPE, task.id);
@@ -121,7 +123,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
         type="checkbox"
         checked={task.done}
         onChange={() => onToggle(task.id)}
-        aria-label={`Mark "${task.text}" as ${task.done ? 'not done' : 'done'}`}
+        aria-label={`Done: ${task.text}`}
       />
       <div className="body">
         {editing ? (
@@ -133,7 +135,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
             }}
             onBlur={() => finish(true)} />
         ) : (
-          <span ref={textRef} className="text" dir="auto" tabIndex={0} title="Double-click or press F2 to rename" aria-keyshortcuts="F2" onDoubleClick={startEdit}>
+          <span ref={textRef} className="text" dir="auto" tabIndex={0} title="Double-click or press F2 to rename" aria-keyshortcuts="F2" aria-describedby="rename-hint" onDoubleClick={startEdit}>
             <Highlight text={task.text} query={query} />
           </span>
         )}

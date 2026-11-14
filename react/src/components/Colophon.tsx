@@ -18,7 +18,7 @@ const SYNC_TEXT: Record<SyncState, string> = {
   connecting: 'Connecting…',
   synced: 'Synced.',
   offline: 'Offline. Changes sync when you are back online.',
-  error: 'Sync paused.',
+  error: 'Sync paused. Reload the page to try again.',
 };
 
 // `null` is the brand red from the stylesheet.
@@ -53,7 +53,7 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
         <p className="col-name">Tasks</p>
         {user
           ? <p>Your tasks sync to your account and are stored by Google Firebase. Only you can read them.</p>
-          : <p>Guest mode: your tasks are saved in this browser only. Nothing is uploaded unless you sign in or export.</p>}
+          : <p>Guest mode: your tasks are saved in this browser only. Nothing is uploaded unless you sign in.</p>}
       </div>
 
       {account?.available && (
@@ -65,7 +65,7 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
               {account.error && <p className="col-storage" role="alert">{account.error}</p>}
               <div className="data">
                 <button type="button" className="link" onClick={account.onSignOut}>Sign out</button>
-                <button type="button" className="link" onClick={account.onDelete}>Delete my cloud data</button>
+                <button type="button" className="link" onClick={account.onDelete}>Delete my account and cloud data</button>
               </div>
             </>
           ) : (
@@ -112,6 +112,7 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
           <dt><kbd>{modKey}</kbd> <kbd>K</kbd></dt><dd>Commands</dd>
           <dt><kbd>Alt</kbd> <kbd>↑↓</kbd></dt><dd>Reorder</dd>
           <dt><kbd>F2</kbd></dt><dd>Rename</dd>
+          <dt><kbd>{modKey}</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd>
         </dl>
       </div>
     </footer>

@@ -127,10 +127,10 @@ describe('leaving the account', () => {
     await signIn(false);
     sendSnapshot([cloudTask('Account only')]);
     vi.spyOn(window, 'confirm').mockReturnValue(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Delete my cloud data' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete my account and cloud data' }));
     expect(h.s.deleted).toEqual([]);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Delete my cloud data' })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Delete my account and cloud data' })); });
     expect(h.s.deleted).toEqual(['u1']);
     expect(titles()).toEqual(['Guest task']);
     expect(guestSaved()).toEqual(['Guest task']);

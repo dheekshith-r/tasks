@@ -158,7 +158,7 @@ describe('App: undo', () => {
     act(() => { vi.advanceTimersByTime(30_000); });
     expect(screen.queryByText('Task deleted')).not.toBeNull();
     fireEvent.mouseLeave(toast);
-    act(() => { vi.advanceTimersByTime(7_000); });
+    act(() => { vi.advanceTimersByTime(10_200); });
     expect(screen.queryByText('Task deleted')).toBeNull();
   });
 });
@@ -250,9 +250,10 @@ describe('App: recurring tasks', () => {
   it('creates the next occurrence on completion and removes it again on undo', () => {
     seed([{ text: 'Water plants', dueDate: '2026-11-10', repeat: 'weekly' }]);
     render(<App />);
-    fireEvent.click(screen.getByLabelText('Mark "Water plants" as done'));
+    fireEvent.click(screen.getByLabelText('Done: Water plants'));
     expect(titles()).toEqual(['Water plants', 'Water plants']);
-    fireEvent.click(screen.getByLabelText('Mark "Water plants" as not done'));
+    // Undo the tick on the finished one (both share a name; the checkbox state tells them apart).
+    fireEvent.click(screen.getAllByLabelText('Done: Water plants').find((c) => (c as HTMLInputElement).checked)!);
     expect(titles()).toEqual(['Water plants']);
   });
 });
@@ -265,7 +266,7 @@ describe('App: date rollover', () => {
     expect(document.querySelector('.item .due-today')).not.toBeNull();
     expect(viewButton(/^Carried over/).textContent).toBe('Carried over0');
     act(() => { vi.advanceTimersByTime(60_000); });
-    expect(document.querySelector('.item .overdue')?.textContent).toBe('Due yesterday');
+    expect(document.querySelector('.item .overdue')?.textContent).toBe('Carried over from yesterday');
     expect(viewButton(/^Carried over/).textContent).toBe('Carried over1');
   });
 });
