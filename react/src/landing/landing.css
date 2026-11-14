@@ -126,7 +126,7 @@ kbd {
 .slip.fresh { animation: drop 240ms var(--ease-out); }
 .slip.fresh .postmark { animation: stamp 180ms var(--ease-out) 200ms both; }
 
-.sample-note { margin: 0 0 10px; font: 500 .8125rem var(--mono); color: var(--muted); }
+.sample-note { margin-top: 10px; font: 500 .8125rem var(--mono); color: var(--muted); }
 
 /* Sections below the frame share one rhythm: more space above a heading than below it. */
 .section { border-top: 3px solid var(--frame); margin-top: 64px; padding-block: 64px; }
