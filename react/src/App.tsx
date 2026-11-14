@@ -19,7 +19,7 @@ import { useCloud } from './useCloud';
 import { resolveList, takePending } from './handoff';
 import type { Filter, List, Sort, Task, View } from './types';
 import { uid } from './uid';
-import { count, dueForNewTask, inView, whenLabel } from './views';
+import { bySlot, count, dueForNewTask, inView, slotOf } from './views';
 
 type Theme = 'light' | 'dark';
 interface Undo { id: string; message: string; items: { task: Task; index: number }[] }
@@ -29,7 +29,7 @@ const ACCENT_KEY = 'todo-accent';
 const RANK = { high: 0, med: 1, low: 2 } as const;
 const LIST_COLORS = ['#D62839', '#FFC53D', '#8A8A8A'];
 const DATE_LONG: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-const VIEW_TITLES: Record<string, string> = { all: 'All tasks', today: 'Today', upcoming: 'Upcoming', overdue: 'Overdue' };
+const VIEW_TITLES: Record<string, string> = { all: 'All tasks', today: 'Today', upcoming: 'Upcoming', overdue: 'Carried over' };
 const MOD_KEY = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
 
 const formatDay = (iso: string) => parseISO(iso)?.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) ?? iso;
@@ -55,6 +55,7 @@ export default function App() {
   const [palette, setPalette] = useState(false);
   const [menu, setMenu] = useState(false);
   const [status, setStatus] = useState(''); // read out by screen readers
+  const [stampId, setStampId] = useState<string | null>(null); // the newest task wears the postmark
   const [persist, setPersist] = useState<PersistState>(loadPersist);
   const [backupDate, setBackupDate] = useState<string | null>(loadBackupDate);
   const persistAsked = useRef(false);
@@ -65,7 +66,7 @@ export default function App() {
     } catch { return null; }
   });
   const searchRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const focusAfterMove = useRef<string | null>(null);
   const { today, hello } = useClock(); // stays correct when the tab is left open past midnight
   const lastCount = useRef<number | null>(null); // the poster numeral rolls only when its value changes
@@ -125,8 +126,8 @@ export default function App() {
     const surfaces = [css.getPropertyValue('--bg'), css.getPropertyValue('--surface')];
     const vars = accent ? accentVars(accent, surfaces, theme === 'dark') : null;
     if (vars) Object.entries(vars).forEach(([name, value]) => root.style.setProperty(name, value));
-    // The browser bar takes the field colour, so the red runs to the top edge on phones.
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(root).getPropertyValue('--accent').trim() || '#D62839');
+    // The browser bar takes the page colour, so the frame starts at the top edge on phones.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(root).getPropertyValue('--bg').trim() || '#FFFFFF');
     try {
       if (accent) localStorage.setItem(ACCENT_KEY, accent);
       else localStorage.removeItem(ACCENT_KEY);
@@ -165,7 +166,7 @@ export default function App() {
     const id = focusAfterMove.current;
     if (!id) return;
     focusAfterMove.current = null;
-    const row = [...(listRef.current?.children ?? [])].find((li) => (li as HTMLElement).dataset.id === id);
+    const row = [...(frameRef.current?.querySelectorAll('li.item') ?? [])].find((li) => (li as HTMLElement).dataset.id === id);
     row?.querySelector<HTMLElement>('.text')?.focus();
   }, [tasks]);
 
@@ -194,8 +195,8 @@ export default function App() {
     });
     if (sort === 'due') list = [...list].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
     if (sort === 'priority') list = [...list].sort((a, b) => RANK[a.priority] - RANK[b.priority]);
-    return list;
-  }, [scoped, filter, sort, deferredQuery]);
+    return bySlot(list, today); // the sorting frame: slots in order, the chosen order inside each slot
+  }, [scoped, filter, sort, deferredQuery, today]);
 
   const overdue = viewCounts.overdue;
   const allActive = viewCounts.all;
@@ -218,6 +219,7 @@ export default function App() {
     if (resolved.lists !== lists) setLists(resolved.lists);
     const task: Task = { id: uid(), text, priority, done: false, dueDate: dueForNewTask(view, today, explicitDue), listId: resolved.listId ?? currentListId };
     dispatch({ type: 'add', ...task });
+    setStampId(task.id);
     if (!inView(task, view, today) || (resolved.listId && resolved.listId !== currentListId)) setView('all'); // keep the new task in sight
     setQuery('');                                   // so the new task is never hidden by a leftover search
     if (filter === 'done') setFilter('all');
@@ -272,10 +274,17 @@ export default function App() {
     }
     const i = visible.findIndex((t) => t.id === id);
     const other = visible[i + dir];
-    if (i < 0 || !other) return;
+    if (i < 0) return;
+    // A task moves inside its own slot; its date decides the slot.
+    const slot = slotOf(visible[i], today);
+    if (!other || slotOf(other, today) !== slot) {
+      setStatus(`"${visible[i].text}" is already ${dir < 0 ? 'first' : 'last'} in ${slot}`);
+      return;
+    }
+    const inSlot = visible.filter((t) => slotOf(t, today) === slot);
     if (refocus) focusAfterMove.current = id;
     dispatch({ type: 'move', from: id, to: other.id });
-    setStatus(`Moved "${visible[i].text}" to position ${i + dir + 1} of ${visible.length}`);
+    setStatus(`Moved "${visible[i].text}" to position ${inSlot.indexOf(visible[i]) + dir + 1} of ${inSlot.length} in ${slot}`);
   }
 
   const paletteItems = [
@@ -284,7 +293,7 @@ export default function App() {
     { id: 'v-all', label: 'Go to All tasks', run: () => setView('all') },
     { id: 'v-today', label: 'Go to Today', run: () => setView('today') },
     { id: 'v-up', label: 'Go to Upcoming', run: () => setView('upcoming') },
-    { id: 'v-over', label: 'Go to Overdue', run: () => setView('overdue') },
+    { id: 'v-over', label: 'Go to Carried over', run: () => setView('overdue') },
     ...lists.map((l) => ({ id: `l-${l.id}`, label: `Go to list: ${l.name}`, run: () => setView(`list:${l.id}` as View) })),
     { id: 'theme', label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`, run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
     { id: 'export', label: `Export backup (last: ${backupDate ? formatDay(backupDate) : 'never'})`, run: () => exportData() },
@@ -340,7 +349,17 @@ export default function App() {
   useEffect(() => { lastCount.current = remaining; });
   const allDone = tasks.length > 0 && allActive === 0;
   const dateLong = parseISO(today)?.toLocaleDateString(undefined, DATE_LONG) ?? '';
-  const whens = useMemo(() => visible.map((t) => whenLabel(t, today)), [visible, today]);
+  // The sorting frame: one section per slot that holds a task, in frame order.
+  const frame = useMemo(() => {
+    const groups: { name: string; tasks: Task[] }[] = [];
+    visible.forEach((t) => {
+      const name = slotOf(t, today);
+      const last = groups[groups.length - 1];
+      if (last?.name === name) last.tasks.push(t); else groups.push({ name, tasks: [t] });
+    });
+    return groups;
+  }, [visible, today]);
+  const stampDate = parseISO(today)?.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }).toUpperCase() ?? '';
 
   return (
     <div className="poster">
@@ -375,7 +394,7 @@ export default function App() {
               {hello}.{' '}
               {tasks.length === 0 ? 'Add a task to get started.'
                 : allActive === 0 ? 'Everything is done.'
-                : <>{count(allActive, 'task')} to do{overdue > 0 && <>, <strong>{overdue} overdue</strong></>}.</>}
+                : <>{count(allActive, 'task')} to do{overdue > 0 && <>, <strong>{overdue} carried over</strong></>}.</>}
             </p>
             <TaskForm onAdd={handleAdd} />
           </div>
@@ -392,29 +411,33 @@ export default function App() {
           </div>
           <Filters filter={filter} counts={counts} onFilter={setFilter} query={query} onQuery={setQuery}
             sort={sort} onSort={setSort} searchRef={searchRef} />
-          <ul className="list" ref={listRef}>
-            {visible.map((t, i) => {
-              const when = whens[i];
-              const first = i === 0 || whens[i - 1] !== when;
-              return (
-                <TaskItem
-                  key={t.id}
-                  task={t}
-                  when={when}
-                  first={first}
-                  list={currentListId ? undefined : lists.find((l) => l.id === t.listId)}
-                  query={deferredQuery}
-                  draggable={canDrag}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                  onEdit={(id, text) => dispatch({ type: 'edit', id, text })}
-                  onOpen={setOpenId}
-                  onMove={(from, to) => dispatch({ type: 'move', from, to })}
-                  onNudge={nudge}
-                />
-              );
-            })}
-          </ul>
+          {frame.length > 0 && (
+            <div className="frame" ref={frameRef}>
+              {frame.map((g, gi) => (
+                <section key={g.name} className={`slot slot-${g.name.toLowerCase().replace(/\s+/g, '-')}`} aria-labelledby={`slot-${gi}`}>
+                  <h3 className="slot-label" id={`slot-${gi}`}>{g.name} <span className="slot-n">{g.tasks.length}</span></h3>
+                  <ul className="list">
+                    {g.tasks.map((t) => (
+                      <TaskItem
+                        key={t.id}
+                        task={t}
+                        stamped={t.id === stampId ? stampDate : undefined}
+                        list={currentListId ? undefined : lists.find((l) => l.id === t.listId)}
+                        query={deferredQuery}
+                        draggable={canDrag}
+                        onToggle={handleToggle}
+                        onDelete={handleDelete}
+                        onEdit={(id, text) => dispatch({ type: 'edit', id, text })}
+                        onOpen={setOpenId}
+                        onMove={(from, to) => dispatch({ type: 'move', from, to })}
+                        onNudge={nudge}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
           {visible.length === 0 && (
             <EmptyState kind={emptyKind} listName={currentListId ? viewTitle : undefined}
               query={query.trim()} onClearSearch={() => setQuery('')} />

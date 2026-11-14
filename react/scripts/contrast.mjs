@@ -11,7 +11,8 @@ const MIN = 4.5;
 const PAIRS = [
   ['ink', 'bg', 'body text on the page'],
   ['ink', 'surface', 'task text on cards'],
-  ['ink', 'soft', 'inputs, badges'],
+  ['ink', 'soft', 'inputs, badges, text in a slot'],
+  ['ink', 'line', 'Carried over and Done slot labels'],
   ['muted', 'bg', 'sidebar labels, hovered task meta'],
   ['muted', 'surface', 'task meta, low-priority pill, list monogram'],
   ['muted', 'soft', 'inactive filter tabs'],

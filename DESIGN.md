@@ -1,26 +1,33 @@
 ---
 version: alpha
-name: Tasks · Grid
-description: A personal to-do list set as a Swiss International Style poster.
+name: Tasks · Sorting Frame
+description: A personal to-do list set as a post-office sorting frame. One typed line is postmarked and filed under its day.
 colors:
+  bg: "#FFFFFF"
+  surface: "#FFFFFF"
+  soft: "#F3F3F1"
+  line: "#E2E2DF"
+  ink: "#161616"
+  muted: "#4A4A4A"
+  frame: "#161616"
   accent: "#D62839"
   accent-ink: "#FFFFFF"
   accent-text: "#C8202F"
+  accent-hover: "#B3202F"
   sun: "#FFC53D"
-  sun-ink: "#111111"
-  ink: "#111111"
-  muted: "#636363"
-  bg: "#FFFFFF"
-  surface: "#FFFFFF"
-  soft: "#F2F2F2"
-  line: "#DCDCDC"
+  sun-ink: "#161616"
   danger: "#A4161A"
+  mark: "#D62839"
 typography:
   sans:
-    fontFamily: Hanken Grotesk
-    fontWeight: 300 400 600 800 900
+    fontFamily: Overpass Variable
+    fontWeight: 400 600 700 800
+  mono:
+    fontFamily: Overpass Mono Variable
+    fontWeight: 500 600 700
 rounded:
-  base: 2px
+  base: 0px
+  button: 2px
 spacing:
   s1: 4px
   s2: 8px
@@ -32,90 +39,60 @@ spacing:
   s8: 64px
 ---
 
-# Design System: Tasks · Grid
+# Design System: Tasks · Sorting Frame
 
 ## Overview
 
-**Creative North Star: "The day as a Swiss poster."**
+**Creative North Star: "Your week, sorted like the post."**
 
-One red field states how many tasks remain, at poster scale, beside the date. Below it, a strict 12-column typographic sheet lists the tasks by when they are due. The sheet has no cards and no shadows: 3px ink rules open each group, 1px hairlines separate rows, and corners are square. The design refuses the sidebar-plus-cards shell that most to-do apps ship.
+The page and the app are one sorting frame: 3px ink rules divide pigeonhole slots (Carried over, Today, Tomorrow, This week, Later, Done). A yellow strip labels each slot. Every task is a white paper slip. The newest slip carries a red postmark with today's date, drawn in code and roughened by an SVG ink filter. The frame refuses the hero-plus-screenshot landing page and the sidebar-plus-list app.
 
-**Key Characteristics:**
-- A full-bleed colour field holds navigation, the count numeral, the date and quick-add.
-- A "when" rail (4 of 12 columns) labels each run of tasks: Overdue, Today, Tomorrow, a date, No date, Done.
-- One type family in dramatic weights; tabular figures for every number.
-- Yellow is a marker only, never a surface.
+**Key characteristics**
+- The frame is the layout: slots are sections of one grid, at least 280px wide, wrapping into rows. An empty cell at the end of a row stays open, as if the frame continues.
+- The start page's first slot is the IN slot: the headline, one line of help and the working input. The same IN strip opens the app's quick-add.
+- Square corners everywhere (buttons 2px). Depth comes from a soft inner shade at the top of each slot and a 1px shadow under each slip.
 
-## Colors
+## Colour roles
 
-Brand red and yellow on pure white and off-black.
+| Role | Light | Dark | Use |
+|---|---|---|---|
+| Ground | #FFFFFF | #101010 | page, IN slot |
+| Slot | #F3F3F1 | #1A1A1A | inside each pigeonhole |
+| Slip | #FFFFFF | #262626 | each task |
+| Ink / frame | #161616 | #EDEDED / #4A4A4A frame | text and the 3px rules |
+| Yellow #FFC53D | same | same | slot label strips, the day tag, "Today" |
+| Red #D62839 | same | same | the main action, the postmark, "High" (always with its word) |
+| Calm grey | line token | line token | Carried over and Done labels: never red |
 
-### Primary
-- **Field red** (#D62839): the whole top field, with white text. It follows the user's accent colour choice; the text colour is derived for 4.5:1.
-- **Text-safe red** (#C8202F light, #FF5A68 dark): red text on white or grey (overdue labels, High priority).
-
-### Secondary
-- **Marker yellow** (#FFC53D, always with #111 text): the overdue count, the Today badge, search matches, selection, a completed count.
-
-### Neutral
-- **Ink** (#111111 / #F4F4F4 dark): text, rules, checks.
-- **Muted** (#636363 / #A6A6A6): meta text.
-- **Paper** (#FFFFFF / #0C0C0C): the sheet.
-- **Soft** (#F2F2F2 / #1F1F1F): input wells and the hovered row.
-
-### Named Rules
-**The Marker Rule.** Yellow highlights a word or a count; it never fills a panel.
-**The Red Text Rule.** Red text uses the text-safe red, never the field red.
-
-## Themes
-
-| Token | Light | Dark |
-|---|---|---|
-| bg | #FFFFFF | #0C0C0C |
-| surface | #FFFFFF | #161616 |
-| soft | #F2F2F2 | #1F1F1F |
-| ink | #111111 | #F4F4F4 |
-| muted | #636363 | #A6A6A6 |
-| accent-text | #C8202F | #FF5A68 |
-
-The field stays brand red in both themes.
+Every text pair is checked by `npm run contrast` in both themes.
 
 ## Typography
 
-**Font:** Hanken Grotesk (system-ui fallback), weights 300 to 900.
-
-### Hierarchy
-- **Numeral** (900, clamp 7.5–13.5rem, line-height .8, tracking -0.04em): the remaining count; smaller for 3 and 4 digits.
-- **Display** (800, clamp 2.25–3.5rem, line-height 1, tracking -0.035em): the date (h1).
-- **Headline** (800, 2rem, tracking -0.03em): the view title (h2).
-- **Title** (600, 1.0625rem, line-height 1.6): task titles and the "when" rail (800).
-- **Body** (300–400, 1–1.1875rem): summary and empty-state text, max 44ch.
-- **Meta** (600–800, .8125–.875rem): priority, dates, list names.
-
-**The Tracking Rule.** Tracking tightens as size grows; body text stays at 0.
-
-## Layout
-
-12 columns on desktop (24px gutter, 40px margins, max 1240px), 4 columns on phones (16px). The count spans 4 columns, the date and quick-add 8. In the sheet, the "when" rail spans 4 columns, so the check circles align with the date above. On phones the rail becomes a line above each group, and the view index becomes an off-canvas menu.
-
-## Elevation & Depth
-
-The sheet is flat. Only the command palette carries a soft shadow, and the drawer a 1px ink edge.
-
-## Shapes
-
-Square: 2px radius on buttons and inputs, 0 on swatches and badges. Circles only for the check.
+- Overpass for all text: 800 for headings and labels, 600 for task titles, 400 for body.
+- Overpass Mono for dates, tags, counts and keys (data, not decoration), with tabular figures.
+- Labels: 0.75rem, 800, uppercase, 0.09em tracking. Headings: -0.025em tracking, `text-wrap: balance`.
 
 ## Components
 
-- **Rule:** 3px ink rule opens a group; 1px hairline between rows; a red 3px rule marks a drag target.
-- **Check:** 22px ink ring; done fills it with ink and draws a 2px red strike across the title, line by line.
-- **Field controls:** transparent with a 1.5px current-colour border; the primary button inverts (white on red).
-- **Tabs:** text with a 2px underline for the active one.
+- **Slot label:** yellow strip, ink text, mono count. Calm grey for Carried over and Done.
+- **Slip:** white, 12px padding, 1px bottom shadow; square check (2px ink border, ink fill when done); title strikes through with an ink stripe; meta row in mono.
+- **Postmark:** two rings, today's date, four wavy cancel lines; red at 55% opacity under the text in the app, full on the start page.
+- **Buttons:** red solid for the main action; 2px ink outline for secondary; press scale 0.97; hover only with a fine pointer.
+- **Inputs:** 2px ink border, 56px tall for the main line.
 
-## Do's and Don'ts
+## Motion
 
-- Do keep every number tabular.
-- Don't add cards, rounded containers or a sidebar on desktop.
-- Don't animate actions people repeat many times a day (the palette opens instantly).
-- Don't use a coloured left border on rows; group with rules instead.
+- Start page (rare, first visit): the new slip drops 14px in 240ms and the postmark stamps in 180ms, ease-out cubic-bezier(.23,1,.32,1). None with reduced motion.
+- App (many times a day, keyboard): no motion on add or move; the postmark appears still. Drawer 280ms iOS curve; palette instant.
+
+## Layout
+
+- Slots: `repeat(auto-fill, minmax(280px, 1fr))`; four per row at 1280px, one per row on phones.
+- With a mouse, row actions float over the slip so narrow slots keep their width for text; on touch they stay in the row.
+- First view: the headline and the input are visible with no scroll at 375x667 and 1280x720.
+
+## Do and don't
+
+- Do keep nav, footer and forms standard; the frame is the one strange thing.
+- Do date the sample week from the visitor's real today.
+- Don't use red for overdue or for decoration. Don't animate keyboard actions. Don't add a third font family for text.

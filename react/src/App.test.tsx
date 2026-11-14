@@ -117,8 +117,8 @@ describe('App: adding tasks', () => {
 
   it('jumps to All tasks when a new task would be invisible in the current view', () => {
     render(<App />);
-    fireEvent.click(viewButton(/^Overdue/));
-    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Overdue');
+    fireEvent.click(viewButton(/^Carried over/));
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Carried over');
     addTask('No date on this one');
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('All tasks');
     expect(titles()).toEqual(['No date on this one']);
@@ -144,7 +144,9 @@ describe('App: undo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear completed' }));
     expect(titles()).toEqual(['Two']);
     fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
-    expect(titles()).toEqual(['One', 'Two', 'Three']);
+    // On screen, done tasks sit in the Done slot after the open ones; in storage every task is back in its old place.
+    expect(titles()).toEqual(['Two', 'One', 'Three']);
+    expect(JSON.parse(localStorage.getItem('todo-app:v1')!).map((t: { text: string }) => t.text)).toEqual(['One', 'Two', 'Three']);
   });
 
   it('keeps the undo toast while it is hovered, then dismisses it', () => {
@@ -191,7 +193,7 @@ describe('App: keyboard', () => {
     down.focus();
     fireEvent.click(down);
     expect(titles()).toEqual(['Two', 'One', 'Three']);
-    expect(status()).toBe('Moved "One" to position 2 of 3');
+    expect(status()).toBe('Moved "One" to position 2 of 3 in Later');
     expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Move up' }));
     expect(titles()).toEqual(['One', 'Two', 'Three']);
@@ -205,7 +207,7 @@ describe('App: keyboard', () => {
     fireEvent.keyDown(one, { key: 'ArrowDown', altKey: true });
     expect(titles()).toEqual(['Two', 'One', 'Three']);
     expect(document.activeElement?.textContent).toBe('One');
-    expect(status()).toBe('Moved "One" to position 2 of 3');
+    expect(status()).toBe('Moved "One" to position 2 of 3 in Later');
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown', altKey: true });
     expect(titles()).toEqual(['Two', 'Three', 'One']);
     expect(document.activeElement?.textContent).toBe('One');
@@ -256,15 +258,15 @@ describe('App: recurring tasks', () => {
 });
 
 describe('App: date rollover', () => {
-  it('moves a task from Today to overdue when midnight passes with the tab open', () => {
+  it('moves a task from Today to Carried over when midnight passes with the tab open', () => {
     vi.setSystemTime(new Date(2026, 10, 10, 23, 59, 30));
     seed([{ text: 'Due tonight', dueDate: '2026-11-10' }]);
     render(<App />);
     expect(document.querySelector('.item .due-today')).not.toBeNull();
-    expect(viewButton(/^Overdue/).textContent).toBe('Overdue0');
+    expect(viewButton(/^Carried over/).textContent).toBe('Carried over0');
     act(() => { vi.advanceTimersByTime(60_000); });
     expect(document.querySelector('.item .overdue')?.textContent).toBe('Due yesterday');
-    expect(viewButton(/^Overdue/).textContent).toBe('Overdue1');
+    expect(viewButton(/^Carried over/).textContent).toBe('Carried over1');
   });
 });
 

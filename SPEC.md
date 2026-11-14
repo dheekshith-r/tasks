@@ -28,6 +28,7 @@ Fixes risk 1 in DEFINE.md (silent data loss on iPhone) and risk 6 (not installab
 - **Not in M1:** IndexedDB. It has the same eviction rules as localStorage (RESEARCH.md), and the dataset is small. It moves to M5, where sync needs it.
 
 ### M2: Sorting Frame rebuild (start page and app), started 2026-11-14
+- **Status (2026-11-14):** start page and app rebuilt; acceptance tests 1 to 6 pass (210 unit/DOM tests, 17 rules tests; first view at 375x667 and 1280x720; Lighthouse mobile: start LCP 1.7 s, TBT 0 ms, CLS 0.002; app LCP 2.0 s, TBT 140 ms, CLS 0.003; accessibility 100). Still open in M2: "Let go", `14 nov` dates, `every …` repeats, a new `og.png`.
 - **Scope:** new look for both pages; app fonts self-hosted (done); the frame layout; postmark on add; "Carried over" naming. Later in M2: "Let go" after 14 days, dates such as `14 nov`, `every day|week|month`, a new `og.png`.
 - **Screens:** start page (IN slot with the working input, then the day slots with a sample list); app (header with the IN slot, list strips, the frame, the key bar).
 - **Data:** unchanged. Same storage keys, same Firestore rules, same hand-off.
@@ -47,8 +48,7 @@ Fixes risk 1 in DEFINE.md (silent data loss on iPhone) and risk 6 (not installab
   - **Quick-add:** the app's quick-add now reads weekdays and `#list`, so the page claims nothing the app cannot do.
 - **Still open:**
   - The Get started screen (install, protect, back up) is still to do. Today the app shows the same items in its colophon.
-  - The app itself still wears the Grid look. M2 restyles it to Plain Sight, so the page and the app match.
-  - The share image (`og.png`) still shows the Grid look. M2 replaces it.
+  - Superseded on 2026-11-14: both pages now use the Sorting Frame design (M2). The share image (`og.png`) still shows the old Grid look.
 
 ### M4: Free features, batch 1
 Week calendar view, durations and deadlines, saved filters and labels, unlimited lists (already true).

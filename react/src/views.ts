@@ -41,3 +41,24 @@ export function whenLabel(t: Task, today: string): string {
   const d = parseISO(t.dueDate);
   return d ? WHEN.format(d) : 'No date';
 }
+
+// The sorting frame: which slot (box) a task sits in. Wide screens show each slot as a column.
+export const SLOTS = ['Carried over', 'Today', 'Tomorrow', 'This week', 'Later', 'Done'] as const;
+export type SlotName = (typeof SLOTS)[number];
+export function slotOf(t: Task, today: string): SlotName {
+  if (t.done) return 'Done';
+  if (!t.dueDate) return 'Later';
+  if (t.dueDate < today) return 'Carried over';
+  if (t.dueDate === today) return 'Today';
+  const tomorrow = nextDue(today, 'daily');
+  if (t.dueDate === tomorrow) return 'Tomorrow';
+  const d = parseISO(t.dueDate), now = parseISO(today);
+  if (d && now && (d.getTime() - now.getTime()) / 86_400_000 <= 6) return 'This week';
+  return 'Later';
+}
+
+// Keeps the chosen order inside each slot, and the slots in frame order.
+export function bySlot<T extends Task>(list: T[], today: string): T[] {
+  const rank = (t: T) => SLOTS.indexOf(slotOf(t, today));
+  return list.map((t, i) => ({ t, i, r: rank(t) })).sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.t);
+}

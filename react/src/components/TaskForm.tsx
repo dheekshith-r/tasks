@@ -27,6 +27,7 @@ export default function TaskForm({ onAdd }: Props) {
 
   return (
     <form className="composer" onSubmit={submit} autoComplete="off">
+      <span className="in-label" aria-hidden="true">In · one line at a time</span>
       <label className="sr-only" htmlFor="new-task">New task</label>
       <input
         id="new-task"
