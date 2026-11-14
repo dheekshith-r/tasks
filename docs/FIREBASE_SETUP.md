@@ -2,6 +2,8 @@
 
 Tasks works without any of this. Guest mode keeps tasks on the device. These steps turn on the optional "Sign in with Google" sync, on the free **Spark** plan. No credit card is needed.
 
+**Status (2026-11-14):** done for project `tasks-dheekshith` (Firestore in `asia-south1`, production mode, rules deployed, Google sign-in on, GitHub Pages domain authorized, web app "Tasks web" created). `react/.firebaserc` links the CLI to this project. Still open: the GitHub variables and a live sign-in test.
+
 Who does what: steps marked **(Ddk)** need your Google login in a browser. Claude does all the steps marked **(Claude)** with the Firebase CLI and `gh`.
 
 ## 1. Create the project
