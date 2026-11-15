@@ -1,8 +1,10 @@
 import '@fontsource-variable/overpass';
 import '@fontsource-variable/overpass-mono';
+import '@fontsource/kalam/400.css';
 import { readConfig } from '../firebaseConfig';
 import { addFromStartPage } from '../handoff';
 import { parseLine } from './parseLine';
+import { captureDates, heroIntro, inkFrame, lineMirror, scenes } from './scenes';
 import './landing.css';
 
 type Slot = 'today' | 'tomorrow' | 'week' | 'later';
@@ -112,6 +114,13 @@ function say(text: string, isError = false) {
 
 labelSlots();
 fill();
+const frame = document.getElementById('frame');
+const mirror = document.querySelector<HTMLElement>('.line-mirror-in');
+if (frame) { inkFrame(frame); heroIntro(frame, document.querySelector('.chute'), document.querySelector('.aside')); }
+document.querySelectorAll<HTMLElement>('.cap-frame').forEach(inkFrame);
+if (mirror) lineMirror(input, mirror);
+captureDates();
+scenes();
 
 input.addEventListener('input', () => {
   if (input.getAttribute('aria-invalid')) { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
@@ -136,6 +145,7 @@ form.addEventListener('submit', (e) => {
 
   if (result !== 'failed') {
     input.value = ''; // on failure the line stays in the box, so nothing typed is lost
+    input.dispatchEvent(new Event('input'));
     document.querySelectorAll('.slip.fresh').forEach((n) => n.classList.remove('fresh'));
     document.querySelectorAll('.slip .postmark').forEach((n) => n.remove());
     slotList(slot).prepend(slipNode({ text: p.title, list: p.listName, high: p.priority === 'high', off, fresh: true }));
