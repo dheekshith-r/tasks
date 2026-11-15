@@ -107,10 +107,11 @@ export function demo() {
     return ul;
   };
 
-  const searchResults = (box: HTMLElement) => {
+  const searchResults = (box: HTMLElement, status?: HTMLElement) => {
     box.textContent = '';
     const q = query.trim();
     const found = q ? TASKS.filter((t) => t.text.toLowerCase().includes(q.toLowerCase()) || t.list?.includes(q.toLowerCase())) : [];
+    if (status) status.textContent = q ? `${found.length} ${found.length === 1 ? 'task' : 'tasks'} found` : '';
     if (!q) box.append(el('p', 'demo-empty', 'Type to search every list at once.'));
     else if (!found.length) box.append(el('p', 'demo-empty', `No tasks match "${q}".`));
     else box.append(list(found, q, true));
@@ -137,6 +138,7 @@ export function demo() {
     input.placeholder = placeholder;
     input.setAttribute('aria-label', label);
     input.autocomplete = 'off';
+    input.enterKeyHint = label.startsWith('Search') ? 'search' : 'go'; // the phone keyboard's Enter says what it does
     input.addEventListener('input', () => onInput(input.value));
     return input;
   };
@@ -159,7 +161,9 @@ export function demo() {
       panel.append(el('p', 'demo-hint', 'Grey, with no red count. They wait until you give them a new date.'));
     } else if (view === 'search') {
       const box = el('div');
-      panel.append(field(query, 'Search the sample tasks', 'Search tasks', (v) => { query = v; searchResults(box); }), box);
+      const status = el('p', 'sr-only');
+      status.setAttribute('role', 'status');
+      panel.append(field(query, 'Search the sample tasks', 'Search tasks', (v) => { query = v; searchResults(box, status); }), box, status);
       searchResults(box);
     } else {
       const box = el('div');
@@ -302,10 +306,13 @@ export function keyboard() {
     if (!inView || !keys.has(e.code)) return;
     const t = e.target as HTMLElement;
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || t.isContentEditable) return;
-    if (demoTimer) { clearTimeout(demoTimer); demoTimer = 0; clearAll(); }
+    if (demoTimer) { clearTimeout(demoTimer); demoTimer = 0; clearAll(); said.setAttribute('aria-live', 'polite'); }
     light(e.code, true);
     const ctrl = e.ctrlKey || e.metaKey;
-    if (!/^(Control|Alt|Shift|Meta)/.test(e.code)) show(e.code, { ctrl, alt: e.altKey });
+    // Modifiers and the keys people move around the page with press the drawn key without words,
+    // so a keyboard or screen-reader user is not told "not a shortcut" on every Tab.
+    const quiet = /^(Control|Alt|Shift|Meta|Tab|Space|Enter|CapsLock|Backspace|Page|Home|End)/.test(e.code) || (e.code.startsWith('Arrow') && !e.altKey);
+    if (!quiet) show(e.code, { ctrl, alt: e.altKey });
     // Keep the browser's own meaning of these keys out of the way while you try them here.
     if (e.code === 'Slash' || (ctrl && e.code === 'KeyK') || e.code === 'F2') e.preventDefault();
     if (e.code === 'KeyN') e.stopPropagation(); // the page's "n puts the cursor in the box" waits
@@ -325,13 +332,14 @@ export function keyboard() {
     let i = 0;
     const next = () => {
       clearAll();
-      if (i >= steps.length) { said.textContent = 'Now try one yourself.'; demoTimer = 0; return; }
+      if (i >= steps.length) { said.textContent = 'Now try one yourself.'; said.setAttribute('aria-live', 'polite'); demoTimer = 0; return; }
       const [code, mods] = steps[i++];
       for (const m of mods) light(m, true);
       light(code, true);
       show(code, { ctrl: mods === MOD.ctrl, alt: mods === MOD.alt });
       demoTimer = window.setTimeout(() => { clearAll(); demoTimer = window.setTimeout(next, 260); }, 620);
     };
+    said.setAttribute('aria-live', 'off'); // nobody pressed these: do not read them aloud
     demoTimer = window.setTimeout(next, 400);
   }, 0.6);
 }

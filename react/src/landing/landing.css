@@ -267,6 +267,8 @@ main h2:not(.label) span { color: var(--muted); } /* slot labels are headings to
 .demo-cmds li:first-child { background: var(--slip); box-shadow: var(--slip-shadow); }
 .demo-cmds .run { font: 600 .75rem var(--mono); color: var(--muted); white-space: nowrap; }
 mark { background: linear-gradient(transparent 58%, var(--sun) 58%); color: inherit; }
+/* Controls, not content: no long-press text selection, no tap delay. */
+.demo-dock button, .faq summary, .priv-switch label { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 @media (hover: hover) and (pointer: fine) {
   .demo-dock button[aria-selected='false']:hover { background: var(--soft); }
 }
