@@ -326,3 +326,32 @@ describe('App: lists', () => {
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Work');
   });
 });
+
+describe('search keeps the start page promise', () => {
+  const search = (q: string) => fireEvent.change(screen.getByLabelText('Search tasks'), { target: { value: q } });
+
+  it('looks in every view and list at once, even from Today', () => {
+    seed([{ text: 'Water the tulsi plant', dueDate: '2026-11-10' }, { text: 'Pay rent', dueDate: '2026-11-13' }, { text: 'Book the train' }]);
+    render(<App />);
+    fireEvent.click(viewButton(/^Today/));
+    expect(titles()).toEqual(['Water the tulsi plant']);
+    search('rent');
+    expect(titles()).toEqual(['Pay rent']);
+    expect(screen.getByRole('heading', { name: 'Search, every list' })).toBeTruthy();
+    search('');
+    expect(titles()).toEqual(['Water the tulsi plant']);
+  });
+
+  it('finds tasks by their list name, with or without #, and by their notes', () => {
+    localStorage.setItem('todo-lists:v1', JSON.stringify([{ id: 'home', name: 'Home', color: '#FFC53D' }, { id: 'work', name: 'Work', color: '#FFC53D' }]));
+    seed([{ text: 'Pay rent', listId: 'home' }, { text: 'Send the report', listId: 'work', notes: 'Ask Priya for the Q3 numbers' }, { text: 'Call Amma' }]);
+    render(<App />);
+    search('home');
+    expect(titles()).toEqual(['Pay rent']);
+    search('#home');
+    expect(titles()).toEqual(['Pay rent']);
+    search('priya');
+    expect(titles()).toEqual(['Send the report']);
+  });
+});
+

@@ -198,10 +198,25 @@ export default function App() {
 
   const scoped = useMemo(() => tasks.filter((t) => inView(t, view, today)), [tasks, view, today]);
 
+  // The list filters on a deferred copy of the query, so the search field paints each keystroke first.
+  // A search looks in every view and list at once (as the start page promises), and matches the
+  // title, the notes and the list name ("home" or "#home" finds the tasks in Home).
+  const deferredQuery = useDeferredValue(query);
+  const searching = deferredQuery.trim().length > 0;
+  const base = useMemo(() => {
+    const q = deferredQuery.trim().toLowerCase();
+    if (!q) return scoped;
+    const listQ = q.replace(/^#/, '');
+    const listNames = new Map(lists.map((l) => [l.id, l.name.toLowerCase()]));
+    return tasks.filter((t) => t.text.toLowerCase().includes(q)
+      || (t.notes ?? '').toLowerCase().includes(q)
+      || (!!t.listId && !!listQ && (listNames.get(t.listId) ?? '').includes(listQ)));
+  }, [tasks, scoped, lists, deferredQuery]);
+
   const counts: Record<Filter, number> = {
-    all: scoped.length,
-    active: scoped.filter((t) => !t.done).length,
-    done: scoped.filter((t) => t.done).length,
+    all: base.length,
+    active: base.filter((t) => !t.done).length,
+    done: base.filter((t) => t.done).length,
   };
 
   const viewCounts: Record<string, number> = {};
@@ -210,26 +225,23 @@ export default function App() {
   });
   lists.forEach((l) => { viewCounts[`list:${l.id}`] = tasks.filter((t) => !t.done && t.listId === l.id).length; });
 
-  // The list filters on a deferred copy of the query, so the search field paints each keystroke first.
-  const deferredQuery = useDeferredValue(query);
   const visible = useMemo(() => {
-    const q = deferredQuery.trim().toLowerCase();
-    let list = scoped.filter((t) => {
+    let list = base.filter((t) => {
       if (filter === 'active' && t.done) return false;
       if (filter === 'done' && !t.done) return false;
-      return !q || t.text.toLowerCase().includes(q);
+      return true;
     });
     if (sort === 'due') list = [...list].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
     if (sort === 'priority') list = [...list].sort((a, b) => RANK[a.priority] - RANK[b.priority]);
     return bySlot(list, today); // the sorting frame: slots in order, the chosen order inside each slot
-  }, [scoped, filter, sort, deferredQuery, today]);
+  }, [base, filter, sort, today]);
 
   const overdue = viewCounts.overdue;
   const allActive = viewCounts.all;
   const totalDone = tasks.filter((t) => t.done).length;
 
   const currentListId = view.startsWith('list:') ? view.slice(5) : undefined;
-  const viewTitle = VIEW_TITLES[view] ?? lists.find((l) => l.id === currentListId)?.name ?? 'List';
+  const viewTitle = searching ? 'Search, every list' : VIEW_TITLES[view] ?? lists.find((l) => l.id === currentListId)?.name ?? 'List';
   // Which empty state fits: a search miss, a filter that hides everything, or a truly empty view.
   const emptyKind: EmptyKind =
     query.trim() ? 'search'
