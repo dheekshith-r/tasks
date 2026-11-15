@@ -180,7 +180,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Mentions of sync show only when this build has a Firebase project behind it.
-if (readConfig()) document.querySelectorAll<HTMLElement>('[data-cloud]').forEach((n) => { n.hidden = false; });
+// removeAttribute, not .hidden: the cloud and the letter in the house drawing are SVG, which has no .hidden.
+if (readConfig()) document.querySelectorAll('[data-cloud]').forEach((n) => n.removeAttribute('hidden'));
 
 // Follow the system theme when the visitor has not picked one in the app.
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
