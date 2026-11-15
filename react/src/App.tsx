@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import AccountMenu from './components/AccountMenu';
 import Colophon, { KeyList } from './components/Colophon';
 import Drawer from './components/Drawer';
 import EmptyState, { type EmptyKind } from './components/EmptyState';
@@ -463,10 +464,8 @@ export default function App() {
         view={view} onView={goView} counts={viewCounts} lists={lists}
         onAddList={addList} onDeleteList={deleteList} open={menu} onClose={() => setMenu(false)}
         footer={<>
-          {/* No aria-label: the visible word "Commands" must be part of the accessible name (WCAG 2.5.3). */}
-          <button className="cmd" type="button" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
-            Commands <kbd aria-hidden="true">{MOD_KEY} K</kbd>
-          </button>
+          <AccountMenu account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
+            onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
           <button className="icon-btn" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}>
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
@@ -565,15 +564,13 @@ export default function App() {
         </main>
 
         <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={false}
-          persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null}
-          account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
-            onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
+          persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null} signedIn={!!cloud.user} />
       </div>
 
       {/* Wide screens: the keys stay in sight beside the day line (the colophon's copy hides there). */}
       <aside className="keys-card" aria-label="Keyboard shortcuts" inert={menu}>
         <p className="label">Keys</p>
-        <KeyList modKey={MOD_KEY} />
+        <KeyList modKey={MOD_KEY} onCommands={() => setPalette(true)} />
         <p className="keys-note" aria-hidden="true">your day, top to bottom</p>
       </aside>
 

@@ -1,25 +1,5 @@
 import { useRef } from 'react';
-import type { CloudUser } from '../cloud';
 import { storageMessage, type PersistState } from '../safety';
-import type { SyncState } from '../useCloud';
-
-export interface AccountProps {
-  available: boolean;
-  user: CloudUser | null;
-  sync: SyncState;
-  error: string;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  onDelete: () => void;
-}
-
-const SYNC_TEXT: Record<SyncState, string> = {
-  guest: '',
-  connecting: 'Connecting…',
-  synced: 'Synced.',
-  offline: 'Offline. Changes sync when you are back online.',
-  error: 'Sync paused. Reload the page to try again.',
-};
 
 // `null` is the brand red from the stylesheet.
 const ACCENTS: { name: string; value: string | null; swatch: string }[] = [
@@ -40,15 +20,19 @@ interface Props {
   inert?: boolean; // set while the mobile menu is open
   persist?: PersistState;
   lastBackup?: string | null; // already formatted for display
-  account?: AccountProps;
+  signedIn?: boolean; // the about line says where the tasks are kept
 }
 
-export function KeyList({ modKey }: { modKey: string }) {
+// With `onCommands`, "Commands" is also a button that opens the command menu (the Keys card).
+export function KeyList({ modKey, onCommands }: { modKey: string; onCommands?: () => void }) {
   return (
     <dl>
       <dt><kbd>N</kbd></dt><dd>New task</dd>
       <dt><kbd>/</kbd></dt><dd>Search</dd>
-      <dt><kbd>{modKey}</kbd> <kbd>K</kbd></dt><dd>Commands</dd>
+      <dt><kbd>{modKey}</kbd> <kbd>K</kbd></dt>
+      <dd>{onCommands
+        ? <button type="button" className="key-cmd" onClick={onCommands} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">Commands</button>
+        : 'Commands'}</dd>
       <dt><kbd>Alt</kbd> <kbd>↑↓</kbd></dt><dd>Reorder</dd>
       <dt><kbd>F2</kbd></dt><dd>Rename</dd>
       <dt><kbd>{modKey}</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd>
@@ -57,39 +41,16 @@ export function KeyList({ modKey }: { modKey: string }) {
 }
 
 // The page's closing block, like the colophon of a printed poster: settings, backup and shortcuts.
-export default function Colophon({ accent, onAccent, onExport, onImport, modKey, inert, persist = 'unknown', lastBackup = null, account }: Props) {
+export default function Colophon({ accent, onAccent, onExport, onImport, modKey, inert, persist = 'unknown', lastBackup = null, signedIn = false }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const user = account?.user;
   return (
     <footer className="colophon" inert={inert}>
       <div className="col-about">
         <p className="col-name">Tasks</p>
-        {user
+        {signedIn
           ? <p>Your tasks sync to your account and are stored by Google Firebase. Only you can read them.</p>
           : <p>Guest mode: your tasks are saved in this browser only. Nothing is uploaded unless you sign in.</p>}
       </div>
-
-      {account?.available && (
-        <div className="col-block">
-          <p className="col-title">Account</p>
-          {user ? (
-            <>
-              <p className="col-storage">Signed in as {user.name || user.email}. {SYNC_TEXT[account.sync]}</p>
-              {account.error && <p className="col-storage" role="alert">{account.error}</p>}
-              <div className="data">
-                <button type="button" className="link" onClick={account.onSignOut}>Sign out</button>
-                <button type="button" className="link" onClick={account.onDelete}>Delete my account and cloud data</button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="col-storage">Optional. Sign in to use the same list on your phone and laptop.</p>
-              {account.error && <p className="col-storage" role="alert">{account.error}</p>}
-              <button type="button" className="link" onClick={account.onSignIn}>Sign in with Google</button>
-            </>
-          )}
-        </div>
-      )}
 
       <div className="col-block">
         <p className="col-title" id="accent-title">Accent colour</p>
@@ -105,7 +66,7 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
         <p className="col-title">Backup</p>
         <p className="col-storage">{storageMessage(persist)}</p>
         <p className="col-storage">Last backup: {lastBackup ?? 'never'}</p>
-        <div className="data">
+        <div className="data data-row">
           <button type="button" className="link" onClick={onExport}>Export backup</button>
           <button type="button" className="link" onClick={() => fileRef.current?.click()}>Import backup</button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden

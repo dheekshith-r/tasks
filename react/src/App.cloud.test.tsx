@@ -51,8 +51,15 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
+// Account actions live in the panel behind the profile button, at the foot of the rail.
+function openAccount() {
+  const button = screen.getByRole('button', { name: /^Account/ });
+  if (button.getAttribute('aria-expanded') !== 'true') fireEvent.click(button);
+}
+
 async function signIn(copy: boolean) {
   vi.spyOn(window, 'confirm').mockReturnValue(copy);
+  openAccount();
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Sign in with Google' })); });
   await waitFor(() => expect(h.s.dataCb).not.toBeNull());
 }
@@ -61,6 +68,7 @@ describe('guest mode', () => {
   it('is the default: device-only text, a sign-in offer, and saving to this device', () => {
     render(<App />);
     expect(screen.getByText(/Guest mode: your tasks are saved in this browser only/)).toBeTruthy();
+    openAccount();
     expect(screen.getByRole('button', { name: 'Sign in with Google' })).toBeTruthy();
     addTask('Another guest task');
     expect(guestSaved()).toContain('Another guest task');
@@ -97,6 +105,7 @@ describe('signing in', () => {
   it('does nothing when the person closes the Google window', async () => {
     h.s.signInError = { code: 'auth/popup-closed-by-user' };
     render(<App />);
+    openAccount();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Sign in with Google' })); });
     expect(screen.queryByRole('alert')).toBeNull();
     expect(screen.getByRole('button', { name: 'Sign in with Google' })).toBeTruthy();
@@ -105,6 +114,7 @@ describe('signing in', () => {
   it('explains a blocked pop-up', async () => {
     h.s.signInError = { code: 'auth/popup-blocked' };
     render(<App />);
+    openAccount();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Sign in with Google' })); });
     expect(screen.getByRole('alert').textContent).toMatch(/Allow pop-ups/);
   });
@@ -115,6 +125,7 @@ describe('leaving the account', () => {
     render(<App />);
     await signIn(false);
     sendSnapshot([cloudTask('Account only')]);
+    openAccount();
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Sign out' })); });
     expect(h.s.signedOut).toBe(1);
     expect(titles()).toEqual(['Guest task']);
@@ -127,6 +138,7 @@ describe('leaving the account', () => {
     await signIn(false);
     sendSnapshot([cloudTask('Account only')]);
     vi.spyOn(window, 'confirm').mockReturnValue(false);
+    openAccount();
     fireEvent.click(screen.getByRole('button', { name: 'Delete my account and cloud data' }));
     expect(h.s.deleted).toEqual([]);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
@@ -167,6 +179,23 @@ describe('coming back', () => {
     render(<App />);
     await waitFor(() => expect(localStorage.getItem('todo-cloud:v1')).toBeNull());
     expect(titles()).toEqual(['Guest task']);
+    openAccount();
     expect(screen.getByRole('button', { name: 'Sign in with Google' })).toBeTruthy();
   });
 });
+
+describe('the account panel', () => {
+  it('opens from the profile button beside the theme, closes with Escape, and gives focus back', () => {
+    render(<App />);
+    const button = screen.getByRole('button', { name: 'Account' });
+    expect(screen.queryByRole('button', { name: 'Sign in with Google' })).toBeNull(); // nothing below the tasks any more
+    fireEvent.click(button);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    const signIn = screen.getByRole('button', { name: 'Sign in with Google' });
+    expect(document.activeElement).toBe(signIn);
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(button);
+  });
+});
+

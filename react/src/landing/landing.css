@@ -72,6 +72,10 @@ kbd {
 .brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 800; font-size: 1.25rem; text-decoration: none; }
 .nav-links { display: flex; align-items: center; gap: 4px 24px; flex-wrap: wrap; }
 .nav-links a:not(.btn) { text-decoration: none; padding-block: 10px; }
+/* GitHub links carry GitHub's own mark, in the text colour. */
+.gh { display: inline-flex; align-items: center; gap: 7px; }
+.gh-logo { flex: none; }
+.foot-cols a.gh { display: flex; align-items: center; gap: 7px; }
 
 /* ---- Ink drawings: one family for every illustration. Lines are ink, fills are flat. ---- */
 .ink { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
