@@ -43,6 +43,19 @@ interface Props {
   account?: AccountProps;
 }
 
+export function KeyList({ modKey }: { modKey: string }) {
+  return (
+    <dl>
+      <dt><kbd>N</kbd></dt><dd>New task</dd>
+      <dt><kbd>/</kbd></dt><dd>Search</dd>
+      <dt><kbd>{modKey}</kbd> <kbd>K</kbd></dt><dd>Commands</dd>
+      <dt><kbd>Alt</kbd> <kbd>↑↓</kbd></dt><dd>Reorder</dd>
+      <dt><kbd>F2</kbd></dt><dd>Rename</dd>
+      <dt><kbd>{modKey}</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd>
+    </dl>
+  );
+}
+
 // The page's closing block, like the colophon of a printed poster: settings, backup and shortcuts.
 export default function Colophon({ accent, onAccent, onExport, onImport, modKey, inert, persist = 'unknown', lastBackup = null, account }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -104,16 +117,9 @@ export default function Colophon({ accent, onAccent, onExport, onImport, modKey,
         </div>
       </div>
 
-      <div className="col-block keys">
+      <div className="col-block keys col-keys">
         <p className="col-title">Keys</p>
-        <dl>
-          <dt><kbd>N</kbd></dt><dd>New task</dd>
-          <dt><kbd>/</kbd></dt><dd>Search</dd>
-          <dt><kbd>{modKey}</kbd> <kbd>K</kbd></dt><dd>Commands</dd>
-          <dt><kbd>Alt</kbd> <kbd>↑↓</kbd></dt><dd>Reorder</dd>
-          <dt><kbd>F2</kbd></dt><dd>Rename</dd>
-          <dt><kbd>{modKey}</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd>
-        </dl>
+        <KeyList modKey={modKey} />
       </div>
     </footer>
   );

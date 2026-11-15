@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import Colophon from './components/Colophon';
+import Colophon, { KeyList } from './components/Colophon';
 import Drawer from './components/Drawer';
 import EmptyState, { type EmptyKind } from './components/EmptyState';
 import Filters from './components/Filters';
@@ -569,6 +569,13 @@ export default function App() {
           account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
             onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
       </div>
+
+      {/* Wide screens: the keys stay in sight beside the day line (the colophon's copy hides there). */}
+      <aside className="keys-card" aria-label="Keyboard shortcuts" inert={menu}>
+        <p className="label">Keys</p>
+        <KeyList modKey={MOD_KEY} />
+        <p className="keys-note" aria-hidden="true">your day, top to bottom</p>
+      </aside>
 
       {openTask && (
         <Drawer

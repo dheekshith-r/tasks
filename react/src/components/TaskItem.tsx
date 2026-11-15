@@ -149,7 +149,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
           {due?.tone === 'overdue' && <span className="tag overdue"><AlertIcon size={14} />{due.label}</span>}
           {due?.tone === 'later' && !(hideDue && !task.done) && <span className="tag">{weekday && !task.done ? WEEKDAY.format(parseISO(task.dueDate!)!) : due.label}</span>}
           {list && <span className="tag list-tag">#{list.name}</span>}
-          {subs.length > 0 && <span className="tag">{subs.filter((s) => s.done).length}/{subs.length} steps</span>}
+          {subs.length > 0 && <span className="tag">{subs.filter((s) => s.done).length}/{subs.length} subtasks</span>}
           {task.notes && <span className="tag">note</span>}
           {task.repeat && task.dueDate && <span className="tag"><RepeatIcon size={13} />repeats {task.repeat}</span>}
         </div>
