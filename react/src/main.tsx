@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import '@fontsource-variable/overpass';
 import '@fontsource-variable/overpass-mono';
+import '@fontsource/kalam/400.css'; // handwritten notes only ("no rush")
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(

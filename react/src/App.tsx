@@ -8,7 +8,7 @@ import Sidebar from './components/Sidebar';
 import TaskForm from './components/TaskForm';
 import TaskItem from './components/TaskItem';
 import Toast from './components/Toast';
-import { MenuIcon, MoonIcon, SunIcon } from './components/icons';
+import { MenuIcon, MoonIcon, SearchIcon, SunIcon } from './components/icons';
 import { accentVars, parseHex } from './color';
 import { parseISO } from './dates';
 import { isDialogOpen, useClock } from './hooks';
@@ -23,6 +23,9 @@ import { bySlot, count, dueForNewTask, inView, slotOf } from './views';
 
 type Theme = 'light' | 'dark';
 interface Undo { id: string; message: string; items: { task: Task; index: number }[] }
+type GroupKind = 'carried' | 'today' | 'day' | 'week' | 'later' | 'done';
+interface Group { key: string; name: string; slug: string; kind: GroupKind; num?: number; sub?: string; tasks: Task[] }
+const KIND_OF: Record<string, GroupKind> = { 'Carried over': 'carried', Today: 'today', Tomorrow: 'day', 'This week': 'week', Later: 'later', Done: 'done' };
 
 const THEME_KEY = 'todo-theme';
 const ACCENT_KEY = 'todo-accent';
@@ -54,6 +57,9 @@ export default function App() {
   const [undo, setUndo] = useState<Undo | null>(null);
   const [palette, setPalette] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false); // phones: the search field opens from the top bar
+  // Carried over waits folded on a phone (one line, "no rush"), so today's tasks get the first screen.
+  const [carriedOpen, setCarriedOpen] = useState(() => window.matchMedia?.('(min-width: 900px)').matches ?? true);
   const [status, setStatus] = useState(''); // read out by screen readers
   const [stampId, setStampId] = useState<string | null>(null); // the newest task wears the postmark
   // A message equal to the last one gets a no-break space, so screen readers announce it again.
@@ -75,7 +81,6 @@ export default function App() {
   const undoAction = useRef<(() => void) | null>(null);
   const [landed, setLanded] = useState(''); // visible "Added to Today" line under the IN slot
   const { today, hello } = useClock(); // stays correct when the tab is left open past midnight
-  const lastCount = useRef<number | null>(null); // the poster numeral rolls only when its value changes
 
   // Optional Google sign-in. Guest mode keeps everything on this device; signed in, the tasks
   // on screen are the account's, and this device's guest list stays untouched until sign-out.
@@ -159,7 +164,7 @@ export default function App() {
       }
       // Single-key shortcuts must not reach behind an open dialog
       if (typing || isDialogOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === '/') { e.preventDefault(); searchRef.current?.focus(); }
+      if (e.key === '/') { e.preventDefault(); setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 0); }
       if (e.key === 'n') { e.preventDefault(); document.getElementById('new-task')?.focus(); }
     };
     window.addEventListener('keydown', onKey);
@@ -233,8 +238,25 @@ export default function App() {
     });
     if (sort === 'due') list = [...list].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
     if (sort === 'priority') list = [...list].sort((a, b) => RANK[a.priority] - RANK[b.priority]);
-    return bySlot(list, today); // the sorting frame: slots in order, the chosen order inside each slot
-  }, [base, filter, sort, today]);
+    const framed = bySlot(list, today); // the sorting frame: slots in order, the chosen order inside each slot
+    // Upcoming is read day by day: a stable sort by date keeps the chosen order inside each day.
+    return view === 'upcoming' && !searching ? [...framed].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999')) : framed;
+  }, [base, filter, sort, today, view, searching]);
+  const byDay = view === 'upcoming' && !searching;
+  const groupOf = (t: Task) => (byDay && !t.done ? `d:${t.dueDate ?? ''}` : slotOf(t, today));
+  // How a section is shown and announced: a slot name, or (Upcoming) the day as a numeral and a name.
+  function describeGroup(key: string, t: Task): Group {
+    const slot = slotOf(t, today);
+    if (key.startsWith('d:') || slot === 'Tomorrow') {
+      const d = parseISO(t.dueDate ?? '');
+      const tomorrow = slot === 'Tomorrow';
+      const long = d?.toLocaleDateString(undefined, DATE_LONG) ?? '';
+      return { key, kind: 'day', slug: tomorrow ? 'tomorrow' : 'day', num: d?.getDate(), name: tomorrow ? `Tomorrow, ${long}` : long,
+        sub: tomorrow ? 'Tomorrow' : d?.toLocaleDateString(undefined, { weekday: 'long' }), tasks: [t] };
+    }
+    return { key, kind: KIND_OF[slot] ?? 'later', slug: slot.toLowerCase().replace(/\s+/g, '-'), name: slot, tasks: [t] };
+  }
+  const groupName = (t: Task) => { const g = describeGroup(groupOf(t), t); return g.kind === 'day' && !byDay ? 'Tomorrow' : g.name; };
 
   const overdue = viewCounts.overdue;
   const allActive = viewCounts.all;
@@ -320,13 +342,14 @@ export default function App() {
     const i = visible.findIndex((t) => t.id === id);
     const other = visible[i + dir];
     if (i < 0) return;
-    // A task moves inside its own slot; its date decides the slot.
-    const slot = slotOf(visible[i], today);
-    if (!other || slotOf(other, today) !== slot) {
+    // A task moves inside its own section (its slot, or its day in Upcoming); its date decides which.
+    const group = groupOf(visible[i]);
+    const slot = groupName(visible[i]);
+    if (!other || groupOf(other) !== group) {
       announce(`"${visible[i].text}" is already ${dir < 0 ? 'first' : 'last'} in ${slot}`);
       return;
     }
-    const inSlot = visible.filter((t) => slotOf(t, today) === slot);
+    const inSlot = visible.filter((t) => groupOf(t) === group);
     if (refocus) focusAfterMove.current = id;
     dispatch({ type: 'move', from: id, to: other.id });
     announce(`Moved "${visible[i].text}" to position ${inSlot.indexOf(visible[i]) + dir + 1} of ${inSlot.length} in ${slot}`);
@@ -334,7 +357,7 @@ export default function App() {
 
   const paletteItems = [
     { id: 'new', label: 'New task', run: () => { setTimeout(() => document.getElementById('new-task')?.focus(), 0); } },
-    { id: 'search', label: 'Search tasks', run: () => { setTimeout(() => searchRef.current?.focus(), 0); } },
+    { id: 'search', label: 'Search tasks', run: () => { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 0); } },
     { id: 'v-all', label: 'Go to All tasks', run: () => goView('all') },
     { id: 'v-today', label: 'Go to Today', run: () => goView('today') },
     { id: 'v-up', label: 'Go to Upcoming', run: () => goView('upcoming') },
@@ -403,36 +426,43 @@ export default function App() {
   }, [deferredQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const remaining = viewCounts[view] ?? 0;
-  const rolled = lastCount.current !== null && lastCount.current !== remaining;
-  // Updated after paint, so the next render can tell whether the numeral changed.
-  useEffect(() => { lastCount.current = remaining; });
   const allDone = tasks.length > 0 && allActive === 0;
-  const dateLong = parseISO(today)?.toLocaleDateString(undefined, DATE_LONG) ?? '';
-  // The sorting frame: one section per slot that holds a task, in frame order.
+  const now = parseISO(today);
+  const dayNum = now?.getDate() ?? '';
+  const weekday = now?.toLocaleDateString(undefined, { weekday: 'long' }) ?? '';
+  const month = now?.toLocaleDateString(undefined, { month: 'long' }) ?? '';
+  const dateLong = now?.toLocaleDateString(undefined, DATE_LONG) ?? '';
+  const todayShort = now?.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) ?? '';
+  // The day line: one section per slot that holds a task, in frame order. Upcoming is one
+  // section per day instead, each headed by its date as a big numeral (as on the start page).
   const frame = useMemo(() => {
-    const groups: { name: string; tasks: Task[] }[] = [];
+    const groups: Group[] = [];
     visible.forEach((t) => {
-      const name = slotOf(t, today);
+      const key = groupOf(t);
       const last = groups[groups.length - 1];
-      if (last?.name === name) last.tasks.push(t); else groups.push({ name, tasks: [t] });
+      if (last?.key === key) { last.tasks.push(t); return; }
+      groups.push(describeGroup(key, t));
     });
     return groups;
-  }, [visible, today]);
-  const stampDate = parseISO(today)?.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }).toUpperCase() ?? '';
+  }, [visible, today, byDay]); // eslint-disable-line react-hooks/exhaustive-deps
+  const stampDate = now?.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }).toUpperCase() ?? '';
+  const summary = tasks.length === 0 ? `${hello}. Add a task to get started.`
+    : allDone ? `All ${count(tasks.length, 'task')} done.`
+    : viewCounts.today + overdue === 0 ? `${allActive} to do, nothing due today.`
+    : [`${viewCounts.today} today`, overdue > 0 ? `${overdue} carried over` : ''].filter(Boolean).join(' · ');
+
+  function openSearch() {
+    setSearchOpen(true);
+    setTimeout(() => searchRef.current?.focus(), 0);
+  }
 
   return (
-    <div className="poster">
+    <div className={`app${searchOpen ? ' search-open' : ''}`}>
       <a className="skip" href="#new-task">Skip to new task</a>
-      <header className="field">
-        <div className="bar">
-          <button className="icon-btn menu-btn" type="button" onClick={() => setMenu(true)} aria-label="Open menu" aria-expanded={menu} aria-controls="sidebar">
-            <MenuIcon />
-          </button>
-          <span className="brand-sm" aria-hidden="true">Tasks</span>
-          <Sidebar
-            view={view} onView={goView} counts={viewCounts} lists={lists}
-            onAddList={addList} onDeleteList={deleteList} open={menu} onClose={() => setMenu(false)}
-          />
+      <Sidebar
+        view={view} onView={goView} counts={viewCounts} lists={lists}
+        onAddList={addList} onDeleteList={deleteList} open={menu} onClose={() => setMenu(false)}
+        footer={<>
           {/* No aria-label: the visible word "Commands" must be part of the accessible name (WCAG 2.5.3). */}
           <button className="cmd" type="button" onClick={() => setPalette(true)} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
             Commands <kbd aria-hidden="true">{MOD_KEY} K</kbd>
@@ -441,82 +471,104 @@ export default function App() {
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}>
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
-        </div>
+        </>}
+      />
 
-        <div className="masthead" inert={menu}>
-          <p className={`count${allDone ? ' complete' : ''}`} role="img" data-len={String(remaining).length}
-            aria-label={allDone ? `All ${count(tasks.length, 'task')} done` : `${count(remaining, 'task')} to do in ${viewTitle}`}>
-            <span key={remaining} className={rolled ? 'roll' : undefined}>{remaining}</span>
-          </p>
-          <div className="head">
-            <h1><span className="sr-only">Tasks, </span>{dateLong}</h1>
-            <p className="sub">
-              {hello}.{' '}
-              {tasks.length === 0 ? 'Add a task to get started.'
-                : allActive === 0 ? 'Everything is done.'
-                : <>{count(allActive, 'task')} to do{overdue > 0 && <>, <strong>{overdue} carried over</strong></>}.</>}
-            </p>
-            <TaskForm onAdd={handleAdd} />
-            <p className="landed" aria-hidden="true">{landed}</p>
+      <div className="col" inert={menu}>
+        <header className="head">
+          <p className="daynum" aria-hidden="true">{dayNum}</p>
+          <div className="head-words">
+            <h1><span className="sr-only">Tasks, {dateLong}</span><span aria-hidden="true">{weekday}</span></h1>
+            <p className="month" aria-hidden="true">{month}</p>
+            <p className="sum">{summary}</p>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="sheet" inert={menu}>
-        <section className="panel" aria-labelledby="view-title">
-          <div className="panel-head">
-            <h2 className="view-title" id="view-title">{viewTitle}</h2>
-            <span className={`badge${view === 'today' && viewCounts.today > 0 ? ' sun' : ''}`}>
-              {remaining}<span className="sr-only"> to do</span>
-            </span>
-          </div>
-          <Filters filter={filter} counts={counts} onFilter={setFilter} query={query} onQuery={setQuery}
-            sort={sort} onSort={setSort} searchRef={searchRef} />
-          {frame.length > 0 && (
-            <div className="frame" ref={frameRef}>
-              {frame.map((g, gi) => (
-                <section key={g.name} className={`slot slot-${g.name.toLowerCase().replace(/\s+/g, '-')}`} aria-labelledby={`slot-${gi}`}>
-                  <h3 className="slot-label" id={`slot-${gi}`}>{g.name} <span className="slot-n" aria-hidden="true">{g.tasks.length}</span><span className="sr-only">, {count(g.tasks.length, 'task')}</span></h3>
-                  <ul className="list">
-                    {g.tasks.map((t) => (
-                      <TaskItem
-                        key={t.id}
-                        task={t}
-                        stamped={t.id === stampId ? stampDate : undefined}
-                        list={currentListId ? undefined : lists.find((l) => l.id === t.listId)}
-                        query={deferredQuery}
-                        draggable={canDrag}
-                        onToggle={handleToggle}
-                        onDelete={handleDelete}
-                        onEdit={(id, text) => dispatch({ type: 'edit', id, text })}
-                        onOpen={setOpenId}
-                        onMove={(from, to) => dispatch({ type: 'move', from, to })}
-                        onNudge={nudge}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          )}
-          {visible.length === 0 && (
-            <EmptyState kind={emptyKind} listName={currentListId ? viewTitle : undefined}
-              query={query.trim()} onClearSearch={() => setQuery('')} />
-          )}
-          {totalDone > 0 && (
-            <div className="foot">
-              <button className="link" type="button" onClick={clearCompleted}>Clear completed</button>
-            </div>
-          )}
-        </section>
-        <p className="sr-only" role="status">{status}</p>
-        <p className="sr-only" id="rename-hint">Press F2 to rename</p>
-      </main>
+        <TaskForm onAdd={handleAdd} landed={landed} />
 
-      <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={menu}
-        persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null}
-        account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
-          onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
+        <main className="sheet">
+          <section className="panel" aria-labelledby="view-title">
+            <div className="panel-head">
+              <h2 className="view-title" id="view-title">{viewTitle}</h2>
+              <span className={`badge${view === 'today' && viewCounts.today > 0 ? ' sun' : ''}`}>
+                {remaining}<span className="sr-only"> to do</span>
+              </span>
+              {/* Phones: no logo bar. Search (with the filters and the sort) and the menu sit on this row. */}
+              <div className="head-acts">
+                <button className="icon-btn search-btn" type="button" onClick={() => (searchOpen ? setSearchOpen(false) : openSearch())} aria-label="Search and filter" aria-expanded={searchOpen}>
+                  <SearchIcon />
+                </button>
+                <button className="icon-btn menu-btn" type="button" onClick={() => setMenu(true)} aria-label="Open menu" aria-expanded={menu} aria-controls="sidebar">
+                  <MenuIcon />
+                </button>
+              </div>
+            </div>
+            <Filters filter={filter} counts={counts} onFilter={setFilter} query={query} onQuery={setQuery}
+              sort={sort} onSort={setSort} searchRef={searchRef} />
+            {frame.length > 0 && (
+              <div className="day" ref={frameRef}>
+                {frame.map((g, gi) => (
+                  <section key={g.key} className={`slot slot-${g.slug} k-${g.kind}`} aria-labelledby={`slot-${gi}`}>
+                    <h3 className="slot-head" id={`slot-${gi}`}>
+                      {g.kind === 'day' ? (
+                        <><span className="num" aria-hidden="true">{g.num}</span><span className="dname" aria-hidden="true">{g.sub}</span><span className="sr-only">{g.name}</span></>
+                      ) : (
+                        <span className="slot-label">{g.name}{g.kind === 'today' && <> · <span className="d">{todayShort}</span></>}</span>
+                      )}
+                      <span className="slot-n" aria-hidden="true">{g.tasks.length}</span><span className="sr-only">, {count(g.tasks.length, 'task')}</span>
+                    </h3>
+                    {g.kind === 'carried' && <>
+                      <svg className="clip" viewBox="0 0 18 40" aria-hidden="true"><path d="M6 36 V8 a3 3 0 0 1 6 0 V30 a5 5 0 0 1 -10 0 V12" /></svg>
+                      <span className="aside" aria-hidden="true">no rush</span>
+                      {view !== 'overdue' && (
+                        <button type="button" className="link fold" aria-expanded={carriedOpen} aria-controls={`list-${gi}`} onClick={() => setCarriedOpen((o) => !o)}>
+                          {carriedOpen ? 'Hide' : 'Show'}<span className="sr-only"> carried over tasks</span>
+                        </button>
+                      )}
+                    </>}
+                    <ul className="list" id={`list-${gi}`} hidden={g.kind === 'carried' && view !== 'overdue' && !carriedOpen}>
+                      {g.tasks.map((t) => (
+                        <TaskItem
+                          key={t.id}
+                          task={t}
+                          stamped={t.id === stampId ? stampDate : undefined}
+                          list={currentListId ? undefined : lists.find((l) => l.id === t.listId)}
+                          query={deferredQuery}
+                          draggable={canDrag}
+                          hideDue={g.kind === 'today' || g.kind === 'day'}
+                          weekday={g.kind === 'week'}
+                          onToggle={handleToggle}
+                          onDelete={handleDelete}
+                          onEdit={(id, text) => dispatch({ type: 'edit', id, text })}
+                          onOpen={setOpenId}
+                          onMove={(from, to) => dispatch({ type: 'move', from, to })}
+                          onNudge={nudge}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            )}
+            {visible.length === 0 && (
+              <EmptyState kind={emptyKind} listName={currentListId ? viewTitle : undefined}
+                query={query.trim()} onClearSearch={() => setQuery('')} />
+            )}
+            {totalDone > 0 && (
+              <div className="foot">
+                <button className="link" type="button" onClick={clearCompleted}>Clear completed</button>
+              </div>
+            )}
+          </section>
+          <p className="sr-only" role="status">{status}</p>
+          <p className="sr-only" id="rename-hint">Press F2 to rename</p>
+        </main>
+
+        <Colophon accent={accent} onAccent={setAccent} onExport={exportData} onImport={importData} modKey={MOD_KEY} inert={false}
+          persist={persist} lastBackup={backupDate ? formatDay(backupDate) : null}
+          account={{ available: cloud.available, user: cloud.user, sync: cloud.sync, error: cloud.error,
+            onSignIn: () => { cloud.signIn(); }, onSignOut: () => { cloud.signOut(); }, onDelete: deleteCloudData }} />
+      </div>
 
       {openTask && (
         <Drawer

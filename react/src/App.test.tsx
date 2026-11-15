@@ -294,7 +294,7 @@ describe('App: mobile menu', () => {
     const commands = screen.getByRole('button', { name: /^Commands/ });
     fireEvent.click(commands);
     expect(screen.queryByRole('combobox', { name: 'Command' })).not.toBeNull();
-    expect(screen.getByRole('img', { name: 'All 1 task done' })).not.toBeNull();
+    expect(screen.getByText('All 1 task done.')).not.toBeNull(); // the summary under the date says it in words
   });
 
   it('closes the menu after picking a view', () => {
@@ -307,14 +307,15 @@ describe('App: mobile menu', () => {
 });
 
 describe('App: lists', () => {
-  it('marks each list with a monogram and highlights only the active one', () => {
+  it('writes each list as #name, the way it is typed, and highlights only the active one', () => {
     render(<App />);
-    const marks = () => [...document.querySelectorAll('.side .mark')];
-    expect(marks().map((m) => m.textContent)).toEqual(['PE', 'WO']);
-    expect(marks().every((m) => m.getAttribute('aria-hidden') === 'true')).toBe(true);
-    expect(document.querySelectorAll('.side button.on .mark')).toHaveLength(0);
+    const rows = () => [...document.querySelectorAll<HTMLButtonElement>('.side .lists .list-row > button:first-child')];
+    expect(rows().map((b) => b.textContent)).toEqual(['#Personal0', '#Work0']);
+    // The "#" is drawn, not read: screen readers hear "Work, 0".
+    expect([...document.querySelectorAll('.side .hash')].every((h) => h.getAttribute('aria-hidden') === 'true')).toBe(true);
+    expect(rows().filter((b) => b.classList.contains('on'))).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: /^Work/ }));
-    expect([...document.querySelectorAll('.side button.on .mark')].map((m) => m.textContent)).toEqual(['WO']);
+    expect(rows().filter((b) => b.classList.contains('on')).map((b) => b.textContent)).toEqual(['#Work0']);
     expect(JSON.parse(localStorage.getItem('todo-lists:v1')!)[1]).toEqual({ id: 'work', name: 'Work', color: '#FFC53D' });
   });
 
@@ -355,3 +356,49 @@ describe('search keeps the start page promise', () => {
   });
 });
 
+
+describe('the day line (direction A)', () => {
+  it('marks the words it understands while you type, and saves exactly what it marked', () => {
+    render(<App />);
+    const input = screen.getByLabelText('New task');
+    fireEvent.change(input, { target: { value: 'Pay rent friday !high #home' } });
+    const marks = (cls: string) => document.querySelector(`.line-mirror .${cls}`)?.textContent;
+    expect([marks('m-due'), marks('m-pr'), marks('m-list')]).toEqual(['friday', '!high', '#home']);
+    fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
+    const task = (JSON.parse(localStorage.getItem('todo-app:v1') ?? '[]') as Task[]).find((t) => t.text === 'Pay rent');
+    const home = (JSON.parse(localStorage.getItem('todo-lists:v1') ?? '[]') as { id: string; name: string }[]).find((l) => l.name === 'Home');
+    expect(task).toMatchObject({ dueDate: '2026-11-13', priority: 'high', listId: home!.id });
+    expect(document.querySelector('.line-mirror')!.textContent).toBe(''); // the field is clear for the next line
+  });
+
+  it('groups Upcoming by day, each with its date as a big numeral, and moves tasks inside their day', () => {
+    seed([{ text: 'Dentist', dueDate: '2026-11-12' }, { text: 'Bin day', dueDate: '2026-11-12' }, { text: 'Pay rent', dueDate: '2026-11-13' }, { text: 'Lunch', dueDate: '2026-11-11' }]);
+    render(<App />);
+    fireEvent.click(viewButton(/^Upcoming/));
+    const days = [...document.querySelectorAll('.slot.k-day')];
+    expect(days.map((d) => d.querySelector('.num')?.textContent)).toEqual(['11', '12', '13']);
+    expect(days[0].querySelector('.dname')?.textContent).toBe('Tomorrow');
+    expect(days.map((d) => [...d.querySelectorAll('.text')].map((n) => n.textContent))).toEqual([['Lunch'], ['Dentist', 'Bin day'], ['Pay rent']]);
+    // Alt+Down on the last task of a day stays in that day, and says so.
+    const bin = [...document.querySelectorAll<HTMLElement>('.text')].find((n) => n.textContent === 'Bin day')!;
+    fireEvent.keyDown(bin, { key: 'ArrowDown', altKey: true });
+    expect(status()).toMatch(/^"Bin day" is already last in /);
+    fireEvent.keyDown(bin, { key: 'ArrowUp', altKey: true });
+    expect(status()).toMatch(/^Moved "Bin day" to position 1 of 2 in /);
+  });
+
+  it('keeps Carried over folded on a phone ("no rush"), and opens it with Show', () => {
+    seed([{ text: 'Return the library book', dueDate: '2026-11-08' }, { text: 'Today thing', dueDate: '2026-11-10' }]);
+    render(<App />); // the test window is narrow (no min-width: 900px match), like a phone
+    const list = document.querySelector('.slot-carried-over .list')!;
+    expect(list.hasAttribute('hidden')).toBe(true);
+    const show = within(document.querySelector('.slot-carried-over') as HTMLElement).getByRole('button', { name: /carried over tasks/ });
+    expect(show.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(show);
+    expect(list.hasAttribute('hidden')).toBe(false);
+    expect(show.getAttribute('aria-expanded')).toBe('true');
+    // In the Carried over view itself it is always open.
+    fireEvent.click(viewButton(/^Carried over/));
+    expect(document.querySelector('.slot-carried-over .list')!.hasAttribute('hidden')).toBe(false);
+  });
+});

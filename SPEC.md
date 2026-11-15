@@ -41,6 +41,19 @@ Fixes risk 1 in DEFINE.md (silent data loss on iPhone) and risk 6 (not installab
   5. Lighthouse mobile (slow 4G): LCP <= 2.5 s, TBT <= 200 ms, CLS <= 0.1.
   6. No horizontal scroll at 320 px; worst-case lines (long, RTL, Hindi, emoji) stay inside their slip.
 
+### M2b: The app as "one day line" (Ddk chose direction A, 2026-11-15)
+- **Why:** [docs/design/APP-STUDY.md](docs/design/APP-STUDY.md): on a phone only 1 task was in the first view; the start page's marked input and day line were missing; noise on every task.
+- **Scope, checkpoint 1 (main screen):** a left rail on laptops (views, `#lists`, commands, theme) that is the menu on phones; the date as a big numeral with the day and a one-line summary; one input that marks the date, priority and list while you type (the start page's parser, so what is marked is what is saved), docked at the bottom on phones; the day line: Carried over as a grey slip clipped to the page ("no rush"), Today, Tomorrow, This week, Later, Done; Upcoming grouped by day with big numerals; slips without "Medium"/"Low" and without a "Today" tag inside Today; `!high` as a red check ring plus its red tag; the colophon and empty-state squeeze fixed.
+- **Status (2026-11-15), checkpoint 1 built:** 5 tasks in the phone's first view (was 1), measured with a touch-phone viewport and a realistic week; on phones the carried-over slip starts folded ("no rush"), search with filters and sort opens from one button, and each task keeps one details button (Delete is in the details, followed by Undo). Truth check 40 of 40; 220 tests (3 new: marks equal what is saved, Upcoming by day, the folded slip); contrast AA on the rendered app in both themes; no sideways scroll 320 to 1280 px with text up to 200%; Lighthouse mobile 96 to 97, LCP 2.0 s, TBT 120 to 140 ms, CLS under 0.04.
+- **Checkpoint 2:** details panel, command menu, empty states with drawn art, settings and colophon, keys card.
+- **Data:** unchanged. Same storage keys, same Firestore rules, same hand-off.
+- **Acceptance tests:**
+  1. All unit, DOM and rules tests pass; tests change only where a behaviour was removed on purpose (list code boxes, date and priority fields beside the input, the count numeral), each replaced by a test of the new behaviour.
+  2. At least 5 tasks in the first view at 375 x 812 with the realistic week; the input reachable without scrolling.
+  3. The truth check keeps 40 of 40 promises of the start page.
+  4. Contrast AA on the rendered page, both themes; CSP check; no sideways scroll at 320 to 1280 px with text up to 200%.
+  5. Lighthouse mobile: LCP up to 2.5 s, TBT up to 200 ms, CLS up to 0.1.
+
 ### M3: Landing page (built 2026-11-13, ahead of M2, at Ddk's request)
 - **Done:**
   - The site root is the start page, and the app moved to `/app/`. The storage keys and the origin are unchanged, so existing lists stay.

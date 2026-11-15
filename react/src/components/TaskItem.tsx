@@ -1,5 +1,5 @@
 import { type DragEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { dueInfo } from '../dates';
+import { dueInfo, parseISO } from '../dates';
 import type { List, Task } from '../types';
 import { AlertIcon, MoreIcon, RepeatIcon, TrashIcon } from './icons';
 
@@ -15,9 +15,12 @@ interface Props {
   onMove: (from: string, to: string) => void;
   onNudge: (id: string, dir: -1 | 1) => void;
   stamped?: string; // the newest task of this visit carries a postmark with this date (no animation)
+  // Where the row sits on the day line: its section already says the day, so the row does not repeat it.
+  hideDue?: boolean; // in Today, Tomorrow and the day groups of Upcoming
+  weekday?: boolean; // in This week: "Thu 19" instead of "19 Nov"
 }
 
-const PRIORITY_LABEL = { low: 'Low', med: 'Medium', high: 'High' } as const;
+const WEEKDAY = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric' });
 // A private drag type, so dropped files, links or selected text are never mistaken for a task.
 const DRAG_TYPE = 'application/x-task';
 const isTaskDrag = (e: DragEvent) => [...e.dataTransfer.types].includes(DRAG_TYPE);
@@ -32,7 +35,7 @@ function Highlight({ text, query }: { text: string; query?: string }) {
   return <>{parts.map((part, i) => (i % 2 ? <mark key={i}>{part}</mark> : part))}</>;
 }
 
-export default function TaskItem({ task, list, query, draggable, onToggle, onDelete, onEdit, onOpen, onMove, onNudge, stamped }: Props) {
+export default function TaskItem({ task, list, query, draggable, onToggle, onDelete, onEdit, onOpen, onMove, onNudge, stamped, hideDue, weekday }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(task.text);
   const [over, setOver] = useState(false);
@@ -119,7 +122,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
       }}
     >
       <input
-        className="check"
+        className={`check${task.priority === 'high' && !task.done ? ' high' : ''}`}
         type="checkbox"
         checked={task.done}
         onChange={() => onToggle(task.id)}
@@ -140,14 +143,15 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
           </span>
         )}
         <div className="meta">
-          <span className={`pill prio-${task.priority}`}><span className="sr-only">Priority: </span>{PRIORITY_LABEL[task.priority]}</span>
-          {due?.tone === 'today' && <span className="pill due-today"><span className="sr-only">Due </span>Today</span>}
+          {/* Marks only for exceptions: high priority says so; medium and low show nothing. */}
+          {task.priority === 'high' && <span className="pill prio-high"><span className="sr-only">Priority: High</span><span aria-hidden="true">!high</span></span>}
+          {due?.tone === 'today' && <span className={`pill due-today${hideDue ? ' sr-only' : ''}`}><span className="sr-only">Due </span>Today</span>}
           {due?.tone === 'overdue' && <span className="tag overdue"><AlertIcon size={14} />{due.label}</span>}
-          {due?.tone === 'later' && <span className="tag">{due.label}</span>}
-          {list && <span className="tag">{list.name}</span>}
+          {due?.tone === 'later' && !(hideDue && !task.done) && <span className="tag">{weekday && !task.done ? WEEKDAY.format(parseISO(task.dueDate!)!) : due.label}</span>}
+          {list && <span className="tag list-tag">#{list.name}</span>}
           {subs.length > 0 && <span className="tag">{subs.filter((s) => s.done).length}/{subs.length} steps</span>}
-          {task.notes && <span className="tag">Note</span>}
-          {task.repeat && task.dueDate && <span className="tag"><RepeatIcon size={13} />Repeats {task.repeat}</span>}
+          {task.notes && <span className="tag">note</span>}
+          {task.repeat && task.dueDate && <span className="tag"><RepeatIcon size={13} />repeats {task.repeat}</span>}
         </div>
       </div>
       <button className="act" type="button" onClick={() => onOpen(task.id)} aria-label={`Open details for "${task.text}"`}>
