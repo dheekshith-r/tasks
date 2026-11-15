@@ -112,6 +112,7 @@ Method: a capture script (Playwright with the installed Edge, 1280x800, light) s
 | Microsoft To Do | 6,332px | 10 | 34 | 0 | 1 | 3D glass render (anti-reference) |
 | Tweek | the app itself | 1 | 37 | 0 | 1 | blob-bird mascot |
 | **Tasks (ours, 2026-11-14)** | **3,632px** | **10 (5 real)** | **0** | **0** | **0** | **one small stamp** |
+| **Tasks (ours, 2026-11-15, checkpoint 2)** | **12,568px** | **16 (13 sections)** | **0 photos, 16 drawn in code** | **0** | **10 scroll and view moments** | **hand-inked scenes, live demo, drawn keyboard** |
 
 ## What every strong page does (and ours does not)
 

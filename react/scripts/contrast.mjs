@@ -62,7 +62,9 @@ const START_PAIRS = [
   ['red-ink', 'red-hover', 'button text on hover'],
   ['red-text', 'bg', 'error message, invalid input border'],
   ['sun-ink', 'sun', 'slot labels, the day tag'],
-  ['band-ink', 'band', 'closing band heading'],
+  ['bg', 'ink', 'selected demo view, pressed key, chosen privacy option'],
+  ['ink', 'line', 'the Carried over tray label in the night drawing'],
+  ['mark', 'bg', 'the FREE stamp, the postmark'],
 ]
 const SOURCES = [
   ...FILES.map((file) => ({ file, pairs: PAIRS })),

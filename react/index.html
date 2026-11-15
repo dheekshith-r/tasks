@@ -212,9 +212,9 @@
     </section>
 
     <!-- 3 · Capture: the day starts. One line types itself; each word flies to its place on a slip. -->
-    <section class="scene capture" id="capture" aria-labelledby="capture-title">
+    <section class="scene capture day-sec" id="capture" aria-labelledby="capture-title">
       <div class="pin">
-        <div class="wrap capture-in">
+        <div class="wrap capture-in day-in">
           <p class="day-time"><span class="day-dot" aria-hidden="true"></span>8:14 am</p>
           <h2 id="capture-title">One line. <span>Three words it understands.</span></h2>
           <div class="cap-stage" id="cap-stage" aria-hidden="true">
@@ -240,66 +240,289 @@
       </div>
     </section>
 
-    <section class="section" id="keys" aria-labelledby="keys-title">
-      <div class="wrap">
-        <h2 id="keys-title">Run it from the keyboard.</h2>
-        <p class="sub">Add, search, move, rename and close with keys alone. Moves and changes are announced to screen readers.</p>
-        <dl class="keys">
-          <div><dt><kbd>N</kbd></dt><dd>New task</dd></div>
-          <div><dt><kbd>/</kbd></dt><dd>Search</dd></div>
-          <div><dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>Command menu (<kbd>Cmd</kbd> <kbd>K</kbd> on a Mac)</dd></div>
-          <div><dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd></div>
-          <div><dt><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move a task, and hear where it went</dd></div>
-          <div><dt><kbd>F2</kbd></dt><dd>Rename</dd></div>
-          <div><dt><kbd>Esc</kbd></dt><dd>Close any panel</dd></div>
-        </dl>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="free-title">
-      <div class="wrap">
-        <h2 id="free-title">What other apps charge for is free here.</h2>
-        <p class="sub">No paid plan and no trial. Sharing and teams need a server, so they are not here. MIT licensed, so it stays free.</p>
-        <ul class="free">
-          <li>Unlimited lists and tasks</li>
-          <li>Repeating tasks</li>
-          <li>Subtasks and notes</li>
-          <li>Today, Upcoming and Carried over views</li>
-          <li>Search, undo and a command menu</li>
-          <li>Backups to a file you keep</li>
-          <li>Light and dark themes</li>
-          <li>Installs like an app, works offline</li>
-          <li data-cloud hidden>Optional sync with Google sign-in</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="section" id="privacy" aria-labelledby="privacy-title">
-      <div class="wrap split">
-        <div>
-          <h2 id="privacy-title">Where your tasks are kept.</h2>
-          <p class="sub">No ads and no analytics. In guest mode the page makes no third-party requests; even the fonts come from this site.</p>
+    <!-- 4 · 9:30 am: the app's own logic on sample tasks dated from the visitor's today. -->
+    <section class="day-sec demo" id="demo" aria-labelledby="demo-title">
+      <div class="wrap day-in">
+        <p class="day-time"><span class="day-dot" aria-hidden="true"></span>9:30 am</p>
+        <h2 id="demo-title">Your day, sorted. <span>Switch views the way you would in the app.</span></h2>
+        <p class="sub">Sample tasks, dated from your own today and clock. The views, dates and search run the same rules as the app.</p>
+        <div class="frame demo-frame">
+          <div class="slot demo-win">
+            <div class="demo-top">
+              <p class="label demo-day" id="demo-day">Today</p>
+              <p class="demo-clock"><span class="now-dot" aria-hidden="true"></span><span id="demo-clock">now</span></p>
+            </div>
+            <div class="demo-dock" role="tablist" aria-label="Demo views">
+              <button type="button" role="tab" id="tab-today" aria-controls="demo-panel" aria-selected="true" data-view="today">Today</button>
+              <button type="button" role="tab" id="tab-upcoming" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-view="upcoming">Upcoming</button>
+              <button type="button" role="tab" id="tab-carried" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-view="carried">Carried over</button>
+              <button type="button" role="tab" id="tab-search" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-view="search"><kbd>/</kbd>Search</button>
+              <button type="button" role="tab" id="tab-commands" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-view="commands"><kbd>Ctrl K</kbd>Commands</button>
+            </div>
+            <div class="demo-panel" id="demo-panel" role="tabpanel" aria-labelledby="tab-today" tabindex="0">
+              <ul class="slips demo-list">
+                <li class="slip"><p class="slip-text">Renew passport</p><p class="slip-meta"><span class="tag tag-high">!high</span><span class="tag">#documents</span></p></li>
+                <li class="slip"><p class="slip-text">Call Amma about Sunday lunch</p><p class="slip-meta"><span class="tag">#family</span></p></li>
+                <li class="slip"><p class="slip-text">Water the tulsi plant</p><p class="slip-meta"><span class="tag">repeats daily</span></p></li>
+              </ul>
+            </div>
+          </div>
+          <svg class="frame-ink" aria-hidden="true"></svg>
         </div>
-        <dl class="facts">
-          <div><dt>Guest mode, the default</dt><dd>Your tasks are saved in this browser only. Nothing leaves your device. A backup is a file you save yourself.</dd></div>
-          <div data-cloud hidden><dt>Optional Google sign-in</dt><dd>Signed-in tasks are stored by Google Firebase so they sync to your other devices. Security rules let only your account read or write them, and you can delete them and your account from inside the app.</dd></div>
-          <div><dt>Open source, built in the open</dt><dd>Every line is <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">on GitHub</a> under the MIT license, with tests that run on every change. How AI helped, and how its work was checked, is in <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/AI_WORKFLOW.md">AI_WORKFLOW.md</a>.</dd></div>
-        </dl>
       </div>
     </section>
 
-    <section class="band" aria-labelledby="band-title">
+    <!-- 5 · 1:30 pm: the keyboard. Press a real key and the drawn one goes down. -->
+    <section class="day-sec keys-sec" id="keys" aria-labelledby="keys-title">
+      <div class="wrap day-in">
+        <p class="day-time"><span class="day-dot" aria-hidden="true"></span>1:30 pm</p>
+        <h2 id="keys-title">Run it from the keyboard. <span>Your hands never leave it.</span></h2>
+        <p class="sub">Try the keys below on your own keyboard. Everything in the app works this way, and every move is announced to screen readers.</p>
+        <div class="keys-stage">
+          <div class="kbd-wrap"><svg class="kbd-art" id="kbd-art" viewBox="0 0 640 268" aria-hidden="true"></svg><p class="kbd-said" id="kbd-said" aria-live="polite"></p></div>
+          <dl class="key-list">
+            <div data-key="n"><dt><kbd>N</kbd></dt><dd>New task</dd></div>
+            <div data-key="/"><dt><kbd>/</kbd></dt><dd>Search</dd></div>
+            <div data-key="k"><dt><kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>Command menu (<kbd>Cmd</kbd> <kbd>K</kbd> on a Mac)</dd></div>
+            <div data-key="arrow"><dt><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move a task, and hear where it went</dd></div>
+            <div data-key="f2"><dt><kbd>F2</kbd></dt><dd>Rename</dd></div>
+            <div data-key="z"><dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo a delete</dd></div>
+            <div data-key="escape"><dt><kbd>Esc</kbd></dt><dd>Close any panel</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · 4:00 pm: what a screen reader hears, in the app's own words. -->
+    <section class="day-sec heard" id="heard" aria-labelledby="heard-title">
+      <div class="wrap day-in">
+        <p class="day-time"><span class="day-dot" aria-hidden="true"></span>4:00 pm</p>
+        <h2 id="heard-title">Heard, not just seen. <span>Every change is spoken.</span></h2>
+        <div class="heard-stage">
+          <svg class="heard-art" viewBox="0 0 220 200" aria-hidden="true">
+            <g filter="url(#wobble)">
+              <path class="ink" d="M40 120 C 40 50, 180 50, 180 120"/>
+              <rect class="f-sun ink" x="22" y="112" width="40" height="66" rx="12"/>
+              <rect class="f-sun ink" x="158" y="112" width="40" height="66" rx="12"/>
+              <path class="ink thin" d="M32 134 V160 M188 134 V160"/>
+            </g>
+            <path class="ink thin wave" d="M82 150 q6 -10 12 0 t12 0 t12 0 t12 0"/>
+          </svg>
+          <div>
+            <p class="heard-note">These are the app's real announcements. A screen reader says them as you work:</p>
+            <ol class="said" id="said">
+              <li>Added "Pay rent" to This week</li>
+              <li>Today: 3 tasks to do</li>
+              <li>Moved "Pay rent" to position 1 of 3 in This week</li>
+              <li>"Pay rent" completed</li>
+              <li>Task deleted</li>
+              <li>Restored</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 · 9:40 pm: calm. What you did not finish waits in grey; the red pile of other apps is crossed out. -->
+    <section class="scene calm day-sec" id="calm" aria-labelledby="calm-title">
+      <div class="pin">
+        <div class="wrap day-in">
+          <p class="day-time"><span class="day-dot" aria-hidden="true"></span>9:40 pm</p>
+          <h2 id="calm-title">Yesterday's tasks wait. <span>They don't shout.</span></h2>
+          <p class="sub">Anything you did not finish moves to Carried over, in calm grey. No red counts and no pile. Give it a new date when you are ready, or let it wait.</p>
+          <svg class="calm-art calm-wide" viewBox="0 0 1000 420" role="img" aria-labelledby="calm-art-title">
+            <title id="calm-art-title">Drawing: overnight, two unfinished tasks slide from today's slot into a grey Carried over tray, the sun comes up, and a red "14 overdue" badge from other apps is crossed out by hand.</title>
+            <path class="dots arc" d="M120 170 C 300 0, 700 0, 880 170"/>
+            <g class="moon" filter="url(#wobble)"><path class="f-paper ink" d="M858 34 a32 32 0 1 0 34 50 a25 25 0 1 1 -34 -50 Z"/></g>
+            <g class="sun"><circle class="f-sun ink" cx="0" cy="0" r="26"/><path class="ink thin" d="M0 -42 V-34 M0 34 V42 M-42 0 H-34 M34 0 H42 M-30 -30 l6 6 M24 24 l6 6 M-30 30 l6 -6 M24 -24 l6 -6"/></g>
+            <text class="hand t-muted calm-morning" x="330" y="128" font-size="18" text-anchor="middle">next morning</text>
+            <path class="ink thin" d="M40 360 H960"/>
+            <g filter="url(#wobble)">
+              <rect class="f-slot ink" x="60" y="180" width="270" height="160"/>
+              <rect class="f-sun" x="60" y="180" width="128" height="26"/>
+              <text class="sans-t t-onsun calm-day" x="70" y="198" font-size="13" letter-spacing="1.5">TODAY</text>
+              <rect class="f-slot ink" x="670" y="180" width="270" height="160"/>
+              <rect class="f-line" x="670" y="180" width="150" height="26"/>
+              <text class="sans-t t-ink" x="680" y="198" font-size="13" letter-spacing="1.5">CARRIED OVER</text>
+            </g>
+            <g class="cslip" data-dx="610"><rect class="f-paper ink thin" x="80" y="222" width="230" height="44"/><text class="sans-t t-ink" x="94" y="249" font-size="15">Return the library book</text></g>
+            <g class="cslip" data-dx="610"><rect class="f-paper ink thin" x="80" y="276" width="230" height="44"/><text class="sans-t t-ink" x="94" y="303" font-size="15">Reply to the landlord</text></g>
+            <g class="badge-old">
+              <rect class="f-red" x="425" y="230" width="150" height="44" rx="22"/>
+              <text class="sans-t t-onred" x="500" y="258" font-size="17" text-anchor="middle">14 overdue</text>
+              <text class="hand t-muted" x="500" y="304" font-size="18" text-anchor="middle">(other apps)</text>
+              <path class="strike" d="M412 270 C 452 238, 532 268, 588 228"/>
+              <path class="strike" d="M418 230 C 462 258, 532 244, 584 278"/>
+            </g>
+            <text class="hand t-ink calm-note" x="805" y="398" font-size="22" text-anchor="middle">no red pile. ever.</text>
+          </svg>
+          <svg class="calm-art calm-tall" viewBox="0 0 400 540" role="img" aria-labelledby="calm-tall-title">
+            <title id="calm-tall-title">Drawing: overnight, two unfinished tasks slide from today's slot into a grey Carried over tray, the sun comes up, and a red "14 overdue" badge from other apps is crossed out by hand.</title>
+            <path class="dots arc" d="M30 150 C 110 -10, 290 -10, 370 150"/>
+            <g class="moon" filter="url(#wobble)"><path class="f-paper ink" d="M332 22 a28 28 0 1 0 30 44 a22 22 0 1 1 -30 -44 Z"/></g>
+            <g class="sun"><circle class="f-sun ink" cx="0" cy="0" r="22"/><path class="ink thin" d="M0 -36 V-29 M0 29 V36 M-36 0 H-29 M29 0 H36 M-26 -26 l5 5 M21 21 l5 5 M-26 26 l5 -5 M21 -21 l5 -5"/></g>
+            <text class="hand t-muted calm-morning" x="124" y="112" font-size="17" text-anchor="middle">next morning</text>
+            <g filter="url(#wobble)">
+              <rect class="f-slot ink" x="20" y="170" width="250" height="134"/>
+              <rect class="f-sun" x="20" y="170" width="96" height="24"/>
+              <text class="sans-t t-onsun" x="29" y="187" font-size="13" letter-spacing="1.5">TODAY</text>
+              <rect class="f-slot ink" x="130" y="330" width="250" height="134"/>
+              <rect class="f-line" x="130" y="330" width="140" height="24"/>
+              <text class="sans-t t-ink" x="139" y="347" font-size="13" letter-spacing="1.5">CARRIED OVER</text>
+            </g>
+            <g class="cslip" data-dx="110" data-dy="160"><rect class="f-paper ink thin" x="34" y="204" width="222" height="40"/><text class="sans-t t-ink" x="46" y="229" font-size="15">Return the library book</text></g>
+            <g class="cslip" data-dx="110" data-dy="160"><rect class="f-paper ink thin" x="34" y="252" width="222" height="40"/><text class="sans-t t-ink" x="46" y="277" font-size="15">Reply to the landlord</text></g>
+            <g class="badge-old">
+              <rect class="f-red" x="284" y="196" width="108" height="36" rx="18"/>
+              <text class="sans-t t-onred" x="338" y="219" font-size="14" text-anchor="middle">14 overdue</text>
+              <text class="hand t-muted" x="338" y="256" font-size="15" text-anchor="middle">(other apps)</text>
+              <path class="strike" d="M276 228 C 306 204, 352 224, 396 194"/>
+              <path class="strike" d="M280 196 C 312 220, 352 210, 394 232"/>
+            </g>
+            <path class="ink thin" d="M20 482 H380"/>
+            <text class="hand t-ink calm-note" x="255" y="518" font-size="20" text-anchor="middle">no red pile. ever.</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · Free: the whole feature list lights up line by line; a stamp says the price. -->
+    <section class="free-sec" id="free" aria-labelledby="free-title">
       <div class="wrap">
-        <h2 id="band-title">Open your list.</h2>
-        <a class="btn btn-red" href="app/">Open my list</a>
+        <h2 id="free-title">Everything is free. <span>There is no paid plan.</span></h2>
+        <div class="free-stage">
+          <ul class="lit-list">
+            <li>Unlimited lists and tasks</li>
+            <li>Repeating tasks</li>
+            <li>Subtasks and notes</li>
+            <li>Today, Upcoming, Carried over</li>
+            <li>Search and a command menu</li>
+            <li>Undo, with a key</li>
+            <li>Backups to a file you keep</li>
+            <li>Works offline, installs like an app</li>
+            <li>Light and dark</li>
+            <li data-cloud hidden>Sync with Google, if you want it</li>
+          </ul>
+          <svg class="free-stamp" viewBox="0 0 220 220" aria-hidden="true">
+            <g filter="url(#ink)">
+              <circle class="stamp-ring" cx="110" cy="110" r="96"/>
+              <circle class="stamp-ring thin" cx="110" cy="110" r="78"/>
+              <text class="stamp-t" x="110" y="104" font-size="44" text-anchor="middle">FREE</text>
+              <text class="stamp-t" x="110" y="140" font-size="22" text-anchor="middle" letter-spacing="4">· MIT ·</text>
+            </g>
+          </svg>
+        </div>
+        <p class="sub">MIT licensed, so it stays free and anyone can check the code. Sharing and teams need a server, so they are not here.</p>
+      </div>
+    </section>
+
+    <!-- 9 · Privacy: a house with a letterbox. Guest keeps the letter in; sync sends it to your own account. -->
+    <section class="priv-sec" id="privacy" aria-labelledby="privacy-title">
+      <div class="wrap priv-in">
+        <div>
+          <h2 id="privacy-title">Your tasks live here. <span>On your device.</span></h2>
+          <p class="sub">No ads and no analytics. In guest mode the page makes no third-party requests; even the fonts come from this site.</p>
+          <fieldset class="priv-switch" data-cloud hidden>
+            <legend class="sr-only">Where your tasks are kept</legend>
+            <label><input type="radio" name="where" value="guest" checked> Guest, this device</label>
+            <label><input type="radio" name="where" value="sync"> Signed in, with sync</label>
+          </fieldset>
+          <dl class="facts">
+            <div><dt>Guest mode, the default</dt><dd>Your tasks are saved in this browser only. Nothing leaves your device. A backup is a file you save yourself.</dd></div>
+            <div data-cloud hidden><dt>Optional Google sign-in</dt><dd>Signed-in tasks are stored by Google Firebase so they sync to your other devices. Security rules let only your account read or write them, and you can delete them and your account from inside the app.</dd></div>
+          </dl>
+        </div>
+        <svg class="house-art" id="house-art" viewBox="0 0 420 360" role="img" aria-labelledby="house-title">
+          <title id="house-title">Drawing: a house with a letterbox. Your tasks are a letter kept inside. With sync on, the letter goes to a cloud marked "your account only".</title>
+          <g class="cloud" data-cloud hidden filter="url(#wobble)">
+            <path class="f-paper ink" d="M268 86 a24 24 0 0 1 30 -30 a32 32 0 0 1 58 6 a22 22 0 0 1 20 38 H276 a20 20 0 0 1 -8 -14 Z"/>
+            <text class="hand t-ink" x="322" y="128" font-size="16" text-anchor="middle">your account only</text>
+          </g>
+          <g filter="url(#wobble)">
+            <path class="f-paper ink" d="M60 180 L170 92 L280 180 V330 H60 Z"/>
+            <path class="f-hatch" d="M60 180 L170 92 L280 180 Z"/>
+            <path class="ink" d="M44 192 L170 84 L296 192"/>
+            <rect class="f-slot ink" x="146" y="236" width="56" height="94"/>
+            <rect class="f-ink" x="156" y="256" width="36" height="7" rx="2"/>
+            <rect class="f-sun ink" x="84" y="208" width="44" height="40"/>
+            <path class="ink thin" d="M106 208 V248 M84 228 H128"/>
+            <path class="ink" d="M30 330 H340"/>
+          </g>
+          <path class="dots sync-line" data-cloud hidden d="M262 206 C 300 170, 300 150, 316 136"/>
+          <g class="letter" filter="url(#wobble)">
+            <rect class="f-paper ink" x="214" y="214" width="52" height="36"/>
+            <path class="ink thin" d="M214 214 L240 234 L266 214"/>
+          </g>
+          <g class="letter-copy" data-cloud hidden filter="url(#wobble)">
+            <rect class="f-paper ink" x="214" y="214" width="52" height="36"/>
+            <path class="ink thin" d="M214 214 L240 234 L266 214"/>
+          </g>
+          <text class="hand t-ink" x="240" y="282" font-size="15" text-anchor="middle">your tasks</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 10 · Built in the open: the latest changes, read from git when the site is built. -->
+    <section class="open-sec" id="open" aria-labelledby="open-title">
+      <div class="wrap">
+        <h2 id="open-title">Built in the open. <span>Every change is public.</span></h2>
+        <ol class="changes"><!--changelog--></ol>
+        <p class="open-links">
+          <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">All code on GitHub</a>
+          <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/AI_WORKFLOW.md">How AI helped, and how its work was checked</a>
+          <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/LICENSE">MIT license</a>
+        </p>
+        <p class="aside open-aside hand" aria-hidden="true">every change is tested before it ships</p>
+      </div>
+    </section>
+
+    <!-- 11 · Questions people really ask. -->
+    <section class="faq-sec" id="faq" aria-labelledby="faq-title">
+      <div class="wrap faq-in">
+        <h2 id="faq-title">Questions</h2>
+        <div class="faq">
+          <details><summary>Is it really free?</summary><p>Yes. There is no paid plan and no trial, and it is MIT licensed. Sharing and teams are not here, because they need a server.</p></details>
+          <details><summary>Where are my tasks kept?</summary><p>In guest mode, in this browser on this device only. <span data-cloud hidden>If you sign in with Google, they are kept in your own Firebase account, and only you can read them.</span></p></details>
+          <details><summary>Does it work offline?</summary><p>Yes, after you open it once. It installs like an app on a phone or a computer.</p></details>
+          <details><summary>What happens if I clear my browser data?</summary><p>Guest tasks are deleted with it. Save a backup file from the app's menu first; the app shows the date of your last backup.</p></details>
+          <details><summary>Can I use it on my phone?</summary><p>Yes, in your phone's browser, and you can add it to the home screen. <span data-cloud hidden>To see the same list on your phone and laptop, sign in with Google.</span></p></details>
+          <details><summary>How do I move my tasks out?</summary><p>Export a backup file at any time and import it on another device. The file is yours.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · Close: the frame again, full, and one big button. -->
+    <section class="close-sec" id="close" aria-labelledby="close-title">
+      <div class="wrap">
+        <div class="frame close-frame">
+          <div class="slot close-slot">
+            <p class="label" id="close-day">Today</p>
+            <h2 id="close-title">Your list is waiting.</h2>
+            <a class="btn btn-red btn-huge" href="app/">Open my list</a>
+            <p class="aside close-aside hand" aria-hidden="true">see you tomorrow</p>
+            <ul class="slips close-slips" aria-hidden="true"></ul>
+          </div>
+          <svg class="frame-ink" aria-hidden="true"></svg>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <div class="wrap">
-      <span>Tasks is free and open source, <a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/LICENSE">MIT license</a>.</span>
-      <span>Guest tasks never leave your device.</span>
+    <div class="wrap foot-in">
+      <div class="foot-about">
+        <p class="brand-line">
+          <svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M13 2v22M2 13h22" stroke="currentColor" stroke-width="2"/><rect x="15.5" y="4.5" width="6" height="6" fill="#D62839"/></svg>
+          Tasks
+        </p>
+        <p>A free to-do list you run from the keyboard. Write one line; it is filed under the right day.</p>
+      </div>
+      <nav class="foot-cols" aria-label="Footer">
+        <div><p class="foot-h">Product</p><a href="app/">Open the app</a><a href="#capture">How it works</a><a href="#keys">Keyboard</a><a href="#privacy">Privacy</a></div>
+        <div><p class="foot-h">Project</p><a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample">GitHub</a><a href="#open">Latest changes</a><a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/AI_WORKFLOW.md">How AI helped</a><a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/blob/main/LICENSE">MIT license</a></div>
+        <div><p class="foot-h">Help</p><a href="#faq">Questions</a><a href="https://github.com/dheekshithsnewjourney-crypto/to-do-sample/issues">Report a problem</a></div>
+      </nav>
+      <p class="foot-legal">Free and open source, MIT license. Guest tasks never leave your device.</p>
     </div>
   </footer>
 

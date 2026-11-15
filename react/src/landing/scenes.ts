@@ -11,13 +11,13 @@ const SVG = 'http://www.w3.org/2000/svg';
 export const motionOn = () => document.documentElement.classList.contains('motion');
 
 // A small seeded random source, so a drawing looks the same on every visit.
-function rng(seed: number) {
+export function rng(seed: number) {
   let s = seed >>> 0 || 1;
   return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; };
 }
 
 // One hand-drawn line: two loose passes whose ends and middle drift a little, like a pen going twice.
-function sketch(x1: number, y1: number, x2: number, y2: number, r: () => number): [string, string] {
+export function sketch(x1: number, y1: number, x2: number, y2: number, r: () => number): [string, string] {
   const len = Math.hypot(x2 - x1, y2 - y1);
   const j = Math.min(2.4, 0.6 + len / 140);
   const pass = (k: number) => {
@@ -128,28 +128,51 @@ export function captureDates() {
 type Scene = { el: HTMLElement; run: (p: number) => void; measure?: () => void };
 
 // 2 · Pain: the six pieces are pulled into one envelope, which drops into the slot.
-function pain(el: HTMLElement): Scene {
-  const pieces = [...el.querySelectorAll<SVGGElement>('.piece')].map((g) => ({ g, x: Number(g.dataset.x), y: Number(g.dataset.y) }));
+// On a phone the drawing is re-laid as a tall pile in two columns, so it can be drawn twice as big.
+const PHONE_PILE = { box: '0 0 560 830', pos: [[130, 120], [400, 95], [420, 270], [150, 330], [410, 470], [160, 560]], env: [280, 700], mouth: [-220, 230], drop: 90 };
+export function pain(el: HTMLElement, moving: boolean): Scene | null {
+  const svg = el.querySelector<SVGSVGElement>('.pain-art');
   const env = el.querySelector<SVGGElement>('.envelope');
+  const mouth = el.querySelector<SVGGElement>('.slot-mouth');
   const arrows = el.querySelector<SVGGElement>('.arrows');
-  const EX = 500, EY = 288;
-  return {
-    el,
-    run(p) {
-      const e = inOut(clamp((p - 0.2) / 0.42));
-      for (const { g, x, y } of pieces) {
-        g.style.transform = e ? `translate(${((EX - x) * e).toFixed(1)}px, ${((EY - y) * e).toFixed(1)}px) rotate(${(e * 8).toFixed(1)}deg) scale(${(1 - 0.82 * e).toFixed(3)})` : '';
-        g.style.opacity = String(1 - clamp((e - 0.72) / 0.28));
-      }
-      if (arrows) arrows.style.opacity = String(1 - clamp(e * 1.8));
-      const show = out(clamp((p - 0.32) / 0.22)); // the envelope opens as the pieces start to gather
-      const drop = inOut(clamp((p - 0.78) / 0.18));
-      if (env) {
-        env.style.opacity = String(show * (1 - clamp((drop - 0.75) / 0.25)));
-        env.style.transform = `translateY(${(drop * 240).toFixed(1)}px) scale(${(0.7 + 0.3 * show).toFixed(3)})`;
-      }
-    },
+  if (!svg || !env) return null;
+  const pieces = [...el.querySelectorAll<SVGGElement>('.piece')].map((g) => ({ g, x: Number(g.dataset.x), y: Number(g.dataset.y), bx: 0, by: 0 }));
+  const phone = matchMedia('(max-width: 560px)');
+  let EX = 500, EY = 288, ebx = 0, eby = 0, DROP = 240, lastP = -1;
+
+  const measure = () => {
+    const pile = phone.matches;
+    svg.setAttribute('viewBox', pile ? PHONE_PILE.box : '0 0 1000 600');
+    el.classList.toggle('pain-pile', pile);
+    pieces.forEach((pc, i) => {
+      const [px, py] = pile ? PHONE_PILE.pos[i] : [pc.x, pc.y];
+      pc.bx = px - pc.x; pc.by = py - pc.y;
+    });
+    [EX, EY] = pile ? PHONE_PILE.env : [500, 288];
+    [ebx, eby] = pile ? [PHONE_PILE.env[0] - 500, PHONE_PILE.env[1] - 288] : [0, 0];
+    DROP = pile ? PHONE_PILE.drop : 240;
+    if (mouth) mouth.style.transform = pile ? `translate(${PHONE_PILE.mouth[0]}px, ${PHONE_PILE.mouth[1]}px)` : '';
+    run(moving ? Math.max(lastP, 0) : -1);
   };
+
+  // p = -1 is the still picture: every piece in its place, the envelope faint in the middle.
+  const run = (p: number) => {
+    lastP = p;
+    const e = p < 0 ? 0 : inOut(clamp((p - 0.2) / 0.42));
+    for (const { g, x, y, bx, by } of pieces) {
+      const tx = bx + (EX - x - bx) * e, ty = by + (EY - y - by) * e;
+      g.style.transform = tx || ty || e ? `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) rotate(${(e * 8).toFixed(1)}deg) scale(${(1 - 0.82 * e).toFixed(3)})` : '';
+      g.style.opacity = String(1 - clamp((e - 0.72) / 0.28));
+    }
+    if (arrows) arrows.style.opacity = String(1 - clamp(e * 1.8));
+    const show = p < 0 ? 1 : out(clamp((p - 0.32) / 0.22)); // the envelope opens as the pieces start to gather
+    const drop = p < 0 ? 0 : inOut(clamp((p - 0.78) / 0.18));
+    if (p >= 0) env.style.opacity = String(show * (1 - clamp((drop - 0.75) / 0.25)));
+    env.style.transform = `translate(${ebx}px, ${(eby + drop * DROP).toFixed(1)}px) scale(${(0.7 + 0.3 * show).toFixed(3)})`;
+  };
+  phone.addEventListener('change', measure);
+  measure();
+  return { el, run, measure };
 }
 
 // 3 · Capture: the line types itself, the three words light up, then each flies to its place on a slip.
@@ -224,30 +247,78 @@ function capture(el: HTMLElement): Scene | null {
   return { el, run, measure };
 }
 
+// 7 · Calm: night turns to morning. The moon goes, the sun climbs, the two unfinished slips slide
+// into Carried over and turn grey, the red "14 overdue" of other apps is crossed out by hand.
+// There are two drawings, wide and tall (phones); both are driven, only one is shown.
+function calmArt(svg: SVGSVGElement) {
+  const arc = svg.querySelector<SVGPathElement>('.arc');
+  const moon = svg.querySelector<SVGGElement>('.moon');
+  const sun = svg.querySelector<SVGGElement>('.sun');
+  const morning = svg.querySelector<SVGTextElement>('.calm-morning');
+  const note = svg.querySelector<SVGTextElement>('.calm-note');
+  if (!arc || !moon || !sun || !morning || !note) return null;
+  const slips = [...svg.querySelectorAll<SVGGElement>('.cslip')].map((g) => ({ g, dx: Number(g.dataset.dx) || 0, dy: Number(g.dataset.dy) || 0 }));
+  const strikes = [...svg.querySelectorAll<SVGPathElement>('.strike')].map((s) => ({ s, len: 0 }));
+  let L = 0;
+  const measure = () => {
+    L = arc.getTotalLength();
+    for (const k of strikes) { k.len = k.s.getTotalLength(); k.s.style.strokeDasharray = `${k.len.toFixed(1)}`; }
+  };
+  const run = (p: number) => {
+    moon.style.opacity = String(1 - clamp((p - 0.08) / 0.22));
+    const t = out(clamp((p - 0.1) / 0.42));
+    const at = arc.getPointAtLength(L * lerp(0.03, 0.3, t));
+    sun.style.transform = `translate(${at.x.toFixed(1)}px, ${at.y.toFixed(1)}px)`;
+    sun.style.opacity = String(clamp(t * 5));
+    morning.style.opacity = String(clamp((p - 0.46) / 0.1));
+    slips.forEach(({ g, dx, dy }, i) => {
+      const e = inOut(clamp((p - 0.18 - i * 0.06) / 0.3));
+      g.style.transform = `translate(${(dx * e).toFixed(1)}px, ${(dy * e - Math.sin(Math.PI * e) * 26).toFixed(1)}px)`;
+      g.classList.toggle('carried', e >= 1);
+    });
+    strikes.forEach(({ s, len }, i) => { s.style.strokeDashoffset = (len * (1 - clamp((p - 0.56 - i * 0.07) / 0.12))).toFixed(1); });
+    note.style.opacity = String(clamp((p - 0.76) / 0.1));
+  };
+  return { run, measure };
+}
+function calm(el: HTMLElement): Scene | null {
+  const arts = [...el.querySelectorAll<SVGSVGElement>('.calm-art')].map(calmArt).filter((a) => a !== null);
+  if (!arts.length) return null;
+  return { el, run: (p) => { for (const a of arts) a.run(p); }, measure: () => { for (const a of arts) a.measure(); } };
+}
+
 // Pinned scenes advance with the scroll position. One listener, one frame of work per scroll.
 export function scenes() {
-  if (!motionOn()) return;
-  const list: Scene[] = [];
   const p = document.getElementById('pain');
+  if (!motionOn()) { if (p) pain(p, false); return; } // still picture; on a phone, the tall pile
+  const list: Scene[] = [];
   const c = document.getElementById('capture');
-  if (p) list.push(pain(p));
+  const n = document.getElementById('calm');
+  const gather = p ? pain(p, true) : null;
+  if (gather) list.push(gather);
   const cap = c ? capture(c) : null;
   if (cap) list.push(cap);
+  const night = n ? calm(n) : null;
+  if (night) list.push(night);
   if (!list.length) return;
   document.documentElement.classList.add('scenes-on');
   let queued = false;
+  // A scene measures itself only when it comes near, so the page does no layout work up front
+  // for scenes far below.
+  const dirty = new Set(list);
   const tick = () => {
     queued = false;
     const vh = window.innerHeight;
     for (const s of list) {
       const r = s.el.getBoundingClientRect();
       if (r.bottom < -vh || r.top > vh * 2) continue;
+      if (dirty.delete(s)) s.measure?.();
       const span = r.height - vh;
       s.run(span > 0 ? clamp(-r.top / span) : clamp((vh - r.top) / vh));
     }
   };
   const request = () => { if (!queued) { queued = true; requestAnimationFrame(tick); } };
-  const remeasure = () => { for (const s of list) s.measure?.(); request(); };
+  const remeasure = () => { for (const s of list) dirty.add(s); request(); };
   window.addEventListener('scroll', request, { passive: true });
   window.addEventListener('resize', remeasure);
   remeasure();

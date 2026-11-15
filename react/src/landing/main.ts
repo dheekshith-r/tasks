@@ -4,6 +4,7 @@ import '@fontsource/kalam/400.css';
 import { readConfig } from '../firebaseConfig';
 import { addFromStartPage } from '../handoff';
 import { parseLine } from './parseLine';
+import { closeDay, demo, freeList, heard, keyboard, privacy, whenNear } from './parts';
 import { captureDates, heroIntro, inkFrame, lineMirror, scenes } from './scenes';
 import './landing.css';
 
@@ -117,10 +118,18 @@ fill();
 const frame = document.getElementById('frame');
 const mirror = document.querySelector<HTMLElement>('.line-mirror-in');
 if (frame) { inkFrame(frame); heroIntro(frame, document.querySelector('.chute'), document.querySelector('.aside')); }
-document.querySelectorAll<HTMLElement>('.cap-frame').forEach(inkFrame);
 if (mirror) lineMirror(input, mirror);
 captureDates();
 scenes();
+// Below the first screen, each part sets itself up when you scroll near it.
+const near = (sel: string, fn: () => void) => whenNear(document.querySelector(sel), fn);
+document.querySelectorAll<HTMLElement>('.cap-frame, .demo-frame, .close-frame').forEach((f) => whenNear(f, () => inkFrame(f)));
+near('#demo', demo);
+near('#keys', keyboard);
+near('#heard', heard);
+near('#free', freeList);
+near('#privacy', privacy);
+near('#close', closeDay);
 
 input.addEventListener('input', () => {
   if (input.getAttribute('aria-invalid')) { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
