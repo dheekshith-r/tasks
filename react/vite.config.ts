@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { changelogItems } from './src/landing/changelog';
 
 // GitHub Pages cannot send HTTP headers, so the Content Security Policy goes in a meta tag.
 // It is added at build time only (dev mode injects its own inline scripts), and every inline
@@ -55,9 +56,8 @@ function csp(authDomain?: string): Plugin {
   };
 }
 
-// "Built in the open" on the start page lists the latest commits. They are read from git when the
-// site is built, escaped, and written into the HTML, so the page makes no request for them.
-const escapeHtml = (t: string) => t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+// "Every change is public" on the start page lists the latest commits. They are read from git when
+// the site is built and escaped in src/landing/changelog.ts, so the page makes no request for them.
 function changelog(): Plugin {
   return {
     name: 'changelog',
@@ -65,13 +65,7 @@ function changelog(): Plugin {
       if (!html.includes('<!--changelog-->')) return html;
       let items = '';
       try {
-        const log = execFileSync('git', ['log', '-n', '6', '--no-merges', '--format=%cs%x09%s'], { encoding: 'utf8', timeout: 5000 });
-        items = log.split('\n').map((line) => {
-          const tab = line.indexOf('\t');
-          const date = line.slice(0, tab), msg = line.slice(tab + 1).trim();
-          return tab > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date) && msg
-            ? `<li><time datetime="${date}">${date}</time><span class="msg">${escapeHtml(msg)}</span></li>` : '';
-        }).join('');
+        items = changelogItems(execFileSync('git', ['log', '-n', '6', '--no-merges', '--format=%cs%x09%s'], { encoding: 'utf8', timeout: 5000 }));
       } catch { /* no git here: the link to the full history is enough */ }
       return html.replace('<!--changelog-->', items || '<li><span class="msg">The full history is on GitHub.</span></li>');
     },

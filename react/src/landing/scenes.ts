@@ -111,7 +111,7 @@ export function heroIntro(frame: HTMLElement, chute: Element | null, aside: HTML
       { transform: `translate(${dx}px, ${dy - 80}px) rotate(-7deg) scale(.45)`, opacity: 0 },
       { transform: `translate(${dx}px, ${dy}px) rotate(-3deg) scale(.5)`, opacity: 1, offset: 0.3 },
       { transform: 'none', opacity: 1 },
-    ], { duration: DUR, delay: START + i * GAP, easing: 'cubic-bezier(.23, 1, .32, 1)', fill: 'backwards' });
+    ], { duration: DUR, delay: START + i * GAP, easing: 'cubic-bezier(.23, 1, .32, 1)', fill: 'backwards' }); // = --ease-out (script cannot read CSS variables here)
   });
   setTimeout(() => { root.classList.remove('intro'); aside?.classList.add('drawn'); }, START + slips.length * GAP + DUR - 120);
 }

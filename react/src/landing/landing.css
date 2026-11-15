@@ -15,6 +15,7 @@
   --max: 1200px;
   --gutter: max(20px, env(safe-area-inset-left, 0px));
   --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1); /* for things that move across the screen */
   color-scheme: light;
 }
 :root[data-theme='dark'] {
@@ -37,7 +38,7 @@ body {
 ::selection { background: var(--sun); color: var(--sun-ink); }
 a { color: inherit; text-underline-offset: 3px; }
 :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
-h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; }
+h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; overflow-wrap: break-word; } /* a word wider than a phone at 200% text breaks instead of being cut off */
 p, dd, li { margin: 0; text-wrap: pretty; }
 kbd {
   display: inline-block; min-width: 1.9em; padding: 1px 7px; text-align: center; white-space: nowrap;
@@ -55,7 +56,7 @@ kbd {
 .btn {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px;
   border: 0; border-radius: 2px; font: 800 1rem var(--font); text-decoration: none; cursor: pointer; touch-action: manipulation;
-  transition: transform 120ms var(--ease-out), background-color 150ms ease-out;
+  transition: transform 120ms var(--ease-out), background-color 150ms ease;
 }
 .btn:active { transform: scale(.97); }
 .btn-red { background: var(--red); color: var(--red-ink); }
@@ -117,7 +118,7 @@ kbd {
 .m-list { box-shadow: 0 0 0 1.5px var(--ink); }
 .try-row .btn { flex: 1 0 auto; min-height: 56px; font-size: 1.0625rem; }
 .status-line { min-height: 1.6em; margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
-.status-line [role='status'] { font-weight: 700; }
+.status-line [role='status'] { min-width: 0; font-weight: 700; overflow-wrap: anywhere; } /* a long typed word wraps */
 .status-line [role='status'][data-error] { color: var(--red-text); }
 
 /* The handwritten aside: an arrow that draws itself toward the box after the frame has filled. */
@@ -126,8 +127,8 @@ kbd {
 .aside-arrow .draw { stroke-dasharray: 140; stroke-dashoffset: 0; }
 .intro .aside { opacity: 0; }
 .intro .aside .draw { stroke-dashoffset: 140; }
-.aside.drawn { opacity: 1; transition: opacity 300ms ease-out; }
-.aside.drawn .draw { stroke-dashoffset: 0; transition: stroke-dashoffset 700ms cubic-bezier(.65, 0, .35, 1) 150ms; }
+.aside.drawn { opacity: 1; transition: opacity 300ms var(--ease-out); }
+.aside.drawn .draw { stroke-dashoffset: 0; transition: stroke-dashoffset 700ms var(--ease-in-out) 150ms; }
 
 .hero-frame { position: relative; padding-top: 124px; }
 .chute { position: absolute; top: 0; right: 16%; width: 220px; height: 132px; overflow: visible; }
@@ -148,7 +149,7 @@ kbd {
 .slip { position: relative; background: var(--slip); box-shadow: var(--slip-shadow); padding: 12px 14px; }
 .slip-text { font-size: 1rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
 .slip-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font: 500 .75rem/1.4 var(--mono); color: var(--muted); }
-.tag { font: 600 .8125rem/1.4 var(--mono); padding: 1px 6px; box-shadow: inset 0 0 0 1.5px currentColor; }
+.tag { font: 600 .8125rem/1.4 var(--mono); padding: 1px 6px; box-shadow: inset 0 0 0 1.5px currentColor; overflow-wrap: anywhere; min-width: 0; } /* a long list name wraps, never widens the page */
 .slip-meta .tag { font-size: .75rem; box-shadow: none; padding: 0; }
 .tag-high, .slip-meta .tag-high { background: var(--red); color: var(--red-ink); padding: 1px 6px; font-weight: 700; box-shadow: none; }
 .tag-day { background: var(--sun); color: var(--sun-ink); box-shadow: none; }
@@ -181,6 +182,9 @@ main h2:not(.label) span { color: var(--muted); } /* slot labels are headings to
 .pain-art { width: 100%; height: auto; margin-top: 20px; overflow: visible; }
 .motion .pain-art { max-height: calc(100svh - 260px); }
 .piece, .envelope { transform-box: fill-box; transform-origin: center; }
+/* Text in the moving drawings scales as geometry. Without this, Chrome lays the SVG text out again
+   on every scroll frame while its group shrinks (measured: 49 ms layouts, 30 fps on a slowed phone). */
+.pain-art text, .calm-art text { text-rendering: geometricPrecision; }
 .envelope { opacity: .35; }
 .scenes-on .envelope { opacity: 0; }
 
@@ -199,7 +203,7 @@ main h2:not(.label) span { color: var(--muted); } /* slot labels are headings to
 .scenes-on .cap-caret { display: block; }
 .hid { visibility: hidden; }
 .intro .slip { z-index: 3; }
-.tok { padding: 0 .12em; transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out; }
+.tok { padding: 0 .12em; transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease; }
 .tok-due { background: linear-gradient(transparent 58%, var(--sun) 58%); }
 .tok-pr { background: var(--red); color: var(--red-ink); }
 .tok-list { box-shadow: inset 0 0 0 2px var(--ink); }
@@ -325,9 +329,9 @@ mark { background: linear-gradient(transparent 58%, var(--sun) 58%); color: inhe
 .free-sec, .priv-sec, .open-sec, .faq-sec, .close-sec { border-top: 3px solid var(--frame); padding-block: 96px; }
 .free-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 48px; align-items: start; margin-top: 36px; }
 .lit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.lit-list li { position: relative; padding: 8px 0 8px 48px; font: 800 clamp(1.375rem, 2.6vw, 2.125rem)/1.2 var(--font); letter-spacing: -.02em; transition: color 200ms ease-out; }
+.lit-list li { position: relative; padding: 8px 0 8px 48px; font: 800 clamp(1.375rem, 2.6vw, 2.125rem)/1.2 var(--font); letter-spacing: -.02em; transition: color 200ms ease; }
 .lit-list li::before { content: ""; position: absolute; left: 0; top: calc(8px + .14em); width: 28px; height: 28px; box-shadow: inset 0 0 0 2.5px var(--ink); }
-.lit-list li::after { content: ""; position: absolute; left: 7px; top: calc(8px + .26em); width: 15px; height: 8px; border-left: 3px solid var(--ink); border-bottom: 3px solid var(--ink); transform: rotate(-45deg); transition: opacity 160ms ease-out, transform 220ms var(--ease-out); }
+.lit-list li::after { content: ""; position: absolute; left: 7px; top: calc(8px + .26em); width: 15px; height: 8px; border-left: 3px solid var(--ink); border-bottom: 3px solid var(--ink); transform: rotate(-45deg); transition: opacity 160ms var(--ease-out), transform 220ms var(--ease-out); }
 .scenes-on .lit-list li:not(.lit) { color: var(--muted); }
 .scenes-on .lit-list li:not(.lit)::after { opacity: 0; transform: rotate(-45deg) scale(.5); }
 .free-stamp { position: sticky; top: 120px; display: block; width: 100%; max-width: 240px; color: var(--mark); transform: rotate(-12deg); }
@@ -335,7 +339,7 @@ mark { background: linear-gradient(transparent 58%, var(--sun) 58%); color: inhe
 .stamp-ring.thin { stroke-width: 2.5; }
 .stamp-t { fill: currentColor; font-family: var(--mono); font-weight: 800; }
 .scenes-on .free-stamp:not(.landed) { opacity: 0; transform: rotate(-12deg) scale(1.3); }
-.free-stamp.landed { transition: transform 260ms var(--ease-out), opacity 120ms ease-out; }
+.free-stamp.landed { transition: transform 260ms var(--ease-out), opacity 120ms var(--ease-out); }
 .free-sec .sub { margin-top: 36px; }
 .free-sec { overflow-x: clip; } /* the stamp starts large before it lands */
 
@@ -355,8 +359,10 @@ mark { background: linear-gradient(transparent 58%, var(--sun) 58%); color: inhe
 .facts dd { margin: 4px 0 0; color: var(--muted); }
 .house-art { display: block; width: 100%; max-width: 460px; height: auto; justify-self: center; overflow: visible; }
 .letter-copy, .sync-line { opacity: 0; }
-.letter-copy { transform-box: fill-box; transform-origin: center; transition: transform 640ms cubic-bezier(.77, 0, .175, 1), opacity 160ms ease-out; }
-.sync-line { transition: opacity 200ms ease-out 300ms; }
+/* Going home, the copy stays visible until it arrives, then fades: it leaves the way it came. */
+.letter-copy { transform-box: fill-box; transform-origin: center; transition: transform 640ms var(--ease-in-out), opacity 160ms var(--ease-out) 480ms; }
+.sync .letter-copy { transition: transform 640ms var(--ease-in-out), opacity 160ms var(--ease-out); }
+.sync-line { transition: opacity 200ms var(--ease-out) 300ms; }
 .sync .letter-copy { opacity: 1; transform: translate(82px, -156px) scale(.55); }
 .sync .sync-line { opacity: 1; }
 
@@ -395,6 +401,9 @@ mark { background: linear-gradient(transparent 58%, var(--sun) 58%); color: inhe
 .close-slot > .label { grid-column: 1 / -1; }
 .close-slips { grid-column: 2; grid-row: 2 / span 3; justify-self: stretch; align-self: center; margin-top: 48px; padding: 0 40px 0 0; }
 .close-slips:empty { display: none; }
+.slip.slip-empty { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
+.slip-empty .slip-text { color: var(--muted); font-weight: 600; }
+.motion .close-slips .stamped .postmark { animation: stamp 180ms var(--ease-out) 350ms both; } /* your line, postmarked again */
 main .close-slot h2 { margin: 56px 32px 0; font-size: clamp(2.5rem, 6.4vw, 5.25rem); }
 .btn-huge { margin: 36px 32px 0; min-height: 72px; padding: 0 40px; font-size: 1.375rem; }
 .aside.close-aside { margin: 20px 0 0 56px; justify-self: auto; font-size: 1.625rem; transform: rotate(-3deg); }
@@ -460,11 +469,11 @@ main .close-slot h2 { margin: 56px 32px 0; font-size: clamp(2.5rem, 6.4vw, 5.25r
   .nav-links .anchor { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn { transition: background-color 150ms ease-out; }
+  .btn { transition: background-color 150ms ease; }
   .btn:active { transform: none; }
   .slip.fresh { animation: none; }
   .slip.fresh .postmark { animation: stamp-soft 120ms var(--ease-out) 40ms both; } /* a fade, no movement */
   .tok { transition: none; }
-  .demo-dock button, .lit-list li, .lit-list li::after, .letter-copy, .sync-line, .free-stamp.landed { transition: none; }
+  .demo-dock button, .lit-list li, .lit-list li::after, .letter-copy, .sync .letter-copy, .sync-line, .free-stamp.landed { transition: none; }
   .demo-dock button:active { transform: none; }
 }

@@ -138,6 +138,7 @@ export function demo() {
     input.placeholder = placeholder;
     input.setAttribute('aria-label', label);
     input.autocomplete = 'off';
+    input.maxLength = 120; // the app's own limit for a task
     input.enterKeyHint = label.startsWith('Search') ? 'search' : 'go'; // the phone keyboard's Enter says what it does
     input.addEventListener('input', () => onInput(input.value));
     return input;
@@ -395,16 +396,20 @@ export function closeDay() {
   label.textContent = 'Today · ';
   label.append(el('span', 'date', shortDay(dayAt(0))));
   if (!slips) return;
-  // "Your list is waiting": today's slips from the top of the page, and the line you added there,
-  // copied fresh each time the closing frame comes into view.
+  // "Your list is waiting": the line you added at the top, postmarked again. If you added none,
+  // an empty slip invites the first one. Sample tasks never appear here: they are not your list.
   new IntersectionObserver((entries) => {
     if (!entries.some((e) => e.isIntersecting)) return;
     const mine = document.querySelector('#frame .slip.fresh');
-    const today = [...document.querySelectorAll('#frame [data-slot="today"] .slip')].filter((n) => n !== mine);
-    slips.replaceChildren(...[mine, ...today].filter(Boolean).slice(0, 3).map((n) => {
-      const copy = n!.cloneNode(true) as HTMLElement;
+    if (mine) {
+      const copy = mine.cloneNode(true) as HTMLElement;
       copy.classList.remove('fresh');
-      return copy;
-    }));
+      copy.classList.add('stamped');
+      slips.replaceChildren(copy);
+    } else if (!slips.querySelector('.slip-empty')) {
+      const empty = el('li', 'slip slip-empty');
+      empty.append(el('p', 'slip-text', 'Your first task lands here.'));
+      slips.replaceChildren(empty);
+    }
   }, { threshold: 0.2 }).observe(slips.parentElement!);
 }
