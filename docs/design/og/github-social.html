@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tasks GitHub preview</title>
+<style>
+@font-face { font-family: "Overpass"; src: url("../../../react/node_modules/@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Overpass Mono"; src: url("../../../react/node_modules/@fontsource-variable/overpass-mono/files/overpass-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 300 700; }
+html, body { margin: 0; }
+body { width: 1280px; height: 640px; overflow: hidden; background: #FFFFFF; color: #161616; font-family: "Overpass", sans-serif; -webkit-font-smoothing: antialiased; position: relative; }
+.top { position: absolute; left: 56px; right: 56px; top: 40px; display: flex; justify-content: space-between; align-items: center; }
+.brand { display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 32px; }
+.facts { font: 600 19px "Overpass Mono", monospace; color: #4A4A4A; }
+h1 { position: absolute; left: 56px; top: 104px; margin: 0; width: 1000px; font-size: 70px; line-height: 1; font-weight: 800; letter-spacing: -0.03em; }
+.frame { position: absolute; left: 56px; top: 300px; width: 1228px; height: 400px; display: grid; grid-template-columns: 470px 400px 1fr; gap: 4px; background: #161616; border-top: 4px solid #161616; border-left: 4px solid #161616; }
+.slot { background: #F3F3F1; box-shadow: inset 0 16px 20px -16px rgba(0,0,0,.3); position: relative; }
+.slot.in { background: #FFFFFF; box-shadow: none; }
+.label { display: inline-block; background: #FFC53D; color: #161616; padding: 7px 14px; font-weight: 800; font-size: 17px; letter-spacing: .09em; text-transform: uppercase; }
+.line { margin: 26px 28px 0; height: 64px; border: 3px solid #161616; display: flex; align-items: center; padding: 0 18px; font-weight: 600; font-size: 22px; white-space: nowrap; overflow: hidden; }
+.tok-day { background: #FFC53D; padding: 0 4px; }
+.tok-high { background: #D62839; color: #FFFFFF; padding: 0 6px; margin: 0 6px; }
+.btn { margin: 14px 28px 0; height: 60px; background: #D62839; color: #FFFFFF; display: grid; place-items: center; font-weight: 800; font-size: 22px; }
+.slips { padding: 18px 22px 0; display: grid; gap: 12px; }
+.slip { position: relative; background: #FFFFFF; box-shadow: 0 1px 0 rgba(0,0,0,.16), 0 2px 6px rgba(0,0,0,.06); padding: 14px 16px; }
+.slip p { margin: 0; font-weight: 600; font-size: 21px; line-height: 1.25; }
+.meta { margin-top: 8px; display: flex; gap: 10px; font: 600 15px "Overpass Mono", monospace; color: #4A4A4A; }
+.meta .high { background: #D62839; color: #FFFFFF; padding: 0 6px; font-weight: 700; }
+.postmark { position: absolute; right: -52px; top: -26px; width: 150px; height: 78px; color: #D62839; transform: rotate(-10deg); opacity: .92; }
+.postmark text { fill: #D62839; font-family: "Overpass Mono", monospace; font-weight: 700; }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute"><filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter></svg>
+  <div class="top">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 26 26"><rect x="1.5" y="1.5" width="23" height="23" fill="none" stroke="#161616" stroke-width="2.5"/><path d="M13 2v22M2 13h22" stroke="#161616" stroke-width="2"/><rect x="15.5" y="4.5" width="6" height="6" fill="#D62839"/></svg>
+      Tasks
+    </div>
+    <div class="facts">Free · open source · no account</div>
+  </div>
+  <h1>Write it once. Tasks files it under the right day.</h1>
+  <div class="frame">
+    <div class="slot in">
+      <span class="label">In · one line at a time</span>
+      <div class="line">Renew passport&nbsp;<span class="tok-day">tomorrow</span><span class="tok-high">!high</span></div>
+      <div class="btn">Add to my list</div>
+    </div>
+    <div class="slot">
+      <span class="label">Today</span>
+      <div class="slips">
+        <div class="slip"><p>Call Amma about Sunday lunch</p><div class="meta"><span>#family</span></div></div>
+        <div class="slip"><p>Pick up the dry-cleaning</p><div class="meta"><span>#home</span></div></div>
+      </div>
+    </div>
+    <div class="slot">
+      <span class="label">Tomorrow</span>
+      <div class="slips">
+        <div class="slip"><p>Renew passport</p><div class="meta"><span class="high">!high</span></div>
+          <svg class="postmark" viewBox="0 0 124 64"><g filter="url(#ink)" fill="none" stroke="currentColor"><circle cx="32" cy="32" r="28" stroke-width="2.2"/><circle cx="32" cy="32" r="21" stroke-width="1.2"/><path d="M64 20 q7 -6 14 0 t14 0 t14 0 t14 0" stroke-width="2"/><path d="M64 29 q7 -6 14 0 t14 0 t14 0 t14 0" stroke-width="2"/><path d="M64 38 q7 -6 14 0 t14 0 t14 0 t14 0" stroke-width="2"/><path d="M64 47 q7 -6 14 0 t14 0 t14 0 t14 0" stroke-width="2"/></g><text x="32" y="30" text-anchor="middle" font-size="9">FILED</text><text x="32" y="41" text-anchor="middle" font-size="7">TASKS</text></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
