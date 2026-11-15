@@ -52,6 +52,7 @@ export default function Palette({ items, onClose }: Props) {
           ))}
           {filtered.length === 0 && <li className="none" role="presentation">No matches</li>}
         </ul>
+        <p className="palette-foot" aria-hidden="true"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> run</span><span><kbd>Esc</kbd> close</span></p>
         <p className="sr-only" role="status">{q.trim() ? (filtered.length ? `${filtered.length} ${filtered.length === 1 ? 'match' : 'matches'}` : 'No matches') : ''}</p>
       </div>
     </>

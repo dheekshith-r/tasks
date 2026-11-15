@@ -279,7 +279,7 @@ describe('TaskItem', () => {
   it('only shows the repeat label when the task can actually repeat', () => {
     expect(renderItem({ ...base, repeat: 'weekly' }).li.textContent).not.toMatch(/repeats/i);
     cleanup();
-    expect(renderItem({ ...base, repeat: 'weekly', dueDate: '2030-01-01' }).li.textContent).toMatch(/Repeats weekly/);
+    expect(renderItem({ ...base, repeat: 'weekly', dueDate: '2030-01-01' }).li.textContent).toMatch(/repeats weekly/); // lower case, as the start page writes it
   });
 
   it('highlights search matches, including queries with regex characters', () => {
