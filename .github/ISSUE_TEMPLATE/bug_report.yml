@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in Tasks does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for the report. Please do not paste your real tasks here; this page is public.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Tell us what you saw, and what you expected to see.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it again
+      placeholder: |
+        1. Open the app
+        2. Type "Pay rent friday" and press Enter
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where?
+      options:
+        - The app
+        - The start page
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: For example, Pixel 8 with Chrome 142, or Windows 11 with Edge 142
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Account
+      options:
+        - Guest mode (no sign-in)
+        - Signed in with Google
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or anything else

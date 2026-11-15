@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 26 26">
+  <style>
+    .ink { stroke: #161616; }
+    @media (prefers-color-scheme: dark) { .ink { stroke: #f2f2f2; } }
+  </style>
+  <rect class="ink" x="1.5" y="1.5" width="23" height="23" fill="none" stroke-width="2.5"/>
+  <path class="ink" d="M13 2v22M2 13h22" stroke-width="2"/>
+  <rect x="15.5" y="4.5" width="6" height="6" fill="#D62839"/>
+</svg>
