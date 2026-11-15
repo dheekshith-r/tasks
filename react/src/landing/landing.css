@@ -38,7 +38,7 @@ body {
 ::selection { background: var(--sun); color: var(--sun-ink); }
 a { color: inherit; text-underline-offset: 3px; }
 :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
-h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; overflow-wrap: break-word; } /* a word wider than a phone at 200% text breaks instead of being cut off */
+h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; overflow-wrap: anywhere; } /* a word wider than a phone at 200% text breaks instead of widening the page */
 p, dd, li { margin: 0; text-wrap: pretty; }
 kbd {
   display: inline-block; min-width: 1.9em; padding: 1px 7px; text-align: center; white-space: nowrap;
@@ -94,7 +94,7 @@ kbd {
   font: 800 .75rem/1.2 var(--font); letter-spacing: .09em; text-transform: uppercase;
 }
 .label .date { font-family: var(--mono); font-weight: 700; letter-spacing: .04em; }
-.hero-copy { display: grid; gap: 18px; padding-top: 28px; position: relative; }
+.hero-copy { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding-top: 28px; position: relative; }
 .hero h1 { font-size: clamp(2.5rem, 4.3vw, 3.6rem); font-weight: 800; letter-spacing: -.03em; }
 .hero h1 span { color: var(--muted); }
 .lede { font-size: clamp(1.0625rem, 1.4vw, 1.1875rem); color: var(--muted); max-width: 46ch; }
@@ -178,7 +178,7 @@ main h2:not(.label) span { color: var(--muted); } /* slot labels are headings to
 .sub { margin-top: 14px; color: var(--muted); max-width: 58ch; font-size: 1.125rem; }
 
 /* 2 · Pain */
-.pain-in { display: grid; }
+.pain-in { display: grid; grid-template-columns: minmax(0, 1fr); }
 .pain-art { width: 100%; height: auto; margin-top: 20px; overflow: visible; }
 .motion .pain-art { max-height: calc(100svh - 260px); }
 .piece, .envelope { transform-box: fill-box; transform-origin: center; }
@@ -192,7 +192,7 @@ main h2:not(.label) span { color: var(--muted); } /* slot labels are headings to
 .day-sec { position: relative; border-top: 3px solid var(--frame); }
 .day-sec + .day-sec { border-top: 0; }
 .day-sec::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(max(0px, (100% - var(--max)) / 2) + var(--gutter)); width: 2px; background: var(--frame); } /* the day line */
-.day-in { position: relative; padding-left: calc(var(--gutter) + 32px); display: grid; }
+.day-in { position: relative; padding-left: calc(var(--gutter) + 32px); display: grid; grid-template-columns: minmax(0, 1fr); }
 .day-sec:not(.scene) .day-in { padding-block: 88px; }
 .day-time { display: flex; align-items: center; gap: 10px; margin: 0 0 14px -41px; font: 700 .9375rem var(--mono); color: var(--muted); }
 .day-dot { width: 20px; height: 20px; background: var(--red); box-shadow: 0 0 0 5px var(--bg); }
