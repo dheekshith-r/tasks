@@ -364,6 +364,223 @@ Rule from `references/README.md`: copy the principles, not the style, art, typef
 
 ---
 
+## Live sites, captured 2026-11-15 (in `live/`)
+
+Captured with a script (Playwright + installed Edge, 1280x800, every screen of the page, hero frames at 0.4 s to 4 s). Full notes per site, with page height, image and animation counts, are in the repo at `docs/design/STUDY.md`.
+
+### live/things-1-icon-hero.png
+- The only image in the first screen is the app icon, drawn as a 3D object: a blue inbox tray holding a white card with a dark check mark, with a soft shadow under it.
+- Under it: the name "Things" in heavy grey sans, one centred sentence, and a blue "Watch Introduction Video" link with a round play icon. No button.
+- The frames at 0.4 s and 4 s are identical: the hero does not move at all.
+- **Principle:** One crafted object can carry a whole first screen if it is made with real care. (P16)
+
+### live/things-2-tilted-app.png
+- The Mac app is shown huge and in 3D perspective, tilted up to the right, cut off by the right edge and by the section below.
+- The type inside the app ("Inbox, Today, Upcoming, Anytime, Someday", "Prepare Presentation") is so large it reads as a landscape.
+- The next section starts with a small three-circle colour icon beside "Simply Powerful".
+- **Principle:** Show the real product at an unusual scale and angle; cropping says there is more. (P2)
+
+### live/things-3-every-device.png
+- A phone and a Mac window side by side, both full of believable life: "Marc's birthday", "7:00 AM Hit the gym with Alex", "Vacation in Rome", "Throw Party for Eve".
+- The Mac window shows a project with sections ("Slides and notes", "Preparation"), tags ("Important") and a date chip ("Nov 13").
+- An iPad and a Watch begin to appear at the bottom edge.
+- **Principle:** Demo data from a believable life makes the product feel lived in. (P15)
+
+### live/things-4-icon-bookend.png
+- The download cards end; then the app icon returns, enormous and cut off by the next section's edge.
+- The next section ("What People Are Saying") has a speech-bubble icon in the brand blue.
+- Price and system needs sit plainly on each device card ("macOS 13.3 or later, $49.99").
+- **Principle:** Repeat the made object at a different scale to bridge two sections. (P16)
+
+### live/todoist-1-parsed-tokens-hero.png
+- Headline "Clarity, finally." left; a desktop app with a phone over it on a soft peach panel right.
+- In the phone, the quick-add line "Write agenda for Monday's meeting tomorrow #Website Update +Paul" shows each understood token in colour ("tomorrow", "#Website Update", "+Paul").
+- Proof right below: "347K+ ★★★★★ reviews" and press quotes in italic serif with The Verge and PC Mag logos.
+- **Principle:** Show the parsing working inside the product in the first screen. (P17)
+
+### live/todoist-2-calendar-now-line.png
+- An "Upcoming" week calendar with real-looking blocks ("Record intro video", "Customer interviews 11:00 AM–03:00 PM", "Deep work").
+- A red "now" line crosses the week at "12:09 PM".
+- Left: an orange kicker "Plan with confidence", a heading and one paragraph.
+- **Principle:** A "now" marker makes a static screenshot feel live. (P18)
+
+### live/todoist-3-drawn-character.png
+- A hand-drawn white blob character with a yellow shadow, hand on chin, stands beside "What's Todoist?" in heavy type on a yellow card.
+- It fronts a video ("Play" pill) among real product tiles (phone widget, watch "Add task").
+- The drawing has a loose, human line: uneven outline, flat fills.
+- **Principle:** One hand-drawn character among product shots gives the page a human voice. (P1)
+
+### live/todoist-4-years-and-days.png
+- "A task manager you can trust for life" with "We've been building Todoist for 19 years and 289 days."
+- 3D-illustrated stat objects in a carousel: a green arrow growing a yellow flower above "30+ million app downloads".
+- A red kicker "In it for the long haul".
+- **Principle:** A precise, ticking number earns trust that a round number cannot. (P19)
+
+### live/superlist-1-two-tone-hero.png
+- Dark ground; headline in two lines, the second in brand red ("Tasks, notes, and plans. / Finally in one app.").
+- One sentence ending "From the creators of Wunderlist", one red pill button.
+- The product loads later below the fold (lazy, animated in).
+- **Principle:** Split the headline into a statement and a payoff, and colour only the payoff. (P20)
+
+### live/superlist-2-auto-tabs.png
+- Left: three feature items with a vertical progress bar ("Plan your day", "Stay on top of work", "Keep home in sync"); the active one is bright, the others grey.
+- Right: a phone on a saturated blue panel showing the active item, with a real photo inside the app.
+- Above: a two-tone statement, white then grey ("Stop juggling five different apps. / Superlist makes it simple…").
+- **Principle:** Let features advance on their own, with a visible timer, beside one large product view. (P21)
+
+### live/superlist-3-scroll-type-list.png
+- A list of features in huge type ("Real-time collaboration / Repeatable tasks / Offline Support / Widgets / Nested Lists & Tasks / Multiplatform").
+- The line in focus is white; the lines below fade through light grey to dark grey.
+- Nothing else on the screen: type alone is the visual.
+- **Principle:** Type can be the motion: lines light up as you scroll. (P21)
+
+### live/superlist-4-reviews-wall-cta.png
+- The final call to action ("Start bringing balance back to your life.", "Download for macOS") floats over a masonry wall of real reviews.
+- Each review shows the name and the store ("Rongax, iOS App Store", "Bernabé, Google Play Store").
+- The wall fades into the dark at the edges; a hand-drawn arrow sits by The Verge logo above.
+- **Principle:** Real customer words can become the texture behind the last button. (P4)
+
+### live/ticktick-1-default-hero.png
+- Centred headline "Stay Organized, Stay Creative.", two buttons (filled and outline), a pale blue-green wash.
+- A large real app screenshot rises from the fold (Today, Tomorrow, Next 7 Days, "Go Grocery Shopping" with Eggs, Milk, Bread).
+- Nothing on the screen is drawn or made: it is the category default.
+- **Principle:** Clean and complete is not enough; this is the page we must clearly beat. (anti-reference)
+
+### live/ticktick-2-fanned-press.png
+- A solid blue download band ends a section.
+- "Recommended by top media / A standout productivity app" in two colours.
+- Quote cards fanned like a slightly spread deck, MKBHD on top.
+- **Principle:** A physical gesture (a fanned deck) adds a little life to a plain quote row. (P4)
+
+### live/sunsama-1-three-beat-hero.png
+- An award badge ("Named Best Scheduling Tool by Wirecutter") above a three-beat headline ("Start Calm. / Stay Focused. / End Confident.").
+- An orange pill button with "14-day free trial / No credit card required" beside it.
+- A warm peach blur fills the right half; a logo marquee runs under the hero.
+- **Principle:** A three-beat headline gives the visitor a day in three words. (P22)
+
+### live/sunsama-2-pain-first.png
+- An emoji tile (an overheated face) above "Work is f***ing chaotic" in grey.
+- Three lines with red-x badges: "Always on, working late, never done", "Constantly interrupted and losing focus", "Struggling to manage tasks and meetings".
+- The peach blur continues; no product yet.
+- **Principle:** Name the pain in the user's blunt words before the cure. (P7)
+
+### live/sunsama-3-day-timeline.png
+- A thin vertical line runs down the left edge, joining the chapters of one day.
+- "Start each day with clarity" with the key word in orange, beside a planner and calendar view.
+- Under it, three cards with one sentence each ("Plan what you need to get done today…").
+- **Principle:** Organise the page as one day in the user's life, joined by a visible line. (P22)
+
+### live/tweek-1-app-is-the-page.png
+- The live week planner fills the screen ("November 2026 W46"); a warm card floats over it with the pitch.
+- A black blob-bird mascot is the logo; a green live dot reads "50 810 tasks, 11 551 active users / 24h".
+- The sample tasks teach the product: "Hi, I'm Tweek! 👋", "Choose a color", "12:00 PM Set a time".
+- **Principle:** Write the sample content as the tutorial; a live number proves the product is alive. (P23)
+
+### live/structured-1-film-hero.png
+- A full-bleed, sound-off film of real life: a sunlit café, someone knitting beside a laptop.
+- A frosted pill nav floats over it; a scroll-down arrow sits at the bottom centre.
+- No headline over the film at all.
+- **Principle:** A real moment of life can open the page before any words. (P14)
+
+### live/structured-2-handwriting.png
+- The page turns salmon; "your all in one / focus timer" in light plus bold weights.
+- A handwritten word writes itself at the top left ("with St…", caught mid-stroke).
+- A hand-drawn curve points at the button "Start planning for free!".
+- **Principle:** Motion that looks made by a hand (writing, a drawn arrow) reads as human. (P24)
+
+### live/structured-3-orbiting-icons.png
+- "one planner, one timeline, / 99 appointments": the last words change; light and bold weights in one line.
+- A phone timeline with 3D icons (phone, check, alarm, palm tree) orbiting and dropping into it.
+- A blush pink field, a frosted nav.
+- **Principle:** Objects that fly into the product show what it does without a caption. (P24)
+
+### live/structured-4-filling-paragraph.png
+- A giant paragraph across the screen: "visualize your day ☀ split it into tasks, set deadlines, get an overview 🕘 store your thoughts ☁ build habits…".
+- Small 3D icons sit inline between the phrases.
+- The words fill from pale to dark as you scroll (still mostly pale in this frame).
+- **Principle:** A paragraph that fills as you read turns a feature list into a moment. (P21)
+
+### live/mstodo-1-glass-render.png
+- Left: "Microsoft To Do", one sentence, "Download app" and "Open web app".
+- Right: the app (Work and Groceries lists) in a frosted glass panel over a render of 3D green glass tiles.
+- A sticky in-page tab bar (Overview, Features, Pricing, FAQ) under the hero.
+- **Principle:** A made render cannot rescue an interchangeable page. (anti-reference)
+
+### live/linear-live-1-staged-hero.png
+- At 0.4 s the hero is empty black; by 4 s the headline, sub-line and a full app window have arrived.
+- The app shows a live issue ("DRV-8852 Faster app launch", "In Progress").
+- "New / Loops →" sits at the right edge as a quiet news link.
+- **Principle:** A staged entrance (a held breath, then the product) makes the opening feel directed. (P25)
+
+### live/linear-live-2-thread-caret.png
+- A Slack-style thread beside a Linear board: lena, didier and andreas discuss a slow iOS launch.
+- The message times match the visitor's real clock (8:14 AM here, 10:03 AM on an earlier visit).
+- A caret blinks in the reply box after "@Linear create issues and assign to me".
+- **Principle:** A live scene with the visitor's own time and a typing caret beats a resting screenshot. (P18)
+
+### live/linear-live-3-data-art.png
+- A project timeline with diamond milestones ("UI Refresh", "Split fares") fades into a dot-swarm chart "Cycle time by agent".
+- Teal dots cluster by month, with soft red trend lines through them.
+- The section fades into black before a "+" feature index.
+- **Principle:** Real data, drawn well, is art. (P15)
+
+### live/raycast-1-brand-streaks.png
+- Headline "Your shortcut to everything." over grainy red diagonal light bars.
+- The bars follow the same diagonal as the Raycast logo.
+- At 0.4 s only the headline showed; the bars bloomed in by 4 s.
+- **Principle:** Make the hero art from the brand mark's own geometry. (P1)
+
+### live/raycast-2-feature-dock.png
+- A large product window (Clipboard History with real colour swatches, "Copied Today at 13:35", "Ctrl K" keycaps).
+- A dock of feature icons below it; the active one has a label "Clipboard History"; picking one swaps the window.
+- A two-tone caption: "Remember Everything. Stop playing Clipboard ping pong…".
+- **Principle:** Let the visitor switch the demo themselves with a dock of real features. (P3)
+
+### live/raycast-3-keyboard-tiles.png
+- A dark 3D keyboard (esc, §, 1, 2, 3, Z, X) where some keys become feature tiles.
+- The tiles: "Fast. Think in milliseconds.", "Ergonomic. Keyboard First.", "Personal. Your tools, your way.", "Reliable. 99.8% crash-free rate."
+- Left: "It's not about saving time. / It's about feeling like you're never wasting it."
+- **Principle:** Draw the core promise as a real object whose parts carry the message. (P16)
+
+### live/raycast-4-streaks-bookend.png
+- The red diagonal streaks return above the footer, cut off by the footer's top rule.
+- Then a six-column site map (Product, Core Features, Top Extensions, Company, Community, By Raycast).
+- "Install via WinGet" in mono at the top of the frame.
+- **Principle:** End with the same made art you opened with. (P16)
+
+### live/amie-1-languages-marquee.png
+- A greeting marquee in italic serif: "こんにちは · Hei · Bonjour · Hallo · नमस्ते · Ciao · Xin chào".
+- Under it, the exact claim: "We speak 17 languages really well. And 82 more without speaker labeling."
+- Above it, a real meeting summary with figures ("Twitter reaching 2.5k weekly views").
+- **Principle:** Show a claim in the user's own languages, then state it with exact numbers. (P19)
+
+### live/amie-2-real-review-arrow.png
+- A green handwritten note "This is a real review we got" with a looping arrow.
+- The arrow points at an actual email card: "From: Nish Budhraja", "Subject: Feedback - Loving the new Amie!".
+- Above: a quote bubble from the founder, with name and role.
+- **Principle:** Show proof as the real object, with a handwritten aside. (P4)
+
+### live/amie-3-annotated-product.png
+- A product window with a list of company pages (remote.com, screen.studio, craft.do).
+- An orange label "Company Pages" with a leader line points into the list.
+- Three tabs above the window ("Share with anyone", "Share like a document", "Ask in context").
+- **Principle:** Annotate the product like a technical drawing. (P8)
+
+### Principles added from the live sites
+
+| ID | Principle | Seen on |
+|---|---|---|
+| P16 | One crafted object, repeated at different scales (opening, bridge, close), is a page's identity. | Things, Raycast |
+| P17 | Show the parsing working inside the product in the first screen. | Todoist |
+| P18 | Make the demo live: a "now" line, the visitor's real clock, a typing caret, "just now". | Todoist, Linear |
+| P19 | A precise, ticking number earns trust ("19 years and 289 days", "11 551 active users / 24h", "17 languages"). | Todoist, Tweek, Amie |
+| P20 | Two-tone headlines: a statement, then a payoff in a second colour or grey. | Superlist, Linear, Raycast |
+| P21 | Type and lists move with the scroll (lines light up, a paragraph fills, tabs advance). | Superlist, Structured |
+| P22 | Tell the product as one day, joined by a visible line, pain first. | Sunsama |
+| P23 | The sample content is the tutorial. | Tweek |
+| P24 | Hand-made motion: writing that writes itself, drawn arrows, objects flying into the product. | Structured, Amie |
+| P25 | A staged entrance: a held breath, then the product arrives. | Linear, Raycast |
+
 ## Shared principles (IDs used in DIRECTIONS.md)
 
 | ID | Principle | Seen in |
