@@ -9,13 +9,22 @@
     "preview": "vite preview",
     "test": "vitest run",
     "contrast": "node scripts/contrast.mjs",
-    "csp": "node scripts/check-csp.mjs"
+    "csp": "node scripts/check-csp.mjs",
+    "test:rules": "npx --yes firebase-tools@15.36.0 emulators:exec --only firestore --project demo-tasks \"vitest run --config vitest.rules.config.ts\""
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.7"
   },
   "dependencies": {
+    "@fontsource-variable/overpass": "^5.3.0",
+    "@fontsource-variable/overpass-mono": "^5.3.0",
+    "@fontsource/kalam": "^5.3.0",
+    "firebase": "^13.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.6",

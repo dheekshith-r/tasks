@@ -32,7 +32,7 @@ export default function Palette({ items, onClose }: Props) {
   function onKey(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') { e.preventDefault(); setIndex(Math.min(active + 1, filtered.length - 1)); }
     if (e.key === 'ArrowUp') { e.preventDefault(); setIndex(Math.max(active - 1, 0)); }
-    if (e.key === 'Enter') choose(filtered[active]);
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) choose(filtered[active]); // not while an IME is composing
   }
 
   return (
@@ -52,6 +52,7 @@ export default function Palette({ items, onClose }: Props) {
           ))}
           {filtered.length === 0 && <li className="none" role="presentation">No matches</li>}
         </ul>
+        <p className="sr-only" role="status">{q.trim() ? (filtered.length ? `${filtered.length} ${filtered.length === 1 ? 'match' : 'matches'}` : 'No matches') : ''}</p>
       </div>
     </>
   );

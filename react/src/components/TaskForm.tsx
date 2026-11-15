@@ -1,10 +1,10 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import { parseQuickAdd } from '../quickadd';
 import type { Priority } from '../types';
 import { AlertIcon } from './icons';
 
 interface Props {
-  onAdd: (text: string, priority: Priority, dueDate?: string) => void;
+  onAdd: (text: string, priority: Priority, dueDate?: string, listName?: string) => void;
 }
 
 export default function TaskForm({ onAdd }: Props) {
@@ -12,28 +12,32 @@ export default function TaskForm({ onAdd }: Props) {
   const [priority, setPriority] = useState<Priority>('med');
   const [due, setDue] = useState('');
   const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function submit(e: FormEvent) {
     e.preventDefault();
     const parsed = parseQuickAdd(text);
     if (!parsed.text) {
       setError('Enter a task before adding it.');
+      inputRef.current?.focus(); // straight back to the field, so the fix is one keystroke away
       return;
     }
-    onAdd(parsed.text, parsed.priority ?? priority, parsed.dueDate ?? (due || undefined));
+    onAdd(parsed.text, parsed.priority ?? priority, parsed.dueDate ?? (due || undefined), parsed.listName);
     setText('');
     setDue('');
   }
 
   return (
     <form className="composer" onSubmit={submit} autoComplete="off">
+      <span className="in-label" aria-hidden="true">In · one line at a time</span>
       <label className="sr-only" htmlFor="new-task">New task</label>
       <input
         id="new-task"
+        ref={inputRef}
         className="title"
         dir="auto"
         type="text"
-        placeholder='Try "Pay rent tomorrow !high"'
+        placeholder='Try "Pay rent friday !high #home"'
         maxLength={120}
         value={text}
         aria-required="true"

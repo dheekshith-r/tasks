@@ -14,14 +14,15 @@ interface Props {
   onOpen: (id: string) => void;
   onMove: (from: string, to: string) => void;
   onNudge: (id: string, dir: -1 | 1) => void;
-  when?: string;   // the "when" rail label (Overdue, Today, Thu 13 Nov…), shown on the first row of each run
-  first?: boolean; // first row of a run: the rail label shows and a heavy rule opens the group
+  stamped?: string; // the newest task of this visit carries a postmark with this date (no animation)
 }
 
 const PRIORITY_LABEL = { low: 'Low', med: 'Medium', high: 'High' } as const;
 // A private drag type, so dropped files, links or selected text are never mistaken for a task.
 const DRAG_TYPE = 'application/x-task';
 const isTaskDrag = (e: DragEvent) => [...e.dataTransfer.types].includes(DRAG_TYPE);
+// On touch screens a long press should select text, not start a drag; the drawer has Move up/down.
+const COARSE = typeof window !== 'undefined' && (window.matchMedia?.('(pointer: coarse)').matches ?? false);
 
 // Wraps every case-insensitive match of the search query in <mark>.
 function Highlight({ text, query }: { text: string; query?: string }) {
@@ -31,7 +32,7 @@ function Highlight({ text, query }: { text: string; query?: string }) {
   return <>{parts.map((part, i) => (i % 2 ? <mark key={i}>{part}</mark> : part))}</>;
 }
 
-export default function TaskItem({ task, list, query, draggable, onToggle, onDelete, onEdit, onOpen, onMove, onNudge, when, first }: Props) {
+export default function TaskItem({ task, list, query, draggable, onToggle, onDelete, onEdit, onOpen, onMove, onNudge, stamped }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(task.text);
   const [over, setOver] = useState(false);
@@ -84,8 +85,8 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
   return (
     <li
       data-id={task.id}
-      className={`item${task.done ? ' done' : ''}${first ? ' first' : ''}${over ? ' over' : ''}${draggable ? ' drag' : ''}${dragging ? ' dragging' : ''}`}
-      draggable={draggable && !editing}
+      className={`item${task.done ? ' done' : ''}${over ? ' over' : ''}${draggable ? ' drag' : ''}${dragging ? ' dragging' : ''}`}
+      draggable={draggable && !editing && !COARSE}
       onKeyDown={onRowKey}
       onDragStart={(e) => {
         e.dataTransfer.setData(DRAG_TYPE, task.id);
@@ -117,14 +118,12 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
         if (from && from !== task.id) onMove(from, task.id);
       }}
     >
-      {/* The rail repeats the due information that the meta row already gives screen readers. */}
-      <span className="when" aria-hidden="true">{first ? when : ''}</span>
       <input
         className="check"
         type="checkbox"
         checked={task.done}
         onChange={() => onToggle(task.id)}
-        aria-label={`Mark "${task.text}" as ${task.done ? 'not done' : 'done'}`}
+        aria-label={`Done: ${task.text}`}
       />
       <div className="body">
         {editing ? (
@@ -136,7 +135,7 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
             }}
             onBlur={() => finish(true)} />
         ) : (
-          <span ref={textRef} className="text" dir="auto" tabIndex={0} title="Double-click or press F2 to rename" aria-keyshortcuts="F2" onDoubleClick={startEdit}>
+          <span ref={textRef} className="text" dir="auto" tabIndex={0} title="Double-click or press F2 to rename" aria-keyshortcuts="F2" aria-describedby="rename-hint" onDoubleClick={startEdit}>
             <Highlight text={task.text} query={query} />
           </span>
         )}
@@ -154,6 +153,17 @@ export default function TaskItem({ task, list, query, draggable, onToggle, onDel
       <button className="act" type="button" onClick={() => onOpen(task.id)} aria-label={`Open details for "${task.text}"`}>
         <MoreIcon />
       </button>
+      {stamped && (
+        <svg className="postmark" viewBox="0 0 124 64" aria-hidden="true">
+          <filter id={`ink-${task.id}`}><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves={2} seed={7} /><feDisplacementMap in="SourceGraphic" scale={2.2} /></filter>
+          <g filter={`url(#ink-${task.id})`} fill="none" stroke="currentColor">
+            <circle cx="32" cy="32" r="28" strokeWidth="2.2" /><circle cx="32" cy="32" r="21" strokeWidth="1.2" />
+            {[20, 29, 38, 47].map((y) => <path key={y} d={`M64 ${y} q7 -6 14 0 t14 0 t14 0 t14 0`} strokeWidth="2" />)}
+          </g>
+          <text x="32" y="30" textAnchor="middle" fontSize="9">{stamped}</text>
+          <text x="32" y="41" textAnchor="middle" fontSize="7">TASKS</text>
+        </svg>
+      )}
       <button className="act del" type="button" onClick={() => onDelete(task.id)} aria-label={`Delete "${task.text}"`}>
         <TrashIcon />
       </button>

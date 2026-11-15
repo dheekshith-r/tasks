@@ -15,6 +15,53 @@ const addTask = (text: string) => {
   fireEvent.click(screen.getByRole('button', { name: 'Add task' }));
 };
 
+describe('quick-add lists and the start page', () => {
+  it('files a #list task under a new list and keeps it in sight', () => {
+    render(<App />);
+    addTask('Buy curd friday #groceries');
+    expect(titles()).toContain('Buy curd');
+    const stored = JSON.parse(localStorage.getItem('todo-lists:v1') ?? '[]') as { id: string; name: string }[];
+    const groceries = stored.find((l) => l.name === 'Groceries');
+    expect(groceries).toBeTruthy();
+    const task = (JSON.parse(localStorage.getItem('todo-app:v1') ?? '[]') as Task[]).find((t) => t.text === 'Buy curd');
+    expect(task).toMatchObject({ listId: groceries!.id, dueDate: '2026-11-13' });
+  });
+
+  it('adds a task handed over from the start page once, then forgets it', () => {
+    localStorage.setItem('todo-pending:v1', JSON.stringify({ text: 'From the start page', priority: 'high', listName: 'work' }));
+    render(<App />);
+    expect(titles()).toContain('From the start page');
+    expect(localStorage.getItem('todo-pending:v1')).toBeNull();
+    expect(status()).toMatch(/from the start page/);
+  });
+});
+
+describe('storage safety', () => {
+  it('shows the storage state and an unset backup date, then records an export', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<App />);
+    expect(screen.getByText('Last backup: never')).toBeTruthy();
+    expect(screen.getByText(/Not protected yet/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Export backup' }));
+    expect(screen.queryByText('Last backup: never')).toBeNull();
+    expect(localStorage.getItem('todo-backup:v1')).toBe('2026-11-10');
+  });
+
+  it('asks for persistent storage once, after the first saved task', async () => {
+    const persist = vi.fn(async () => true);
+    vi.stubGlobal('navigator', Object.assign(Object.create(navigator), { storage: { persisted: async () => false, persist } }));
+    render(<App />);
+    addTask('First task');
+    addTask('Second task');
+    await act(async () => {});
+    expect(persist).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem('todo-persist:v1')).toBe('granted');
+    expect(screen.getByText(/Protected: this browser will keep your tasks/)).toBeTruthy();
+  });
+});
+
 beforeEach(() => {
   localStorage.clear();
   document.documentElement.removeAttribute('style');
@@ -70,8 +117,8 @@ describe('App: adding tasks', () => {
 
   it('jumps to All tasks when a new task would be invisible in the current view', () => {
     render(<App />);
-    fireEvent.click(viewButton(/^Overdue/));
-    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Overdue');
+    fireEvent.click(viewButton(/^Carried over/));
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Carried over');
     addTask('No date on this one');
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('All tasks');
     expect(titles()).toEqual(['No date on this one']);
@@ -97,7 +144,9 @@ describe('App: undo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear completed' }));
     expect(titles()).toEqual(['Two']);
     fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
-    expect(titles()).toEqual(['One', 'Two', 'Three']);
+    // On screen, done tasks sit in the Done slot after the open ones; in storage every task is back in its old place.
+    expect(titles()).toEqual(['Two', 'One', 'Three']);
+    expect(JSON.parse(localStorage.getItem('todo-app:v1')!).map((t: { text: string }) => t.text)).toEqual(['One', 'Two', 'Three']);
   });
 
   it('keeps the undo toast while it is hovered, then dismisses it', () => {
@@ -109,7 +158,7 @@ describe('App: undo', () => {
     act(() => { vi.advanceTimersByTime(30_000); });
     expect(screen.queryByText('Task deleted')).not.toBeNull();
     fireEvent.mouseLeave(toast);
-    act(() => { vi.advanceTimersByTime(7_000); });
+    act(() => { vi.advanceTimersByTime(10_200); });
     expect(screen.queryByText('Task deleted')).toBeNull();
   });
 });
@@ -144,7 +193,7 @@ describe('App: keyboard', () => {
     down.focus();
     fireEvent.click(down);
     expect(titles()).toEqual(['Two', 'One', 'Three']);
-    expect(status()).toBe('Moved "One" to position 2 of 3');
+    expect(status()).toBe('Moved "One" to position 2 of 3 in Later');
     expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Move up' }));
     expect(titles()).toEqual(['One', 'Two', 'Three']);
@@ -158,7 +207,7 @@ describe('App: keyboard', () => {
     fireEvent.keyDown(one, { key: 'ArrowDown', altKey: true });
     expect(titles()).toEqual(['Two', 'One', 'Three']);
     expect(document.activeElement?.textContent).toBe('One');
-    expect(status()).toBe('Moved "One" to position 2 of 3');
+    expect(status()).toBe('Moved "One" to position 2 of 3 in Later');
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown', altKey: true });
     expect(titles()).toEqual(['Two', 'Three', 'One']);
     expect(document.activeElement?.textContent).toBe('One');
@@ -201,23 +250,24 @@ describe('App: recurring tasks', () => {
   it('creates the next occurrence on completion and removes it again on undo', () => {
     seed([{ text: 'Water plants', dueDate: '2026-11-10', repeat: 'weekly' }]);
     render(<App />);
-    fireEvent.click(screen.getByLabelText('Mark "Water plants" as done'));
+    fireEvent.click(screen.getByLabelText('Done: Water plants'));
     expect(titles()).toEqual(['Water plants', 'Water plants']);
-    fireEvent.click(screen.getByLabelText('Mark "Water plants" as not done'));
+    // Undo the tick on the finished one (both share a name; the checkbox state tells them apart).
+    fireEvent.click(screen.getAllByLabelText('Done: Water plants').find((c) => (c as HTMLInputElement).checked)!);
     expect(titles()).toEqual(['Water plants']);
   });
 });
 
 describe('App: date rollover', () => {
-  it('moves a task from Today to overdue when midnight passes with the tab open', () => {
+  it('moves a task from Today to Carried over when midnight passes with the tab open', () => {
     vi.setSystemTime(new Date(2026, 10, 10, 23, 59, 30));
     seed([{ text: 'Due tonight', dueDate: '2026-11-10' }]);
     render(<App />);
     expect(document.querySelector('.item .due-today')).not.toBeNull();
-    expect(viewButton(/^Overdue/).textContent).toBe('Overdue0');
+    expect(viewButton(/^Carried over/).textContent).toBe('Carried over0');
     act(() => { vi.advanceTimersByTime(60_000); });
-    expect(document.querySelector('.item .overdue')?.textContent).toBe('Due yesterday');
-    expect(viewButton(/^Overdue/).textContent).toBe('Overdue1');
+    expect(document.querySelector('.item .overdue')?.textContent).toBe('Carried over from yesterday');
+    expect(viewButton(/^Carried over/).textContent).toBe('Carried over1');
   });
 });
 

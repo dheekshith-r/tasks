@@ -258,12 +258,12 @@ describe('TaskItem', () => {
     expect(h.onMove).not.toHaveBeenCalled();
   });
 
-  it('marks overdue with an icon and words, never by colour alone', () => {
+  it('marks a late task with an icon and words, never by colour alone', () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 10, 10, 12));
     const { li } = renderItem({ ...base, dueDate: '2026-11-07' });
     const chip = li.querySelector('.overdue')!;
-    expect(chip.textContent).toBe('3 days overdue');
+    expect(chip.textContent).toBe('Carried over 3 days');
     expect(chip.querySelector('svg')).not.toBeNull();
     expect(li.textContent).toContain('High');
   });

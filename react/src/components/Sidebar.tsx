@@ -8,7 +8,7 @@ const SMART: { id: View; label: string }[] = [
   { id: 'all', label: 'All tasks' },
   { id: 'today', label: 'Today' },
   { id: 'upcoming', label: 'Upcoming' },
-  { id: 'overdue', label: 'Overdue' },
+  { id: 'overdue', label: 'Carried over' },
 ];
 
 interface Props {

@@ -52,12 +52,13 @@ export function dueInfo(iso: string, done: boolean, now = new Date()): { label: 
   if (diff === 0) return { label: 'Today', tone: done ? 'later' : 'today' };
   if (diff === 1) return { label: 'Tomorrow', tone: 'later' };
   if (diff > 1 || done) return { label: short, tone: 'later' }; // a finished task is never "overdue"
-  if (diff === -1) return { label: 'Due yesterday', tone: 'overdue' };
-  if (diff >= -7) return { label: `${-diff} days overdue`, tone: 'overdue' };
+  // Calm words for a late task (no "overdue"): the count stays, so the label is still exact.
+  if (diff === -1) return { label: 'Carried over from yesterday', tone: 'overdue' };
+  if (diff >= -7) return { label: `Carried over ${-diff} days`, tone: 'overdue' };
   // After a week a count like "400 days" is hard to read: show the date, with the year once it differs.
   const since = due.getFullYear() === now.getFullYear() ? short
     : SHORT_YEAR.format(due);
-  return { label: `Overdue since ${since}`, tone: 'overdue' };
+  return { label: `Carried over from ${since}`, tone: 'overdue' };
 }
 
 export function greeting(now = new Date()): string {

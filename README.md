@@ -7,7 +7,14 @@ A clean, accessible to-do app built twice to show range:
 | [`/react`](./react) | React 19, TypeScript 7, Vite 8, Vitest 5 | Component-based version with typed state and unit tests |
 | [`/vanilla`](./vanilla) | HTML, CSS, JavaScript | Same app with no framework, proving the fundamentals |
 
-**Live demo:** _paste your GitHub Pages URL here_ (the React version deploys automatically)
+**Live:** the start page is https://dheekshithsnewjourney-crypto.github.io/to-do-sample/ and the app is at [/app/](https://dheekshithsnewjourney-crypto.github.io/to-do-sample/app/). Both deploy automatically from `main`; the app installs like an app and works offline.
+
+The start page is a sorting frame: type a line in the IN slot and it drops into its day's slot (Today, Tomorrow, This week, Later) with a red postmark drawn in code (`react/src/landing/main.ts`). Your line is saved to your list. The app uses the same frame, one slot per day group.
+
+## Guest mode and optional sign-in
+- **Guest mode (default):** no account. Tasks stay in this browser, nothing is uploaded, and the app works offline.
+- **Sign in with Google (optional):** the same list on your phone and laptop. It uses Firebase on the free Spark plan. Your tasks are stored at `users/<your uid>/` in Cloud Firestore, and the [security rules](./react/firestore.rules) let only you read or write them. You can delete your cloud data and account from inside the app.
+- Setup steps for the Firebase project: [docs/FIREBASE_SETUP.md](./docs/FIREBASE_SETUP.md). Without the Firebase variables, the build is guest-only.
 
 ## Features
 - **Lists and smart views:** custom lists (each with a monogram marker, red for the one you are in) plus All tasks, Today, Upcoming and Overdue, each with live counts
@@ -26,7 +33,7 @@ A clean, accessible to-do app built twice to show range:
 The day as a Swiss International Style poster. A red field at the top states how many tasks remain, at poster scale, next to the date. Below it, a 12-column typographic sheet lists the tasks by when they are due. Full rules and tokens: [DESIGN.md](./DESIGN.md).
 
 - **Brand:** red `#D62839` (the field) and yellow `#FFC53D` (a marker only), on white and off-black.
-- **Type:** one family, Hanken Grotesk, from 300 to 900. Every number uses tabular figures.
+- **Type:** Overpass and Overpass Mono on both pages ("Sorting Frame" design, 2026-11-14). All fonts are served from this site. Every number uses tabular figures.
 - **Layout:** no sidebar and no cards. 3px ink rules open each group, and hairlines separate rows. A "when" rail (Overdue, Today, Tomorrow, a date, Done) labels each run of tasks. On phones the views and lists move into a slide-out menu.
 - **Signature:** the count re-sets with a short roll when it changes, and a finished task gets a red strike, line by line.
 - **Red text** uses a text-safe red (`#C8202F`), so it reaches 4.5:1 even on the hover grey. Red never means danger by colour alone: overdue tasks also get an icon and words.
@@ -68,7 +75,8 @@ Needs Node 22.12 or newer (CI uses Node 26 LTS).
 cd react
 npm install
 npm run dev        # development server
-npm test           # unit and DOM tests (145)
+npm test           # unit and DOM tests (210)
+npm run test:rules # Firestore security rules against the emulator (17)
 npm run contrast   # WCAG AA check of the colour tokens
 npm run build      # type-check + production build
 npm run csp        # checks the built page's Content Security Policy
@@ -94,35 +102,13 @@ react/
 ```
 
 ## Tests
-140 tests across 9 files:
+210 tests across 15 files, plus 17 Firestore security-rules tests that run against the emulator (`npm run test:rules`, needs Java 21+):
 - **Logic** (`reducer`, `dates`, `quickadd`, `storage`, `views`, `color`): recurring tasks, month ends, daylight-saving days, quick-add edge cases, corrupted storage, import validation.
 - **Components and app** (jsdom + Testing Library): focus trap and focus restore in the drawer, palette and mobile menu, keyboard reorder, drag and drop, undo, date rollover at midnight.
 - **Vanilla** (`vanilla.test.ts`): loads the real `vanilla/index.html` and `script.js` into jsdom.
 
-## Debugging task
-**Broken:**
-```js
-const todos = ["Buy milk", "Study JS"];
-for (var i = 0; i <= todos.length; i++) {
-  setTimeout(() => console.log(todos[i].toUpperCase()), 100);
-}
-```
-**Problems:** `<=` runs one step past the end (`undefined`), `var` shares one `i` across all callbacks, so the result is a `TypeError`.
-
-**Fixed:**
-```js
-todos.forEach((todo) => setTimeout(() => console.log(todo.toUpperCase()), 100));
-```
-
-## Enhancement ideas for a basic static page
-1. Dark mode with CSS variables and `prefers-color-scheme` (used in this app).
-2. Accessibility and performance pass: semantic landmarks, contrast checks, lazy-loaded images, Lighthouse above 90.
-3. Micro-interactions and a validated contact form instead of a bare `mailto:` link.
-
 ## Roadmap
-- Reordering on touch screens (HTML drag and drop is mouse-only; the keyboard shortcut needs a keyboard)
-- Self-hosted fonts, so the app works fully offline
-- Search inside notes and subtasks
+The plan lives in [SPEC.md](./SPEC.md), built on [DEFINE.md](./DEFINE.md) and [RESEARCH.md](./RESEARCH.md). The original assignment answers are in [docs/assignment.md](./docs/assignment.md).
 
 ## License
-MIT
+[MIT](./LICENSE). Free, with no paywall, ever.

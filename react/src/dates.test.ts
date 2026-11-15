@@ -84,34 +84,34 @@ describe('dueInfo', () => {
     expect(dueInfo('2026-11-11', false, noon)).toEqual({ label: 'Tomorrow', tone: 'later' });
     expect(dueInfo('2026-11-20', false, noon).tone).toBe('later');
   });
-  it('labels overdue tasks in words, not just by tone', () => {
-    expect(dueInfo('2026-11-09', false, noon)).toEqual({ label: 'Due yesterday', tone: 'overdue' });
-    expect(dueInfo('2026-11-07', false, noon)).toEqual({ label: '3 days overdue', tone: 'overdue' });
+  it('labels late tasks in calm words, not just by tone', () => {
+    expect(dueInfo('2026-11-09', false, noon)).toEqual({ label: 'Carried over from yesterday', tone: 'overdue' });
+    expect(dueInfo('2026-11-07', false, noon)).toEqual({ label: 'Carried over 3 days', tone: 'overdue' });
   });
   it('does not call a completed task overdue', () => {
     const late = dueInfo('2026-11-07', true, noon);
     expect(late.tone).toBe('later');
-    expect(late.label).not.toMatch(/overdue|yesterday/i);
+    expect(late.label).not.toMatch(/overdue|yesterday|carried/i);
     expect(dueInfo('2026-11-10', true, noon).tone).toBe('later');
   });
   it('flips exactly at local midnight', () => {
     expect(dueInfo('2026-11-10', false, new Date(2026, 10, 10, 23, 59, 59)).tone).toBe('today');
-    expect(dueInfo('2026-11-10', false, new Date(2026, 10, 11, 0, 0, 1))).toEqual({ label: 'Due yesterday', tone: 'overdue' });
+    expect(dueInfo('2026-11-10', false, new Date(2026, 10, 11, 0, 0, 1))).toEqual({ label: 'Carried over from yesterday', tone: 'overdue' });
     expect(dueInfo('2026-11-10', false, new Date(2026, 10, 9, 23, 59, 59)).label).toBe('Tomorrow');
   });
   it('counts whole days across daylight-saving changes and month ends', () => {
-    expect(dueInfo('2026-03-07', false, new Date(2026, 2, 9, 9, 0)).label).toBe('2 days overdue');
+    expect(dueInfo('2026-03-07', false, new Date(2026, 2, 9, 9, 0)).label).toBe('Carried over 2 days');
     // US clocks change on 2026-11-01, EU clocks on 2026-10-25
-    expect(dueInfo('2026-10-27', false, new Date(2026, 10, 2, 9, 0)).label).toBe('6 days overdue');
-    expect(dueInfo('2026-10-24', false, new Date(2026, 9, 30, 9, 0)).label).toBe('6 days overdue');
-    expect(dueInfo('2026-02-28', false, new Date(2026, 2, 1, 0, 30)).label).toBe('Due yesterday');
+    expect(dueInfo('2026-10-27', false, new Date(2026, 10, 2, 9, 0)).label).toBe('Carried over 6 days');
+    expect(dueInfo('2026-10-24', false, new Date(2026, 9, 30, 9, 0)).label).toBe('Carried over 6 days');
+    expect(dueInfo('2026-02-28', false, new Date(2026, 2, 1, 0, 30)).label).toBe('Carried over from yesterday');
   });
   it('switches from a day count to a date after one week', () => {
-    expect(dueInfo('2026-11-03', false, noon)).toEqual({ label: '7 days overdue', tone: 'overdue' });
+    expect(dueInfo('2026-11-03', false, noon)).toEqual({ label: 'Carried over 7 days', tone: 'overdue' });
     const short = new Date(2026, 10, 2).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    expect(dueInfo('2026-11-02', false, noon)).toEqual({ label: `Overdue since ${short}`, tone: 'overdue' });
+    expect(dueInfo('2026-11-02', false, noon)).toEqual({ label: `Carried over from ${short}`, tone: 'overdue' });
     const long = new Date(2025, 9, 6).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    expect(dueInfo('2025-10-06', false, noon)).toEqual({ label: `Overdue since ${long}`, tone: 'overdue' });
+    expect(dueInfo('2025-10-06', false, noon)).toEqual({ label: `Carried over from ${long}`, tone: 'overdue' });
     expect(dueInfo('2025-10-06', false, noon).label).toMatch(/2025/);
   });
   it('survives a malformed date instead of throwing', () => {

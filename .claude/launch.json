@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tasks-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "react", "run", "preview", "--", "--port", "4173", "--strictPort"],
+      "port": 4173
+    },
+    {
+      "name": "tasks-preview-guest",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "react", "run", "preview", "--", "--port", "4181", "--strictPort"],
+      "port": 4181
+    }
+  ]
+}

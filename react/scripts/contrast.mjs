@@ -11,7 +11,8 @@ const MIN = 4.5;
 const PAIRS = [
   ['ink', 'bg', 'body text on the page'],
   ['ink', 'surface', 'task text on cards'],
-  ['ink', 'soft', 'inputs, badges'],
+  ['ink', 'soft', 'inputs, badges, text in a slot'],
+  ['ink', 'line', 'Carried over and Done slot labels'],
   ['muted', 'bg', 'sidebar labels, hovered task meta'],
   ['muted', 'surface', 'task meta, low-priority pill, list monogram'],
   ['muted', 'soft', 'inactive filter tabs'],
@@ -49,12 +50,33 @@ function themes(css) {
   return { light: blocks[0], dark: { ...blocks[0], ...blocks[1] } };
 }
 
+// The start page has its own, smaller token set.
+const START_PAIRS = [
+  ['ink', 'bg', 'headings, body text, the input'],
+  ['muted', 'bg', 'lede, sub-lines, footer, sample note'],
+  ['ink', 'soft', 'text in a slot, key tiles, button hover'],
+  ['muted', 'soft', 'help text in a slot'],
+  ['ink', 'slip', 'task text on a slip, key caps'],
+  ['muted', 'slip', 'list tags on a slip'],
+  ['red-ink', 'red', 'Add to my list, Open my list, the !high tag'],
+  ['red-ink', 'red-hover', 'button text on hover'],
+  ['red-text', 'bg', 'error message, invalid input border'],
+  ['sun-ink', 'sun', 'slot labels, the day tag'],
+  ['bg', 'ink', 'selected demo view, pressed key, chosen privacy option'],
+  ['ink', 'line', 'the Carried over tray label in the night drawing'],
+  ['mark', 'bg', 'the FREE stamp, the postmark'],
+]
+const SOURCES = [
+  ...FILES.map((file) => ({ file, pairs: PAIRS })),
+  { file: '../src/landing/landing.css', pairs: START_PAIRS },
+];
+
 let failures = 0;
-for (const file of FILES) {
+for (const { file, pairs } of SOURCES) {
   const css = readFileSync(fileURLToPath(new URL(file, import.meta.url)), 'utf8');
   for (const [theme, tokens] of Object.entries(themes(css))) {
     console.log(`\n${file.replace(/^(\.\.\/)+/, '')} (${theme})`);
-    for (const [fg, bg, where] of PAIRS) {
+    for (const [fg, bg, where] of pairs) {
       if (!tokens[fg] || !tokens[bg]) { console.log(`  MISSING  --${fg} / --${bg}`); failures++; continue; }
       const ratio = contrast(tokens[fg], tokens[bg]);
       const ok = ratio >= MIN;

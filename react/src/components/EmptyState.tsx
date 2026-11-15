@@ -26,7 +26,7 @@ export default function EmptyState({ kind, listName, query, onClearSearch }: Pro
     all: ['No tasks yet', 'Type one above. "Call Sam friday !high" sets the date and the priority.'],
     today: ['Nothing due today', 'Tasks you add from this view are due today.'],
     upcoming: ['Nothing upcoming', 'Tasks with a future due date appear here.'],
-    overdue: ['Nothing overdue', 'No task is past its due date.'],
+    overdue: ['Nothing carried over', 'No task is waiting from an earlier day.'],
     list: [`${listName ?? 'This list'} is empty`, 'Add a task above and it goes straight into this list.'],
     search: ['No matches', `Nothing here matches "${query ?? ''}".`],
     allDone: ['All done in this view', 'Every task here is complete.'],

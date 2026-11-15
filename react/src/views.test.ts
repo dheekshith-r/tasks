@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Task } from './types';
 import { uid } from './uid';
-import { count, dueForNewTask, inView, monogram, whenLabel } from './views';
+import { bySlot, count, dueForNewTask, inView, monogram, slotOf, whenLabel } from './views';
 
 const today = '2026-11-10';
 const task = (over: Partial<Task>): Task => ({ id: 'x', text: 'X', priority: 'med', done: false, ...over });
@@ -92,5 +92,23 @@ describe('whenLabel', () => {
     expect(whenLabel(t({ dueDate: '2026-12-01' }), '2026-11-30')).toBe('Tomorrow'); // across a month end
     const later = new Date(2026, 10, 14).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
     expect(whenLabel(t({ dueDate: '2026-11-14' }), '2026-11-11')).toBe(later);
+  });
+});
+
+describe('slotOf and bySlot (the sorting frame)', () => {
+  const today = '2026-11-14'; // a Saturday
+  it('puts each task in its slot', () => {
+    expect(slotOf(task({ dueDate: '2026-11-10' }), today)).toBe('Carried over');
+    expect(slotOf(task({ dueDate: '2026-11-14' }), today)).toBe('Today');
+    expect(slotOf(task({ dueDate: '2026-11-15' }), today)).toBe('Tomorrow');
+    expect(slotOf(task({ dueDate: '2026-11-16' }), today)).toBe('This week');
+    expect(slotOf(task({ dueDate: '2026-11-20' }), today)).toBe('This week'); // six days on
+    expect(slotOf(task({ dueDate: '2026-11-21' }), today)).toBe('Later'); // seven days on
+    expect(slotOf(task({}), today)).toBe('Later');
+    expect(slotOf(task({ done: true, dueDate: '2026-11-14' }), today)).toBe('Done');
+  });
+  it('groups by slot in frame order and keeps the order inside each slot', () => {
+    const a = task({ id: 'a' }), b = task({ id: 'b', dueDate: today }), c = task({ id: 'c', dueDate: '2026-11-01' }), d = task({ id: 'd', dueDate: today });
+    expect(bySlot([a, b, c, d], today).map((x) => x.id)).toEqual(['c', 'b', 'd', 'a']);
   });
 });

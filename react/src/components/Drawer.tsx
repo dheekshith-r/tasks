@@ -31,13 +31,12 @@ export default function Drawer({ task, lists, onClose, onUpdate, onAddSub, onTog
   }
 
   // Every way of closing (Escape, overlay, button) saves the title first, then plays the
-  // slide-out before unmounting. The wait is skipped when the user prefers reduced motion.
+  // slide-out (a fade with reduced motion) before unmounting.
   function close() {
     if (closing) return;
     commitTitle();
     setClosing(true);
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(onClose, still ? 0 : CLOSE_MS);
+    setTimeout(onClose, CLOSE_MS);
   }
 
   useDialog(ref, true, close);
@@ -105,7 +104,7 @@ export default function Drawer({ task, lists, onClose, onUpdate, onAddSub, onTog
         <ul className="subs" aria-labelledby="d-subs">
           {subs.map((s) => (
             <li key={s.id} className={s.done ? 'done' : ''}>
-              <input className="check small" type="checkbox" checked={s.done} onChange={() => onToggleSub(s.id)} aria-label={`Mark "${s.text}" as ${s.done ? 'not done' : 'done'}`} />
+              <input className="check small" type="checkbox" checked={s.done} onChange={() => onToggleSub(s.id)} aria-label={`Done: ${s.text}`} />
               <span dir="auto">{s.text}</span>
               <button type="button" className="x" aria-label={`Delete subtask "${s.text}"`} onClick={() => onDeleteSub(s.id)}><CloseIcon size={15} /></button>
             </li>

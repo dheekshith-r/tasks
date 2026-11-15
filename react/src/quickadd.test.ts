@@ -10,6 +10,15 @@ describe('parseQuickAdd', () => {
   it('reads today', () => {
     expect(parseQuickAdd('Call mom today', now)).toMatchObject({ text: 'Call mom', dueDate: '2026-11-01' });
   });
+  it('reads a list name with combining marks, such as Hindi', () => {
+    expect(parseQuickAdd('Pay rent #मकान', now)).toMatchObject({ text: 'Pay rent', listName: 'मकान' });
+  });
+  it('leaves a list word longer than 24 characters in the title', () => {
+    const long = '#' + 'a'.repeat(25);
+    const r = parseQuickAdd(`Pay rent ${long}`, now);
+    expect(r.text).toBe(`Pay rent ${long}`);
+    expect(r.listName).toBeUndefined();
+  });
   it('leaves plain text alone', () => {
     expect(parseQuickAdd('Buy milk', now)).toEqual({ text: 'Buy milk', priority: undefined, dueDate: undefined });
   });
@@ -50,6 +59,18 @@ describe('parseQuickAdd', () => {
     expect(parseQuickAdd('Rent tomorrow', new Date(2026, 0, 31, 23, 59)).dueDate).toBe('2026-02-01');
     expect(parseQuickAdd('Party tomorrow', new Date(2026, 11, 31, 12)).dueDate).toBe('2027-01-01');
     expect(parseQuickAdd('Leap tomorrow', new Date(2028, 1, 28)).dueDate).toBe('2028-02-29');
+  });
+  it('reads weekday names as the next such day, today included', () => {
+    // 1 Nov 2026 is a Sunday
+    expect(parseQuickAdd('Pay rent friday', now).dueDate).toBe('2026-11-06');
+    expect(parseQuickAdd('Bins sun', now).dueDate).toBe('2026-11-01');
+    expect(parseQuickAdd('Gym Mon', now).dueDate).toBe('2026-11-02');
+    expect(parseQuickAdd('Meet the Friday team', now)).toMatchObject({ text: 'Meet the team', dueDate: '2026-11-06' });
+  });
+  it('reads a #list and leaves look-alikes alone', () => {
+    expect(parseQuickAdd('Pay rent friday !high #home', now)).toEqual({ text: 'Pay rent', priority: 'high', dueDate: '2026-11-06', listName: 'home' });
+    expect(parseQuickAdd('Call Amma #घर', now).listName).toBe('घर');
+    expect(parseQuickAdd('Issue#42 and # alone', now)).toEqual({ text: 'Issue#42 and # alone', priority: undefined, dueDate: undefined });
   });
   it('collapses the whitespace left behind', () => {
     expect(parseQuickAdd('  Buy   milk   today   !low ', now).text).toBe('Buy milk');
