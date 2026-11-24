@@ -11,15 +11,15 @@
 </p>
 
 <p align="center">
-  <a href="https://dheekshithsnewjourney-crypto.github.io/tasks/app/"><b>Open the app</b></a>
+  <a href="https://dheekshith-r.github.io/tasks/app/"><b>Open the app</b></a>
   &nbsp;·&nbsp;
-  <a href="https://dheekshithsnewjourney-crypto.github.io/tasks/">Start page</a>
+  <a href="https://dheekshith-r.github.io/tasks/">Start page</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/dheekshithsnewjourney-crypto/tasks/issues/new/choose">Report a problem</a>
+  <a href="https://github.com/dheekshith-r/tasks/issues/new/choose">Report a problem</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/dheekshithsnewjourney-crypto/tasks/actions/workflows/deploy.yml"><img src="https://github.com/dheekshithsnewjourney-crypto/tasks/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Tests and deploy"></a>
+  <a href="https://github.com/dheekshith-r/tasks/actions/workflows/deploy.yml"><img src="https://github.com/dheekshith-r/tasks/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Tests and deploy"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-161616" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/price-free%2C%20no%20paid%20plan-D62839" alt="Free, no paid plan">
 </p>

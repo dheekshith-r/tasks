@@ -4,7 +4,7 @@
 
 If you find a security problem in Tasks, do not open a public issue.
 
-1. Open the [private report form](https://github.com/dheekshithsnewjourney-crypto/tasks/security/advisories/new).
+1. Open the [private report form](https://github.com/dheekshith-r/tasks/security/advisories/new).
 2. Describe the problem and the steps to see it.
 3. Send the report.
 
@@ -12,7 +12,7 @@ You will get an answer within 7 days. When the fix is live, the report can be ma
 
 ## What is in scope
 
-- The app and the start page at https://dheekshithsnewjourney-crypto.github.io/tasks/
+- The app and the start page at https://dheekshith-r.github.io/tasks/
 - The Firestore security rules in [`react/firestore.rules`](./react/firestore.rules)
 - The code in this repository
 

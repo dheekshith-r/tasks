@@ -12,7 +12,7 @@ Who does what: steps marked **(Ddk)** need your Google login in a browser. Claud
 
 ## 2. Turn on Google sign-in
 1. **(Ddk)** Go to **Build > Authentication > Get started > Sign-in method**, enable **Google**, pick a support email and save.
-2. **(Ddk)** Go to **Authentication > Settings > Authorized domains** and add `dheekshithsnewjourney-crypto.github.io`. `localhost` is already there.
+2. **(Ddk)** Go to **Authentication > Settings > Authorized domains** and add `dheekshith-r.github.io`. `localhost` is already there.
 
 ## 3. Create the database and lock it down
 1. **(Ddk)** Go to **Build > Firestore Database > Create database**, choose **production mode** and a location near you (for example `asia-south1`, Mumbai). The location cannot change later.
@@ -22,7 +22,7 @@ Who does what: steps marked **(Ddk)** need your Google login in a browser. Claud
 ## 4. Register the web app and connect the build
 1. **(Claude)** Create the web app and read its config: `firebase apps:create web Tasks`, then `firebase apps:sdkconfig web <app-id>`.
 2. **(Claude)** Store the four values as GitHub Actions **variables**, after Ddk confirms: `gh variable set VITE_FIREBASE_API_KEY ...` (also `_AUTH_DOMAIN`, `_PROJECT_ID`, `_APP_ID`).
-3. **(Ddk, recommended)** Restrict the API key: Google Cloud console > **APIs & Services > Credentials** > the "Browser key". Under **Website restrictions** add `https://dheekshithsnewjourney-crypto.github.io/*` and `http://localhost:5173/*`.
+3. **(Ddk, recommended)** Restrict the API key: Google Cloud console > **APIs & Services > Credentials** > the "Browser key". Under **Website restrictions** add `https://dheekshith-r.github.io/*` and `http://localhost:5173/*`.
 
 ## 5. Check
 - Push to `main`. CI runs the rules tests, builds with the variables, checks the CSP and deploys.
