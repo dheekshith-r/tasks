@@ -4,7 +4,7 @@ Thank you for your help. Tasks is a small, free to-do list. Bug reports and idea
 
 ## Report a bug or suggest an idea
 
-1. Open [a new issue](https://github.com/dheekshithsnewjourney-crypto/tasks/issues/new/choose).
+1. Open [a new issue](https://github.com/dheekshith-r/tasks/issues/new/choose).
 2. Choose "Bug report" or "Idea".
 3. Fill in the form. Do not paste your real tasks; issues are public.
 

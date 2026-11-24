@@ -21,4 +21,4 @@ Tasks is a small project, and everyone is welcome here.
 
 The maintainer can edit or remove comments, close issues and pull requests, and block people who break these rules.
 
-To report a problem, open a [private security report](https://github.com/dheekshithsnewjourney-crypto/tasks/security/advisories/new) and say that it is about conduct. Every report is read and kept private.
+To report a problem, open a [private security report](https://github.com/dheekshith-r/tasks/security/advisories/new) and say that it is about conduct. Every report is read and kept private.
